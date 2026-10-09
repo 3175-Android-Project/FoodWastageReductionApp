@@ -1,6 +1,8 @@
 package com.project.foodwastagereductionapp;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -40,5 +42,11 @@ public class LoginActivity extends AppCompatActivity {
 
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
+
+        Button btnLogin = findViewById(R.id.btnLogin);
+        btnLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, CustomerHomeActivity.class);
+            startActivity(intent);
+        });
     }
 }
