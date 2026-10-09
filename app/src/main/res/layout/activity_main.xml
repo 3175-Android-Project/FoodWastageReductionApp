@@ -7,95 +7,82 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_white"
+    android:paddingStart="@dimen/space_lg"
+    android:paddingEnd="@dimen/space_lg"
     tools:context=".MainActivity">
 
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_status_badge"
+        android:padding="16dp"
+        android:src="@drawable/icon_leaf"
+        app:tint="@color/background_accent1"
+        app:layout_constraintBottom_toTopOf="@id/txtTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="@dimen/space_xl" />
+    <!-- App Name -->
+    <TextView
+        android:id="@+id/txtTitle"
+        style="@style/Text.HeadlineXL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Good Food&#10;Less Waste"
+        app:layout_constraintBottom_toTopOf="@id/txtDescription"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="@dimen/space_md" />
+
+    <!-- Description -->
+    <TextView
+        android:id="@+id/txtDescription"
+        style="@style/Text.BodySm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Delicious food at a lower price&#10;—for a greener tomorrow."
+        app:layout_constraintBottom_toTopOf="@id/btnLogin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="300dp" />
+
+    <!-- Login -->
+
     <Button
-        android:id="@+id/button5"
+        android:id="@+id/btnLogin"
         style="@style/Button.Primary"
         android:layout_width="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="286dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginEnd="@dimen/screen_padding"
+
         android:text="Log in"
         app:backgroundTint="@null"
+        app:layout_constraintBottom_toTopOf="@id/btnCreateAccount"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginBottom="@dimen/space_sm" />
 
-    <LinearLayout
-        android:id="@+id/orderCard"
-        style="@style/Card.Default"
+    <!-- Create Account -->
+    <Button
+        android:id="@+id/btnCreateAccount"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="32dp"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            style="@style/Badge.Status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Pending" />
-
-        <TextView
-            style="@style/Text.HeadlineSm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Order #1024" />
-
-        <TextView
-            style="@style/Text.BodySm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Awesome Sushi" />
-
-        <TextView
-            style="@style/Text.BodySm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="2 items · Pickup" />
-
-        <TextView
-            style="@style/Text.BodyXs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Today, 6:30 PM" />
-
-    </LinearLayout>
-
-    <EditText
-        android:id="@+id/editEmail"
-        style="@style/Input.Default"
-        android:layout_width="0dp"
-        android:hint="Email"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="200dp" />
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@color/background_white"
-
-        app:itemIconTint="@color/bottom_nav_item_color"
-        app:itemTextColor="@color/bottom_nav_item_color"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/menu_customer_bottom_nav"
-
+        android:layout_height="@dimen/button_height"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginEnd="@dimen/screen_padding"
+        android:background="@drawable/bg_card"
+        android:text="Create account"
+        android:textAllCaps="false"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/text_body_sm"
+        android:textStyle="bold"
+        app:backgroundTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginBottom="@dimen/space_md" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
