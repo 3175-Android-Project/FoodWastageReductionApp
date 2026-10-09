@@ -10,7 +10,7 @@
     android:background="@color/background_white"
     android:paddingStart="@dimen/screen_padding"
     android:paddingEnd="@dimen/screen_padding"
-    tools:context=".LoginActivity">
+    tools:context=".auth.LoginActivity">
 
     <!-- Common Header -->
     <include

@@ -22,11 +22,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name=".auth.LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".CustomerHomeActivity"
+            android:name=".customer.CustomerHomeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".manager.ManagerDashboardActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>
