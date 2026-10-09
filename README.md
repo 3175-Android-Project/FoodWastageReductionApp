@@ -25,7 +25,7 @@ This `README.md` serves as a practical guide for all team members. It outlines o
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 The Food Wastage Reduction App connects customers with local restaurants to reduce food waste by offering discounted surplus food.
 
@@ -40,7 +40,7 @@ Before implementing assigned screens, team members should review the existing st
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 Our codebase follows a feature-based Java package structure alongside the standard Android resource organization.
 
@@ -78,7 +78,7 @@ app/src/main/
 
 ---
 
-## 🎨 Design System
+## Design System
 
 ### Colors
 
@@ -187,7 +187,7 @@ Avoid creating random values such as `17dp`, `21dp`, or `27dp` unless required b
 
 ---
 
-## 🧩 Shared Components
+## Shared Components
 
 Before creating a new UI element, check whether a shared style or component already exists.
 
@@ -299,7 +299,7 @@ txtHeaderTitle.setText("Forgot Password");
 
 ---
 
-## 🏷️ Naming Conventions
+## Naming Conventions
 
 Follow these naming conventions to keep the project organized.
 
@@ -524,7 +524,7 @@ Reference for:
 
 ---
 
-## 🛠️ How to Create a New Screen
+## How to Create a New Screen
 
 ### Step 1: Choose the Correct Package
 
@@ -660,7 +660,7 @@ Before submitting your work:
 
 ---
 
-## ⚠️ Development Guidelines
+## Development Guidelines
 
 1. **Do not duplicate resources.**  
    Check `colors.xml`, `dimens.xml`, `styles.xml`, and `drawable/` before creating something new.
