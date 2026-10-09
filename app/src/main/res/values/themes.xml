@@ -1,9 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Base application theme. -->
-    <style name="Base.Theme.FoodWastageReductionApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Base.Theme.FoodWastageReductionApp"
+        parent="Theme.Material3.DayNight.NoActionBar">
+
+        <item name="colorPrimary">@color/background_accent1</item>
+        <item name="colorSecondaryContainer">@color/background_white</item>
+
     </style>
 
-    <style name="Theme.FoodWastageReductionApp" parent="Base.Theme.FoodWastageReductionApp" />
+    <style name="Theme.FoodWastageReductionApp"
+        parent="Base.Theme.FoodWastageReductionApp" />
+
 </resources>
