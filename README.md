@@ -1,4 +1,3 @@
-```md
 # Food Wastage Reduction App
 
 **Course:** CSIS 3175 – Intro to Mobile Development  
@@ -400,7 +399,7 @@ manager
 
 ---
 
-## 🧭 Navigation
+## Navigation
 
 The app uses separate bottom navigation menus for Customer and Manager screens.
 
@@ -456,7 +455,7 @@ bottom_nav_item_color.xml
 
 ---
 
-## 📱 Current Screens & References
+## Current Screens & References
 
 The following screens have already been created and should be used as reference examples.
 
@@ -711,7 +710,7 @@ layout3
 
 ---
 
-## 🔀 Git Workflow
+## Git Workflow
 
 ### Create a Feature Branch
 
