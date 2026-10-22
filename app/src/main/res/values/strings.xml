@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">FoodWastageReductionApp</string>
+    <string name="txtProfile">Profile</string>
+    <string name="txtEditProfile">Edit Profile</string>
+    <string name="txtLogout">Logout</string>
+    <string name="txtCustomerName">Customer Name</string>
+    <string name="txtEmail">Customer Email</string>
+    <string name="txtAddress">Customer Address</string>
+    <string name="txtEditProfileTitle">Edit Profile</string>
+    <string name="hintFullName">Full Name</string>
+    <string name="hintCity">City</string>
+    <string name="hintProvince">Province</string>
+    <string name="hintPostalCode">Postal Code</string>
+    <string name="hintPhone">Phone Number</string>
+    <string name="btnSaveChanges">Save Changes</string>
+    <string name="msgProfileSaved">Profile saved</string>
+    <string name="txtOrderHistoryTitle">Order history</string>
+    <string name="lblCustomer">Customer</string>
+    <string name="lblMethod">Method</string>
+    <string name="lblTime">Time</string>
+    <string name="lblItems">Items</string>
+    <string name="lblTotal">Total</string>
 </resources>

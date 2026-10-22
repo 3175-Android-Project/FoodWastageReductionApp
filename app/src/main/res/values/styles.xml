@@ -113,5 +113,9 @@
         <item name="android:paddingTop">@dimen/space_xs</item>
         <item name="android:paddingBottom">@dimen/space_xs</item>
     </style>
-
+    <!-- Round Image Corner -->
+    <style name="ShapeAppearance.Rounded12" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
 </resources>
