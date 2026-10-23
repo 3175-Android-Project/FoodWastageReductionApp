@@ -12,8 +12,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.project.foodwastagereductionapp.customer.CustomerHomeActivity;
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.customer.CustomerHomeActivity;
 import com.project.foodwastagereductionapp.manager.ManagerDashboardActivity;
 
 public class LoginActivity extends AppCompatActivity {
@@ -41,8 +41,9 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Header title
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
-        txtHeaderTitle.setText("Good Food Less Waste");
+        txtHeaderTitle.setText(R.string.app_name);
 
         // Back
         ImageView btnBack = findViewById(R.id.btnBack);
@@ -55,9 +56,8 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Forgot Password → Manager Dashboard
+        // Forgot Password → Manager Dashboard (temporary)
         TextView txtForgotPassword = findViewById(R.id.txtForgotPassword);
-
         txtForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, ManagerDashboardActivity.class);
             startActivity(intent);

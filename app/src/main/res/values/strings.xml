@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FoodWastageReductionApp</string>
+    <string name="app_name">Grabbit</string>
     <string name="txtProfile">Profile</string>
     <string name="txtEditProfile">Edit Profile</string>
     <string name="txtLogout">Logout</string>
