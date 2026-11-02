@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Grabbit</string>
+
+    <!-- Profile -->
     <string name="txtProfile">Profile</string>
     <string name="txtEditProfile">Edit Profile</string>
     <string name="txtLogout">Logout</string>
@@ -14,10 +16,61 @@
     <string name="hintPhone">Phone Number</string>
     <string name="btnSaveChanges">Save Changes</string>
     <string name="msgProfileSaved">Profile saved</string>
+
+    <!-- Order History -->
     <string name="txtOrderHistoryTitle">Order history</string>
     <string name="lblCustomer">Customer</string>
     <string name="lblMethod">Method</string>
     <string name="lblTime">Time</string>
     <string name="lblItems">Items</string>
     <string name="lblTotal">Total</string>
+
+    <!-- Choose Role -->
+    <string name="chooseRoleTitle">How will you use the app?</string>
+    <string name="chooseRoleSubtitle">Choose your role to personalize your experience</string>
+    <string name="roleCustomer">Customer</string>
+    <string name="roleCustomerDesc">Discover great food at a lower price.</string>
+    <string name="roleManager">Restaurant Manager</string>
+    <string name="roleManagerDesc">Manage your restaurant, list food and receive orders</string>
+    <string name="btnContinue">Continue</string>
+
+    <!-- Customer Home -->
+    <string name="cityVancouver">Vancouver</string>
+    <string name="titleSearchFood">Search food near you</string>
+    <string name="hintSearchRestaurants">Search restaurants or food</string>
+    <string name="titleNearbyVancouver">Nearby in Vancouver</string>
+    <string name="actionSeeAll">See all</string>
+    <string name="sampleRestaurantSushi1">Awesome sushi</string>
+    <string name="sampleRestaurantSushi2">Great sushi</string>
+    <string name="sampleAddressVancouver">123 Food St, Vancouver</string>
+    <string name="samplePrice850">$8.50</string>
+    <string name="sampleItemsLeft">5 left</string>
+    <string name="titleEndingSoon">Ending soon</string>
+    <string name="sampleGoodPoke">Good poke</string>
+    <string name="samplePokeDetails">$8.50 · until 7:15 PM</string>
+
+    <!-- Auth & Main -->
+    <string name="titleWelcomeBack">Welcome back</string>
+    <string name="hintEmail">Email</string>
+    <string name="hintPassword">Password</string>
+    <string name="actionLogin">Login</string>
+    <string name="actionLogIn">Log in</string>
+    <string name="txtForgotPassword">Forgot password?</string>
+    <string name="txtNoAccount">Don’t have an account? </string>
+    <string name="actionCreateAccount">Create account</string>
+    <string name="mainTitle">Good Food\nLess Waste</string>
+    <string name="mainDescription">Delicious food at a lower price\n—for a greener tomorrow.</string>
+
+    <!-- Manager Dashboard & Sign Up -->
+    <string name="titleManagerDashboard">Manager Dashboard</string>
+    <string name="statusPending">Pending</string>
+    <string name="statusAccepted">Accepted</string>
+    <string name="statusReady">Ready</string>
+    <string name="actionManageFoodItems">Manage food items</string>
+    <string name="actionViewActiveOrders">View active orders</string>
+    <string name="actionRestaurantProfile">Restaurant profile</string>
+    <string name="titleCreateAccount">Create your account</string>
+    <string name="hintConfirmPassword">Confirm Password</string>
+    <string name="txtAlreadyHaveAccount">Already have an account? </string>
+    <string name="contentDescBack">Back</string>
 </resources>

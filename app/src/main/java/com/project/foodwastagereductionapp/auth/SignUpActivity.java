@@ -3,6 +3,8 @@ package com.project.foodwastagereductionapp.auth;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.content.Intent;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -44,5 +46,23 @@ public class SignUpActivity extends AppCompatActivity {
         // Back button
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
+
+        Button btnContinue = findViewById(R.id.btnContinue);
+
+        btnContinue.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    SignUpActivity.this,
+                    ChooseRoleActivity.class
+            );
+
+            startActivity(intent);
+        });
+
+        TextView txtLogin = findViewById(R.id.txtLogin);
+        txtLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
     }
 }

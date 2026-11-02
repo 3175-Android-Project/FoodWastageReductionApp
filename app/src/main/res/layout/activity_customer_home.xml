@@ -50,7 +50,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:fontFamily="@font/pretendard_bold"
-                    android:text="Vancouver"
+                    android:text="@string/cityVancouver"
                     android:textColor="@color/background_accent1" />
             </LinearLayout>
 
@@ -67,7 +67,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Search food near you" />
+                    android:text="@string/titleSearchFood" />
 
                 <ImageView
                     android:id="@+id/btnNotification"
@@ -75,7 +75,8 @@
                     android:layout_height="44dp"
                     android:padding="10dp"
                     android:src="@drawable/icon_bell"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/text_primary"
+                    android:contentDescription="@string/txtProfile" />
 
             </LinearLayout>
 
@@ -87,9 +88,10 @@
                 android:layout_marginTop="24dp"
                 android:drawableStart="@drawable/icon_search"
                 android:drawablePadding="12dp"
-                android:hint="Search restaurants or food"
+                android:hint="@string/hintSearchRestaurants"
                 android:inputType="text"
-                android:focusable="false" />
+                android:focusable="false"
+                android:autofillHints="" />
 
             <!-- Nearby Header -->
             <LinearLayout
@@ -104,14 +106,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Nearby in Vancouver" />
+                    android:text="@string/titleNearbyVancouver" />
 
                 <TextView
                     android:id="@+id/txtSeeAll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pretendard_bold"
-                    android:text="See all"
+                    android:text="@string/actionSeeAll"
                     android:textColor="@color/background_accent1"
                     android:textSize="@dimen/text_body_sm" />
 
@@ -146,14 +148,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
-                            android:text="Awesome sushi" />
+                            android:text="@string/sampleRestaurantSushi1" />
 
                         <TextView
                             style="@style/Text.BodySm"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="123 Food St, Vancouver" />
+                            android:text="@string/sampleAddressVancouver" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -167,7 +169,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:fontFamily="@font/pretendard_bold"
-                                android:text="$8.50"
+                                android:text="@string/samplePrice850"
                                 android:textColor="@color/background_accent1"
                                 android:textSize="@dimen/text_body_md" />
 
@@ -175,7 +177,7 @@
                                 style="@style/Text.BodySm"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="5 left" />
+                                android:text="@string/sampleItemsLeft" />
 
                         </LinearLayout>
 
@@ -203,14 +205,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
-                            android:text="Great sushi" />
+                            android:text="@string/sampleRestaurantSushi2" />
 
                         <TextView
                             style="@style/Text.BodySm"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="123 Food St, Vancouver" />
+                            android:text="@string/sampleAddressVancouver" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -224,7 +226,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:fontFamily="@font/pretendard_bold"
-                                android:text="$8.50"
+                                android:text="@string/samplePrice850"
                                 android:textColor="@color/background_accent1"
                                 android:textSize="@dimen/text_body_md" />
 
@@ -232,7 +234,7 @@
                                 style="@style/Text.BodySm"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="5 left" />
+                                android:text="@string/sampleItemsLeft" />
 
                         </LinearLayout>
 
@@ -248,7 +250,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="40dp"
-                android:text="Ending soon" />
+                android:text="@string/titleEndingSoon" />
 
             <LinearLayout
                 style="@style/Card.Default"
@@ -274,21 +276,21 @@
                         style="@style/Text.HeadlineSm"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Good poke" />
+                        android:text="@string/sampleGoodPoke" />
 
                     <TextView
                         style="@style/Text.BodySm"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="123 Food St, Vancouver" />
+                        android:text="@string/sampleAddressVancouver" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:fontFamily="@font/pretendard_bold"
-                        android:text="$8.50 · until 7:15 PM"
+                        android:text="@string/samplePokeDetails"
                         android:textColor="@color/background_accent1"
                         android:textSize="@dimen/text_body_sm" />
 

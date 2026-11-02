@@ -62,5 +62,13 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, ManagerDashboardActivity.class);
             startActivity(intent);
         });
+
+        // Create account
+        TextView txtCreateAccount = findViewById(R.id.txtCreateAccount);
+
+        txtCreateAccount.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+            startActivity(intent);
+        });
     }
 }

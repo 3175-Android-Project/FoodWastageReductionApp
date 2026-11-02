@@ -43,7 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/pretendard_semibold"
-                    android:text="Manager Dashboard"
+                    android:text="@string/titleManagerDashboard"
                     android:textColor="@color/text_secondary" />
 
                 <ImageView
@@ -52,7 +52,8 @@
                     android:layout_height="44dp"
                     android:padding="10dp"
                     android:src="@drawable/icon_bell"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/text_primary"
+                    android:contentDescription="@string/txtProfile" />
 
             </LinearLayout>
 
@@ -62,7 +63,7 @@
                 style="@style/Text.HeadlineXL"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Awesome sushi" />
+                android:text="@string/sampleRestaurantSushi1" />
 
             <!-- Order Status Summary -->
             <LinearLayout
@@ -94,7 +95,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Pending" />
+                        android:text="@string/statusPending" />
 
                 </LinearLayout>
 
@@ -125,7 +126,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Accepted" />
+                        android:text="@string/statusAccepted" />
 
                 </LinearLayout>
 
@@ -156,7 +157,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Ready" />
+                        android:text="@string/statusReady" />
 
                 </LinearLayout>
 
@@ -178,7 +179,8 @@
                     android:background="@drawable/bg_status_badge"
                     android:padding="11dp"
                     android:src="@drawable/icon_food"
-                    app:tint="@color/background_accent1" />
+                    app:tint="@color/background_accent1"
+                    android:contentDescription="@string/actionManageFoodItems" />
 
                 <TextView
                     style="@style/Text.HeadlineSm"
@@ -186,13 +188,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="Manage food items" />
+                    android:text="@string/actionManageFoodItems" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/icon_right"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/text_primary"
+                    android:contentDescription="@string/actionManageFoodItems" />
 
             </LinearLayout>
 
@@ -212,7 +215,8 @@
                     android:background="@drawable/bg_status_badge"
                     android:padding="11dp"
                     android:src="@drawable/icon_receipt"
-                    app:tint="@color/background_accent1" />
+                    app:tint="@color/background_accent1"
+                    android:contentDescription="@string/actionViewActiveOrders" />
 
                 <TextView
                     style="@style/Text.HeadlineSm"
@@ -220,13 +224,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="View active orders" />
+                    android:text="@string/actionViewActiveOrders" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/icon_right"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/text_primary"
+                    android:contentDescription="@string/actionViewActiveOrders" />
 
             </LinearLayout>
 
@@ -246,7 +251,8 @@
                     android:background="@drawable/bg_status_badge"
                     android:padding="11dp"
                     android:src="@drawable/icon_history"
-                    app:tint="@color/background_accent1" />
+                    app:tint="@color/background_accent1"
+                    android:contentDescription="@string/txtOrderHistoryTitle" />
 
                 <TextView
                     style="@style/Text.HeadlineSm"
@@ -254,13 +260,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="Order History" />
+                    android:text="@string/txtOrderHistoryTitle" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/icon_right"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/text_primary"
+                    android:contentDescription="@string/txtOrderHistoryTitle" />
 
             </LinearLayout>
 
@@ -280,7 +287,8 @@
                     android:background="@drawable/bg_status_badge"
                     android:padding="11dp"
                     android:src="@drawable/icon_user"
-                    app:tint="@color/background_accent1" />
+                    app:tint="@color/background_accent1"
+                    android:contentDescription="@string/actionRestaurantProfile" />
 
                 <TextView
                     style="@style/Text.HeadlineSm"
@@ -288,13 +296,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="Restaurant profile" />
+                    android:text="@string/actionRestaurantProfile" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/icon_right"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/text_primary"
+                    android:contentDescription="@string/actionRestaurantProfile" />
 
             </LinearLayout>
 
