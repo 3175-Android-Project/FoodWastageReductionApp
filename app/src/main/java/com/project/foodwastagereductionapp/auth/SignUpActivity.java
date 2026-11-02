@@ -1,10 +1,12 @@
 package com.project.foodwastagereductionapp.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.content.Intent;
-import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,28 +41,74 @@ public class SignUpActivity extends AppCompatActivity {
                 }
         );
 
-        // Header title
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
         txtHeaderTitle.setText(R.string.app_name);
 
-        // Back button
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
+
+        EditText editEmail = findViewById(R.id.editEmail);
+        EditText editPassword = findViewById(R.id.editPassword);
+        EditText editConfirmPassword = findViewById(R.id.editConfirmPassword);
 
         Button btnContinue = findViewById(R.id.btnContinue);
 
         btnContinue.setOnClickListener(v -> {
+
+            String email =
+                    editEmail.getText().toString().trim();
+
+            String password =
+                    editPassword.getText().toString();
+
+            String confirmPassword =
+                    editConfirmPassword.getText().toString();
+
+            if (email.isEmpty()
+                    || password.isEmpty()
+                    || confirmPassword.isEmpty()) {
+
+                Toast.makeText(
+                        SignUpActivity.this,
+                        R.string.msgCompleteAllFields,
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            if (!password.equals(confirmPassword)) {
+
+                Toast.makeText(
+                        SignUpActivity.this,
+                        "Passwords do not match",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
             Intent intent = new Intent(
                     SignUpActivity.this,
                     ChooseRoleActivity.class
             );
 
+            intent.putExtra("email", email);
+
+            // Temporary until SQLite is implemented
+            intent.putExtra("password", password);
+
             startActivity(intent);
         });
 
         TextView txtLogin = findViewById(R.id.txtLogin);
+
         txtLogin.setOnClickListener(v -> {
-            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+            Intent intent = new Intent(
+                    SignUpActivity.this,
+                    LoginActivity.class
+            );
+
             startActivity(intent);
             finish();
         });

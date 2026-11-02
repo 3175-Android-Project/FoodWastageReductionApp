@@ -1,6 +1,8 @@
 package com.project.foodwastagereductionapp.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -52,6 +54,12 @@ public class ChooseRoleActivity extends AppCompatActivity {
                 }
         );
 
+        String email =
+                getIntent().getStringExtra("email");
+
+        String password =
+                getIntent().getStringExtra("password");
+
         // Header
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
         txtHeaderTitle.setText(R.string.app_name);
@@ -59,7 +67,7 @@ public class ChooseRoleActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        // Role Cards
+        // Cards
         cardCustomer = findViewById(R.id.cardCustomer);
         cardManager = findViewById(R.id.cardManager);
 
@@ -70,34 +78,51 @@ public class ChooseRoleActivity extends AppCompatActivity {
         // Text
         txtCustomerTitle = findViewById(R.id.txtCustomerTitle);
         txtCustomerDesc = findViewById(R.id.txtCustomerDesc);
-
         txtManagerTitle = findViewById(R.id.txtManagerTitle);
         txtManagerDesc = findViewById(R.id.txtManagerDesc);
 
-        // Customer selected by default
         updateRoleUI();
 
-        // Customer click
         cardCustomer.setOnClickListener(v -> {
             selectedRole = "customer";
             updateRoleUI();
         });
 
-        // Manager click
         cardManager.setOnClickListener(v -> {
             selectedRole = "manager";
             updateRoleUI();
+        });
+
+        Button btnContinue = findViewById(R.id.btnContinue);
+
+        btnContinue.setOnClickListener(v -> {
+
+            Intent intent = new Intent(
+                    ChooseRoleActivity.this,
+                    AccountInformationActivity.class
+            );
+
+            intent.putExtra("selectedRole", selectedRole);
+            intent.putExtra("email", email);
+            intent.putExtra("password", password);
+
+            startActivity(intent);
         });
     }
 
     private void updateRoleUI() {
 
-        if (selectedRole.equals("customer")) {
+        if ("customer".equals(selectedRole)) {
 
             // Customer selected
-            cardCustomer.setBackgroundResource(R.drawable.bg_role_selected);
+            cardCustomer.setBackgroundResource(
+                    R.drawable.bg_role_selected
+            );
 
-            iconCustomer.setBackgroundResource(R.drawable.bg_status_badge);
+            iconCustomer.setBackgroundResource(
+                    R.drawable.bg_status_badge
+            );
+
             iconCustomer.setColorFilter(
                     getColor(R.color.background_accent1)
             );
@@ -111,9 +136,14 @@ public class ChooseRoleActivity extends AppCompatActivity {
             );
 
             // Manager unselected
-            cardManager.setBackgroundResource(R.drawable.bg_role_default);
+            cardManager.setBackgroundResource(
+                    R.drawable.bg_role_default
+            );
 
-            iconManager.setBackgroundResource(R.drawable.bg_role_default_icon);
+            iconManager.setBackgroundResource(
+                    R.drawable.bg_role_default_icon
+            );
+
             iconManager.setColorFilter(
                     getColor(R.color.text_tertiary)
             );
@@ -129,9 +159,14 @@ public class ChooseRoleActivity extends AppCompatActivity {
         } else {
 
             // Customer unselected
-            cardCustomer.setBackgroundResource(R.drawable.bg_role_default);
+            cardCustomer.setBackgroundResource(
+                    R.drawable.bg_role_default
+            );
 
-            iconCustomer.setBackgroundResource(R.drawable.bg_role_default_icon);
+            iconCustomer.setBackgroundResource(
+                    R.drawable.bg_role_default_icon
+            );
+
             iconCustomer.setColorFilter(
                     getColor(R.color.text_tertiary)
             );
@@ -145,9 +180,14 @@ public class ChooseRoleActivity extends AppCompatActivity {
             );
 
             // Manager selected
-            cardManager.setBackgroundResource(R.drawable.bg_role_selected);
+            cardManager.setBackgroundResource(
+                    R.drawable.bg_role_selected
+            );
 
-            iconManager.setBackgroundResource(R.drawable.bg_status_badge);
+            iconManager.setBackgroundResource(
+                    R.drawable.bg_status_badge
+            );
+
             iconManager.setColorFilter(
                     getColor(R.color.background_accent1)
             );

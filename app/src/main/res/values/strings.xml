@@ -1,29 +1,41 @@
 <resources>
+
+    <!-- App -->
     <string name="app_name">Grabbit</string>
 
-    <!-- Profile -->
-    <string name="txtProfile">Profile</string>
-    <string name="txtEditProfile">Edit Profile</string>
-    <string name="txtLogout">Logout</string>
-    <string name="txtCustomerName">Customer Name</string>
-    <string name="txtEmail">Customer Email</string>
-    <string name="txtAddress">Customer Address</string>
-    <string name="txtEditProfileTitle">Edit Profile</string>
+    <!-- Common -->
+    <string name="btnContinue">Continue</string>
+    <string name="btnBackToLogin">Back to Log in</string>
+    <string name="btnGoToLogin">Go to Log in</string>
+    <string name="btnCreateAccount">Create Account</string>
+    <string name="btnSaveChanges">Save Changes</string>
+
+    <string name="hintEmail">Email</string>
+    <string name="hintPassword">Password</string>
+    <string name="hintConfirmPassword">Confirm Password</string>
     <string name="hintFullName">Full Name</string>
+    <string name="hintAddress">Address</string>
     <string name="hintCity">City</string>
     <string name="hintProvince">Province</string>
     <string name="hintPostalCode">Postal Code</string>
     <string name="hintPhone">Phone Number</string>
-    <string name="btnSaveChanges">Save Changes</string>
-    <string name="msgProfileSaved">Profile saved</string>
 
-    <!-- Order History -->
-    <string name="txtOrderHistoryTitle">Order history</string>
-    <string name="lblCustomer">Customer</string>
-    <string name="lblMethod">Method</string>
-    <string name="lblTime">Time</string>
-    <string name="lblItems">Items</string>
-    <string name="lblTotal">Total</string>
+    <string name="msgCompleteAllFields">Please complete all fields</string>
+    <string name="contentDescBack">Back</string>
+
+    <!-- Main / Login -->
+    <string name="titleWelcomeBack">Welcome back</string>
+    <string name="actionLogin">Login</string>
+    <string name="actionLogIn">Log in</string>
+    <string name="txtForgotPassword">Forgot password?</string>
+    <string name="txtNoAccount">Don’t have an account? </string>
+    <string name="actionCreateAccount">Create account</string>
+    <string name="mainTitle">Good Food\nLess Waste</string>
+    <string name="mainDescription">Delicious food at a lower price\n—for a greener tomorrow.</string>
+
+    <!-- Sign Up -->
+    <string name="titleCreateAccount">Create your account</string>
+    <string name="txtAlreadyHaveAccount">Already have an account? </string>
 
     <!-- Choose Role -->
     <string name="chooseRoleTitle">How will you use the app?</string>
@@ -32,7 +44,37 @@
     <string name="roleCustomerDesc">Discover great food at a lower price.</string>
     <string name="roleManager">Restaurant Manager</string>
     <string name="roleManagerDesc">Manage your restaurant, list food and receive orders</string>
-    <string name="btnContinue">Continue</string>
+
+    <!-- Account Information -->
+    <string name="accountInformationTitle">Account information</string>
+    <string name="accountInformationDesc">A few details to complete your account.</string>
+
+    <!-- Email Verification -->
+    <string name="emailVerificationTitle">Check your email</string>
+    <string name="emailVerificationMessage">We sent a verification link to\n%s.\nTap the link to verify your account, then log in.</string>
+    <string name="btnResendVerification">Resend verification email</string>
+
+    <!-- Forgot Password -->
+    <string name="forgotPasswordTitle">Forgot Password?</string>
+    <string name="forgotPasswordDesc">Enter your email address and\nwe’ll send you a link to reset your password.</string>
+    <string name="btnSendResetLink">Send Reset Link</string>
+
+    <!-- Reset Link Sent -->
+    <string name="resetLinkSentTitle">Reset link sent</string>
+    <string name="resetLinkSentMessage">If an account exists for\n%s,\nyou\'ll receive a link to reset your password shortly.</string>
+    <string name="btnResendLink">Resend link</string>
+
+    <!-- Reset Password -->
+    <string name="resetPasswordTitle">Reset Password</string>
+    <string name="resetPasswordDesc">Enter your new password below.</string>
+    <string name="hintNewPassword">New Password</string>
+    <string name="hintConfirmNewPassword">Confirm New Password</string>
+    <string name="btnResetPassword">Reset Password</string>
+    <string name="passwordResetSuccess">Password reset successfully</string>
+
+    <!-- Password Reset Complete -->
+    <string name="passwordResetCompleteTitle">Password Reset Complete</string>
+    <string name="passwordResetCompleteDesc">Your password has been reset successfully.</string>
 
     <!-- Customer Home -->
     <string name="cityVancouver">Vancouver</string>
@@ -49,19 +91,25 @@
     <string name="sampleGoodPoke">Good poke</string>
     <string name="samplePokeDetails">$8.50 · until 7:15 PM</string>
 
-    <!-- Auth & Main -->
-    <string name="titleWelcomeBack">Welcome back</string>
-    <string name="hintEmail">Email</string>
-    <string name="hintPassword">Password</string>
-    <string name="actionLogin">Login</string>
-    <string name="actionLogIn">Log in</string>
-    <string name="txtForgotPassword">Forgot password?</string>
-    <string name="txtNoAccount">Don’t have an account? </string>
-    <string name="actionCreateAccount">Create account</string>
-    <string name="mainTitle">Good Food\nLess Waste</string>
-    <string name="mainDescription">Delicious food at a lower price\n—for a greener tomorrow.</string>
+    <!-- Profile -->
+    <string name="txtProfile">Profile</string>
+    <string name="txtEditProfile">Edit Profile</string>
+    <string name="txtLogout">Logout</string>
+    <string name="txtCustomerName">Customer Name</string>
+    <string name="txtEmail">Customer Email</string>
+    <string name="txtAddress">Customer Address</string>
+    <string name="txtEditProfileTitle">Edit Profile</string>
+    <string name="msgProfileSaved">Profile saved</string>
 
-    <!-- Manager Dashboard & Sign Up -->
+    <!-- Order History -->
+    <string name="txtOrderHistoryTitle">Order history</string>
+    <string name="lblCustomer">Customer</string>
+    <string name="lblMethod">Method</string>
+    <string name="lblTime">Time</string>
+    <string name="lblItems">Items</string>
+    <string name="lblTotal">Total</string>
+
+    <!-- Manager Dashboard -->
     <string name="titleManagerDashboard">Manager Dashboard</string>
     <string name="statusPending">Pending</string>
     <string name="statusAccepted">Accepted</string>
@@ -69,33 +117,13 @@
     <string name="actionManageFoodItems">Manage food items</string>
     <string name="actionViewActiveOrders">View active orders</string>
     <string name="actionRestaurantProfile">Restaurant profile</string>
-    <string name="titleCreateAccount">Create your account</string>
-    <string name="hintConfirmPassword">Confirm Password</string>
-    <string name="txtAlreadyHaveAccount">Already have an account? </string>
-    <string name="contentDescBack">Back</string>
 
-    <!-- Forgot Password -->
-    <string name="forgotPasswordTitle">Forgot Password?</string>
-    <string name="forgotPasswordDesc">Enter your email address and \nwe’ll send you a link to reset your password.</string>
-    <string name="btnSendResetLink">Send Reset Link</string>
-    <string name="backToLogin">Back to Login</string>
-
-    <!-- Reset Link -->
-    <string name="resetLinkSentTitle">Reset link sent</string>
-    <string name="resetLinkSentMessage">If an account exists for\n%s,\nyou\'ll receive a link to reset your password shortly.</string>
-    <string name="btnBackToLogin">Back to Log in</string>
-    <string name="btnResendLink">Resend link</string>
-
-    <!-- Reset Password -->
-    <string name="resetPasswordTitle">Reset Password</string>
-    <string name="resetPasswordDesc">Enter your new password below.</string>
-    <string name="hintNewPassword">New Password</string>
-    <string name="hintConfirmNewPassword">Confirm New Password</string>
-    <string name="btnResetPassword">Reset Password</string>
-    <string name="passwordResetSuccess">Password reset successfully</string>
-
-    <!-- Password Reset Complete -->
-    <string name="passwordResetCompleteTitle">Password Reset Complete</string>
-    <string name="passwordResetCompleteDesc">Your password has been reset successfully.</string>
-    <string name="btnGoToLogin">Go to Log in</string>
+    <!-- Restaurant Information -->
+    <string name="restaurantInformationTitle">Restaurant information</string>
+    <string name="restaurantInformationDesc">Tell customers where to find you</string>
+    <string name="hintRestaurantName">Restaurant name</string>
+    <string name="hintPhoneNumber">Phone number</string>
+    <string name="hintCuisineType">Cuisine type</string>
+    <string name="hintRestaurantDescription">Restaurant description</string>
+    <string name="btnGoToDashboard">Go to dashboard</string>
 </resources>
