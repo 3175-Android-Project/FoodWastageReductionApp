@@ -73,4 +73,29 @@
     <string name="hintConfirmPassword">Confirm Password</string>
     <string name="txtAlreadyHaveAccount">Already have an account? </string>
     <string name="contentDescBack">Back</string>
+
+    <!-- Forgot Password -->
+    <string name="forgotPasswordTitle">Forgot Password?</string>
+    <string name="forgotPasswordDesc">Enter your email address and \nwe’ll send you a link to reset your password.</string>
+    <string name="btnSendResetLink">Send Reset Link</string>
+    <string name="backToLogin">Back to Login</string>
+
+    <!-- Reset Link -->
+    <string name="resetLinkSentTitle">Reset link sent</string>
+    <string name="resetLinkSentMessage">If an account exists for\n%s,\nyou\'ll receive a link to reset your password shortly.</string>
+    <string name="btnBackToLogin">Back to Log in</string>
+    <string name="btnResendLink">Resend link</string>
+
+    <!-- Reset Password -->
+    <string name="resetPasswordTitle">Reset Password</string>
+    <string name="resetPasswordDesc">Enter your new password below.</string>
+    <string name="hintNewPassword">New Password</string>
+    <string name="hintConfirmNewPassword">Confirm New Password</string>
+    <string name="btnResetPassword">Reset Password</string>
+    <string name="passwordResetSuccess">Password reset successfully</string>
+
+    <!-- Password Reset Complete -->
+    <string name="passwordResetCompleteTitle">Password Reset Complete</string>
+    <string name="passwordResetCompleteDesc">Your password has been reset successfully.</string>
+    <string name="btnGoToLogin">Go to Log in</string>
 </resources>

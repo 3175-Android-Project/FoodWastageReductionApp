@@ -21,6 +21,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Main Content -->
     <LinearLayout
         android:id="@+id/layoutContent"
         android:layout_width="0dp"
@@ -35,12 +36,15 @@
 
         <!-- Title -->
         <TextView
+            android:id="@+id/txtChooseRoleTitle"
             style="@style/Text.HeadlineSm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chooseRoleTitle" />
 
+        <!-- Subtitle -->
         <TextView
+            android:id="@+id/txtChooseRoleSubtitle"
             style="@style/Text.BodyXs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,7 +55,8 @@
         <LinearLayout
             android:id="@+id/cardCustomer"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
+            android:layout_height="wrap_content"
+            android:minHeight="88dp"
             android:layout_marginTop="@dimen/space_xl"
             android:background="@drawable/bg_role_selected"
             android:gravity="center_vertical"
@@ -59,15 +64,17 @@
             android:padding="@dimen/space_lg">
 
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:id="@+id/iconCustomer"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:background="@drawable/bg_status_badge"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:src="@drawable/icon_user"
-                app:tint="@color/background_accent1"
-                android:contentDescription="@string/roleCustomer" />
+                android:contentDescription="@string/roleCustomer"
+                app:tint="@color/background_accent1" />
 
             <LinearLayout
+                android:id="@+id/layoutCustomerText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/space_md"
@@ -75,17 +82,21 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtCustomerTitle"
                     style="@style/Text.HeadlineSm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/roleCustomer" />
+                    android:text="@string/roleCustomer"
+                    android:textColor="@color/text_primary" />
 
                 <TextView
-                    style="@style/Text.BodyXs"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/txtCustomerDesc"
+                    style="@style/Text.BodySm"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="@string/roleCustomerDesc" />
+                    android:text="@string/roleCustomerDesc"
+                    android:textColor="@color/text_secondary" />
 
             </LinearLayout>
 
@@ -95,23 +106,26 @@
         <LinearLayout
             android:id="@+id/cardManager"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_marginTop="@dimen/space_sm"
+            android:layout_height="wrap_content"
+            android:minHeight="88dp"
+            android:layout_marginTop="@dimen/space_md"
             android:background="@drawable/bg_role_default"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="@dimen/space_lg">
 
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:id="@+id/iconManager"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:background="@drawable/bg_status_badge"
-                android:padding="10dp"
-                android:src="@drawable/icon_user"
-                app:tint="@color/text_secondary"
-                android:contentDescription="@string/roleManager" />
+                android:padding="12dp"
+                android:src="@drawable/icon_store"
+                android:contentDescription="@string/roleManager"
+                app:tint="@color/text_tertiary" />
 
             <LinearLayout
+                android:id="@+id/layoutManagerText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/space_md"
@@ -119,17 +133,21 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtManagerTitle"
                     style="@style/Text.HeadlineSm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/roleManager" />
+                    android:text="@string/roleManager"
+                    android:textColor="@color/text_secondary" />
 
                 <TextView
-                    style="@style/Text.BodyXs"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/txtManagerDesc"
+                    style="@style/Text.BodySm"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="@string/roleManagerDesc" />
+                    android:text="@string/roleManagerDesc"
+                    android:textColor="@color/text_secondary" />
 
             </LinearLayout>
 

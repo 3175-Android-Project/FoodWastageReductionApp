@@ -14,7 +14,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.customer.CustomerHomeActivity;
-import com.project.foodwastagereductionapp.manager.ManagerDashboardActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -56,10 +55,15 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Forgot Password → Manager Dashboard (temporary)
+        // Forgot Password
         TextView txtForgotPassword = findViewById(R.id.txtForgotPassword);
+
         txtForgotPassword.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, ManagerDashboardActivity.class);
+            Intent intent = new Intent(
+                    LoginActivity.this,
+                    ForgotPasswordActivity.class
+            );
+
             startActivity(intent);
         });
 
