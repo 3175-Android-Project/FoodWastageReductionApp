@@ -3,7 +3,7 @@
 **Course:** CSIS 3175 – Intro to Mobile Development  
 **Platform:** Android (Java, XML Layouts, Material 3)
 
-Welcome to the Food Wastage Reduction App project repository!
+Welcome to the Food Wastage Reduction App (GRABBIT) project repository!
 
 This `README.md` serves as a practical guide for all team members. It outlines our project setup, design system, shared components, naming conventions, and development rules to ensure UI/UX consistency across all screens.
 
