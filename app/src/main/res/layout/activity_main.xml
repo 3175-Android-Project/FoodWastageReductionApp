@@ -12,45 +12,53 @@
     tools:context=".MainActivity">
 
     <!-- Logo -->
+    <!-- App Name -->
+
+    <!-- Description -->
+
+    <!-- Login -->
+
     <ImageView
         android:id="@+id/imgLogo"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="93dp"
+        android:layout_height="84dp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/bg_status_badge"
+        android:contentDescription="@string/imgLogo"
         android:padding="16dp"
-        android:src="@drawable/icon_leaf"
-        app:tint="@color/background_accent1"
+        android:src="@drawable/icon_logo_grabbit"
         app:layout_constraintBottom_toTopOf="@id/txtTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="@dimen/space_xl" />
-    <!-- App Name -->
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:tint="@color/text_success" />
+
     <TextView
         android:id="@+id/txtTitle"
         style="@style/Text.HeadlineXL"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="135dp"
+        android:layout_height="57dp"
+        android:layout_marginBottom="20dp"
         android:gravity="center"
         android:text="@string/mainTitle"
         app:layout_constraintBottom_toTopOf="@id/txtDescription"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="@dimen/space_md" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
-    <!-- Description -->
     <TextView
         android:id="@+id/txtDescription"
         style="@style/Text.BodySm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="240dp"
         android:gravity="center"
         android:text="@string/mainDescription"
         app:layout_constraintBottom_toTopOf="@id/btnLogin"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="300dp" />
-
-    <!-- Login -->
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnLogin"
