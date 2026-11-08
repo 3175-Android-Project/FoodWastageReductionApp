@@ -1,7 +1,4 @@
 package com.project.foodwastagereductionapp.customer;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.project.foodwastagereductionapp.R;
-
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +10,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.auth.AuthNavigator;
+import com.project.foodwastagereductionapp.auth.AuthTasks;
+import com.project.foodwastagereductionapp.auth.SessionManager;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.User;
 
 public class CustomerProfileActivity extends AppCompatActivity {
 
@@ -27,7 +32,8 @@ public class CustomerProfileActivity extends AppCompatActivity {
         });
         // Header title
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
-        txtHeaderTitle.setText("Profile");
+        txtHeaderTitle.setText(R.string.txtProfile);
+        findViewById(R.id.layoutLogout).setOnClickListener(v -> AuthNavigator.logout(this));
 
         // Back button → Home
         View btnBack = findViewById(R.id.btnBack);
@@ -55,6 +61,21 @@ public class CustomerProfileActivity extends AppCompatActivity {
                 return true;
             }
             return false;
+        });
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        long userId = new SessionManager(this).getUserId();
+        AuthTasks.run(this, null, () -> AppDatabaseHelper.getInstance(this).getUser(userId), user -> {
+            if (user == null || !user.emailVerified || !User.CUSTOMER.equals(user.role)) {
+                AuthNavigator.logout(this);
+                return;
+            }
+            ((TextView) findViewById(R.id.txtCustomerName)).setText(user.fullName);
+            ((TextView) findViewById(R.id.txtEmail)).setText(user.email);
+            ((TextView) findViewById(R.id.txtAddress)).setText(
+                    getString(R.string.profileLocation, user.city, user.province, user.postalCode));
         });
     }
 

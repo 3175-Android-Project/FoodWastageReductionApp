@@ -30,6 +30,10 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".manager.ManagerProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".manager.ManagerDashboardActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -79,10 +83,6 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".auth.EmailVerificationActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".manager.RestaurantInformationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity

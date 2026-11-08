@@ -50,9 +50,9 @@
     <string name="accountInformationDesc">A few details to complete your account.</string>
 
     <!-- Email Verification -->
-    <string name="emailVerificationTitle">Check your email</string>
-    <string name="emailVerificationMessage">We sent a verification link to\n%s.\nTap the link to verify your account, then log in.</string>
-    <string name="btnResendVerification">Resend verification email</string>
+    <string name="emailVerificationTitle">Confirm your email (local demo)</string>
+    <string name="emailVerificationMessage">Account saved for\n%1$s.\nThis local demo does not send email. Tap below to confirm and continue.</string>
+    <string name="btnResendVerification">About email verification</string>
 
     <!-- Forgot Password -->
     <string name="forgotPasswordTitle">Forgot Password?</string>
@@ -126,4 +126,15 @@
     <string name="hintCuisineType">Cuisine type</string>
     <string name="hintRestaurantDescription">Restaurant description</string>
     <string name="btnGoToDashboard">Go to dashboard</string>
+    <!-- Local SQLite authentication -->
+    <string name="msgInvalidEmail">Enter a valid email address</string>
+    <string name="msgPasswordTooShort">Use at least 6 characters</string>
+    <string name="msgPasswordsDoNotMatch">Passwords do not match</string>
+    <string name="msgEmailExists">This email is already registered. Log in to continue your account setup.</string>
+    <string name="msgInvalidCredentials">Incorrect email or password</string>
+    <string name="msgDatabaseError">Unable to save or load local data. Please try again.</string>
+    <string name="msgLocalVerification">Local demo: no email is sent. Use the confirm button to continue.</string>
+    <string name="btnLocalVerifyContinue">Confirm and continue</string>
+    <string name="btnLocalVerifyLogin">Confirm and go to Log in</string>
+    <string name="profileLocation">%1$s, %2$s %3$s</string>
 </resources>

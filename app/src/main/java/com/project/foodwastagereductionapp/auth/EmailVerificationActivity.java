@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +13,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.User;
 
 public class EmailVerificationActivity extends AppCompatActivity {
 
@@ -39,98 +42,36 @@ public class EmailVerificationActivity extends AppCompatActivity {
                 }
         );
 
-        String selectedRole =
-                getIntent().getStringExtra("selectedRole");
-
-        String email =
-                getIntent().getStringExtra("email");
-
-        String password =
-                getIntent().getStringExtra("password");
-
-        String fullName =
-                getIntent().getStringExtra("fullName");
-
-        String city =
-                getIntent().getStringExtra("city");
-
-        String province =
-                getIntent().getStringExtra("province");
-
-        String postalCode =
-                getIntent().getStringExtra("postalCode");
-
-        if (email == null) {
-            email = "";
-        }
-
-        // Email message
-        TextView txtVerificationMessage =
-                findViewById(R.id.txtVerificationMessage);
-
-        txtVerificationMessage.setText(
-                getString(
-                        R.string.emailVerificationMessage,
-                        email
-                )
-        );
-
-        Button btnContinue =
-                findViewById(R.id.btnVerificationContinue);
-
-        /*
-         * Customer → Login
-         * Manager → Restaurant Information
-         */
-        if ("manager".equals(selectedRole)) {
-            btnContinue.setText(R.string.btnContinue);
-        } else {
-            btnContinue.setText(R.string.btnGoToLogin);
-        }
-
-        String finalEmail = email;
-
-        btnContinue.setOnClickListener(v -> {
-
-            if ("manager".equals(selectedRole)) {
-
-                Intent intent = new Intent(
-                        EmailVerificationActivity.this,
-                        RestaurantInformationActivity.class
-                );
-
-                intent.putExtra("email", finalEmail);
-                intent.putExtra("password", password);
-                intent.putExtra("fullName", fullName);
-
-                intent.putExtra("city", city);
-                intent.putExtra("province", province);
-                intent.putExtra("postalCode", postalCode);
-
-                startActivity(intent);
-
-            } else {
-
-                Intent intent = new Intent(
-                        EmailVerificationActivity.this,
-                        LoginActivity.class
-                );
-
-                intent.setFlags(
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                                Intent.FLAG_ACTIVITY_NEW_TASK
-                );
-
-                startActivity(intent);
-                finish();
+        long userId = getIntent().getLongExtra(AuthNavigator.EXTRA_USER_ID, -1);
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        Button btnContinue = findViewById(R.id.btnVerificationContinue);
+        btnContinue.setEnabled(false);
+        AuthTasks.run(this, null, () -> db.getUser(userId), user -> {
+            if (user == null) {
+                AuthNavigator.logout(this);
+                return;
             }
+            TextView message = findViewById(R.id.txtVerificationMessage);
+            message.setText(getString(R.string.emailVerificationMessage, user.email));
+            btnContinue.setText(User.MANAGER.equals(user.role)
+                    ? R.string.btnLocalVerifyContinue : R.string.btnLocalVerifyLogin);
+            btnContinue.setEnabled(true);
         });
-
-        Button btnResendVerification =
-                findViewById(R.id.btnResendVerification);
-
-        btnResendVerification.setOnClickListener(v -> {
-            // Actual verification email logic will be added later
-        });
+        btnContinue.setOnClickListener(v -> AuthTasks.run(this, btnContinue,
+                () -> db.confirmEmailLocally(userId), user -> {
+                    if (User.MANAGER.equals(user.role)) {
+                        new SessionManager(this).start(user.id);
+                        AuthNavigator.open(this, RestaurantInformationActivity.class, user.id);
+                    } else {
+                        new SessionManager(this).clear();
+                        Intent intent = new Intent(this, LoginActivity.class);
+                        intent.putExtra("email", user.email);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    }
+                }));
+        findViewById(R.id.btnResendVerification).setOnClickListener(v ->
+                Toast.makeText(this, R.string.msgLocalVerification, Toast.LENGTH_LONG).show());
     }
 }

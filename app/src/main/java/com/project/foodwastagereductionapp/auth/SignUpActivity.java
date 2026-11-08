@@ -15,6 +15,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.PasswordHasher;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -55,8 +57,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         btnContinue.setOnClickListener(v -> {
 
-            String email =
-                    editEmail.getText().toString().trim();
+            String email = AppDatabaseHelper.normalizeEmail(editEmail.getText().toString());
 
             String password =
                     editPassword.getText().toString();
@@ -81,24 +82,31 @@ public class SignUpActivity extends AppCompatActivity {
 
                 Toast.makeText(
                         SignUpActivity.this,
-                        "Passwords do not match",
+                        R.string.msgPasswordsDoNotMatch,
                         Toast.LENGTH_SHORT
                 ).show();
 
                 return;
             }
 
-            Intent intent = new Intent(
-                    SignUpActivity.this,
-                    ChooseRoleActivity.class
-            );
-
-            intent.putExtra("email", email);
-
-            // Temporary until SQLite is implemented
-            intent.putExtra("password", password);
-
-            startActivity(intent);
+            if (!AppDatabaseHelper.validEmail(email)) {
+                editEmail.setError(getString(R.string.msgInvalidEmail));
+                return;
+            }
+            if (password.length() < 6) {
+                editPassword.setError(getString(R.string.msgPasswordTooShort));
+                return;
+            }
+            AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+            AuthTasks.run(this, btnContinue, () -> {
+                if (db.emailExists(email)) throw new AppDatabaseHelper.DuplicateEmailException();
+                return PasswordHasher.hash(password);
+            }, passwordHash -> {
+                Intent intent = new Intent(this, ChooseRoleActivity.class);
+                intent.putExtra("email", email);
+                intent.putExtra(AuthNavigator.EXTRA_PASSWORD_HASH, passwordHash);
+                startActivity(intent);
+            });
         });
 
         TextView txtLogin = findViewById(R.id.txtLogin);
