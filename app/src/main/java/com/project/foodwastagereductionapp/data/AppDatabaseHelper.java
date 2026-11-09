@@ -114,7 +114,7 @@ public final class AppDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /** Local demo confirmation only: no email is sent or remotely verified. */
+    /** Store the confirmation after the server verifies the code. */
     public User confirmEmailLocally(long userId) {
         ContentValues values = new ContentValues();
         values.put("email_verified", 1);

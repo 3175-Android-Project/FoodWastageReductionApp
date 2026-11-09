@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.PasswordHasher;
+import com.project.foodwastagereductionapp.data.User;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -99,13 +100,24 @@ public class SignUpActivity extends AppCompatActivity {
             }
             AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
             AuthTasks.run(this, btnContinue, () -> {
-                if (db.emailExists(email)) throw new AppDatabaseHelper.DuplicateEmailException();
-                return PasswordHasher.hash(password);
-            }, passwordHash -> {
-                Intent intent = new Intent(this, ChooseRoleActivity.class);
-                intent.putExtra("email", email);
-                intent.putExtra(AuthNavigator.EXTRA_PASSWORD_HASH, passwordHash);
-                startActivity(intent);
+                if (db.emailExists(email)) {
+                    User existing = db.authenticate(email, password);
+                    if (existing == null || existing.emailVerified) {
+                        throw new AppDatabaseHelper.DuplicateEmailException();
+                    }
+                    return new Intent(this, EmailVerificationActivity.class)
+                            .putExtra(AuthNavigator.EXTRA_USER_ID, existing.id);
+                }
+                return new Intent(this, ChooseRoleActivity.class)
+                        .putExtra("email", email)
+                        .putExtra(AuthNavigator.EXTRA_PASSWORD_HASH, PasswordHasher.hash(password));
+            }, intent -> {
+                long pendingUserId = intent.getLongExtra(AuthNavigator.EXTRA_USER_ID, -1);
+                if (pendingUserId != -1) {
+                    AuthNavigator.open(this, EmailVerificationActivity.class, pendingUserId);
+                } else {
+                    startActivity(intent);
+                }
             });
         });
 

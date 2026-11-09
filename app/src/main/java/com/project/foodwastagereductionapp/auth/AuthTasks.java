@@ -20,6 +20,15 @@ public final class AuthTasks {
     private AuthTasks() { }
 
     public static <T> void run(Activity activity, View button, Callable<T> work, Consumer<T> done) {
+        run(activity, button, work, done, error -> {
+            Log.e("GrabbitDatabase", "Local account operation failed", error);
+            Toast.makeText(activity, error instanceof AppDatabaseHelper.DuplicateEmailException
+                    ? R.string.msgEmailExists : R.string.msgDatabaseError, Toast.LENGTH_LONG).show();
+        });
+    }
+
+    static <T> void run(Activity activity, View button, Callable<T> work, Consumer<T> done,
+                        Consumer<Exception> failed) {
         if (button != null) {
             if (!button.isEnabled()) return;
             button.setEnabled(false);
@@ -33,12 +42,10 @@ public final class AuthTasks {
                     done.accept(result);
                 });
             } catch (Exception error) {
-                Log.e("GrabbitDatabase", "Local account operation failed", error);
                 MAIN.post(() -> {
                     if (activity.isFinishing() || activity.isDestroyed()) return;
                     if (button != null) button.setEnabled(true);
-                    Toast.makeText(activity, error instanceof AppDatabaseHelper.DuplicateEmailException
-                            ? R.string.msgEmailExists : R.string.msgDatabaseError, Toast.LENGTH_LONG).show();
+                    failed.accept(error);
                 });
             }
         });
