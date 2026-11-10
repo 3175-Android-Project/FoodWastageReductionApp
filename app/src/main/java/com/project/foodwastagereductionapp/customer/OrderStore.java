@@ -1,10 +1,34 @@
 package com.project.foodwastagereductionapp.customer;
 
+import com.project.foodwastagereductionapp.data.FoodItem;
+import com.project.foodwastagereductionapp.data.CartItem;
+import com.project.foodwastagereductionapp.data.Order;
+import com.project.foodwastagereductionapp.data.OrderStatus;
+import com.project.foodwastagereductionapp.data.AppNotification;
+import com.project.foodwastagereductionapp.data.CustomerProfile;
+
+
+import com.project.foodwastagereductionapp.data.Restaurant;
+import com.project.foodwastagereductionapp.data.FoodItem;
+import com.project.foodwastagereductionapp.data.CartItem;
+import com.project.foodwastagereductionapp.data.Order;
+import com.project.foodwastagereductionapp.data.OrderStatus;
+import com.project.foodwastagereductionapp.data.AppNotification;
+import com.project.foodwastagereductionapp.data.CustomerProfile;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import com.project.foodwastagereductionapp.data.Restaurant;
+import com.project.foodwastagereductionapp.data.FoodItem;
+import com.project.foodwastagereductionapp.data.CartItem;
+import com.project.foodwastagereductionapp.data.Order;
+import com.project.foodwastagereductionapp.data.OrderStatus;
+import com.project.foodwastagereductionapp.data.AppNotification;
+import com.project.foodwastagereductionapp.data.CustomerProfile;
 
 /**
  * Browse & Checkout / Customer Orders feature - CSIS 3175 Intro to Mobile Development
@@ -60,8 +84,9 @@ public final class OrderStore {
         Date now = new Date();
         Order order = new Order(String.valueOf(nextOrderNumber++), restaurant.name,
                 formatDate(now), formatTime(now), itemCount, total,
-                OrderStatus.PENDING, restaurant.imageRes);
-        PlacedOrder placed = new PlacedOrder(order, copy, pickupTime, restaurant.address);
+                OrderStatus.PENDING, 0); // No imageRes in Restaurant
+        String address = restaurant.city + ", " + restaurant.province;
+        PlacedOrder placed = new PlacedOrder(order, copy, pickupTime, address);
         ORDERS.add(0, placed); // newest first
 
         OrderStatusSimulator.start(order.orderNumber); // demo only, see that class
@@ -162,7 +187,8 @@ public final class OrderStore {
             total += c.getLineTotal();
         }
         Order order = new Order(orderNumber, restaurant.name, date, time,
-                itemCount, total, status, restaurant.imageRes);
-        ORDERS.add(new PlacedOrder(order, items, pickupTime, restaurant.address));
+                itemCount, total, status, 0); // No imageRes in Restaurant
+        String address = restaurant.city + ", " + restaurant.province;
+        ORDERS.add(new PlacedOrder(order, items, pickupTime, address));
     }
 }

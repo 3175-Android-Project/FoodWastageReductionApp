@@ -1,4 +1,4 @@
-package com.project.foodwastagereductionapp.customer;
+package com.project.foodwastagereductionapp.data;
 
 /**
  * Customer Profile feature

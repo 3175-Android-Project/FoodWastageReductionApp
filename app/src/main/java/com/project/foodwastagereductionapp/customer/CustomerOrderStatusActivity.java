@@ -1,5 +1,13 @@
 package com.project.foodwastagereductionapp.customer;
 
+import com.project.foodwastagereductionapp.data.FoodItem;
+import com.project.foodwastagereductionapp.data.CartItem;
+import com.project.foodwastagereductionapp.data.Order;
+import com.project.foodwastagereductionapp.data.OrderStatus;
+import com.project.foodwastagereductionapp.data.AppNotification;
+import com.project.foodwastagereductionapp.data.CustomerProfile;
+
+
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
