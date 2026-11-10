@@ -1,4 +1,4 @@
-package com.project.foodwastagereductionapp.customer;
+package com.project.foodwastagereductionapp.data;
 
 public class Order {
     public final String orderNumber;
