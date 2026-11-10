@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <!-- Circle: the background is a pill shape, tinted green (reached) or grey (not yet) in code -->
+    <TextView
+        android:id="@+id/txtStepNumber"
+        style="@style/Text.BodySm"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="@drawable/bg_status_badge"
+        android:fontFamily="@font/pretendard_bold"
+        android:gravity="center"
+        tools:text="1" />
+
+    <TextView
+        android:id="@+id/txtStepLabel"
+        style="@style/Text.BodyXs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_sm"
+        android:textColor="@color/text_secondary"
+        tools:text="Pending" />
+</LinearLayout>

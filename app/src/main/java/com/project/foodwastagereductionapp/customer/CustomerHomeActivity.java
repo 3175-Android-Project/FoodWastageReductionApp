@@ -25,6 +25,21 @@ public class CustomerHomeActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Browse: search box and "See all" open the Browse screen
+        findViewById(R.id.editSearch).setOnClickListener(v ->
+                startActivity(new Intent(this, CustomerBrowseActivity.class)));
+        findViewById(R.id.txtSeeAll).setOnClickListener(v ->
+                startActivity(new Intent(this, CustomerBrowseActivity.class)));
+
+        // Bell opens the order notifications
+        findViewById(R.id.btnNotification).setOnClickListener(v ->
+                startActivity(new Intent(this, NotificationsActivity.class)));
+
+        // Restaurant cards open the restaurant's food items (ids match SampleData)
+        findViewById(R.id.cardRestaurant1).setOnClickListener(v -> openRestaurant(1));
+        findViewById(R.id.cardRestaurant2).setOnClickListener(v -> openRestaurant(2));
+        findViewById(R.id.cardEndingSoon).setOnClickListener(v -> openRestaurant(3));
+
         // Bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setSelectedItemId(R.id.nav_home);
@@ -32,6 +47,9 @@ public class CustomerHomeActivity extends AppCompatActivity {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
                 return true; // already here
+            } else if (id == R.id.nav_search) {
+                goTo(CustomerBrowseActivity.class);
+                return true;
             } else if (id == R.id.nav_orders) {
                 goTo(CustomerOrderActivity.class);
                 return true;
@@ -41,6 +59,12 @@ public class CustomerHomeActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    private void openRestaurant(int restaurantId) {
+        Intent intent = new Intent(this, RestaurantDetailActivity.class);
+        intent.putExtra(RestaurantDetailActivity.EXTRA_RESTAURANT_ID, restaurantId);
+        startActivity(intent);
     }
 
     private void goTo(Class<?> screen) {

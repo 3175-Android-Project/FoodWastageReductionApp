@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="@dimen/space_md"
+    android:paddingBottom="@dimen/space_md">
+
+    <!-- Icon square (colours are set in code) -->
+    <ImageView
+        android:id="@+id/imgNotificationIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_icon_square"
+        android:importantForAccessibility="no"
+        android:padding="12dp"
+        android:src="@drawable/icon_check"
+        app:tint="@color/background_accent1" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_md"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtNotificationTitle"
+            style="@style/Text.HeadlineSm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Your order is ready!" />
+
+        <TextView
+            android:id="@+id/txtNotificationMessage"
+            style="@style/Text.BodySm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            tools:text="Awesome sushi · Pickup 6:30 PM" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtNotificationTime"
+        style="@style/Text.BodyXs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_sm"
+        tools:text="Oct 10, 10:34 AM" />
+
+    <ImageView
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/icon_right"
+        app:tint="@color/text_tertiary" />
+</LinearLayout>
