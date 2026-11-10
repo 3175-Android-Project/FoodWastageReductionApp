@@ -6,26 +6,23 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.project.foodwastagereductionapp.MainActivity;
 import com.project.foodwastagereductionapp.R;
-import com.project.foodwastagereductionapp.auth.AuthNavigator;
-import com.project.foodwastagereductionapp.auth.AuthTasks;
-import com.project.foodwastagereductionapp.auth.SessionManager;
-import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
-import com.project.foodwastagereductionapp.data.User;
 
 public class CustomerProfileActivity extends AppCompatActivity {
+
+    private TextView txtCustomerName, txtEmail, txtAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_customer_profile);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -35,16 +32,23 @@ public class CustomerProfileActivity extends AppCompatActivity {
         // Header title
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
         txtHeaderTitle.setText(R.string.txtProfile);
-        findViewById(R.id.layoutLogout).setOnClickListener(v -> AuthNavigator.logout(this));
 
         // Back button → Home
         View btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> goToHome());
 
+        txtCustomerName = findViewById(R.id.txtCustomerName);
+        txtEmail = findViewById(R.id.txtEmail);
+        txtAddress = findViewById(R.id.txtAddress);
+
         // Edit Profile row → Edit Profile screen
         LinearLayout layoutEditProfile = findViewById(R.id.layoutEditProfile);
         layoutEditProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, EditProfileActivity.class)));
+
+        // Logout row → confirm, then back to the landing screen
+        LinearLayout layoutLogout = findViewById(R.id.layoutLogout);
+        layoutLogout.setOnClickListener(v -> confirmLogout());
 
         // Bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
@@ -56,8 +60,13 @@ public class CustomerProfileActivity extends AppCompatActivity {
             } else if (id == R.id.nav_home) {
                 goToHome();
                 return true;
+            } else if (id == R.id.nav_search) {
+                startActivity(new Intent(this, CustomerBrowseActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
             } else if (id == R.id.nav_orders) {
-                startActivity(new Intent(this, CustomerHomeActivity.class));
+                startActivity(new Intent(this, CustomerOrderActivity.class));
                 overridePendingTransition(0, 0);
                 finish();
                 return true;
@@ -66,19 +75,35 @@ public class CustomerProfileActivity extends AppCompatActivity {
         });
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onResume() {
         super.onResume();
-        long userId = new SessionManager(this).getUserId();
-        AuthTasks.run(this, null, () -> AppDatabaseHelper.getInstance(this).getUser(userId), user -> {
-            if (user == null || !user.emailVerified || !User.CUSTOMER.equals(user.role)) {
-                AuthNavigator.logout(this);
-                return;
-            }
-            ((TextView) findViewById(R.id.txtCustomerName)).setText(user.fullName);
-            ((TextView) findViewById(R.id.txtEmail)).setText(user.email);
-            ((TextView) findViewById(R.id.txtAddress)).setText(
-                    getString(R.string.profileLocation, user.city, user.province, user.postalCode));
-        });
+        showProfile(); // refresh after returning from Edit Profile
+    }
+
+    private void showProfile() {
+        txtCustomerName.setText(CustomerProfile.fullName);
+        txtEmail.setText(CustomerProfile.email);
+
+        String address = CustomerProfile.getAddressLine();
+        txtAddress.setText(address.isEmpty() ? getString(R.string.txtNoAddress) : address);
+    }
+
+    private void confirmLogout() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.dialogLogoutTitle)
+                .setMessage(R.string.dialogLogoutMessage)
+                .setPositiveButton(R.string.btnLogoutConfirm, (dialog, which) -> logout())
+                .setNegativeButton(R.string.btnCancel, null)
+                .show();
+    }
+
+    private void logout() {
+        // TODO: sign out of the real account later
+        CartManager.clear();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     private void goToHome() {

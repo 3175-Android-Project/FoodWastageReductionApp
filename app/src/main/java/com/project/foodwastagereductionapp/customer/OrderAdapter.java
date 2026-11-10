@@ -1,6 +1,6 @@
 package com.project.foodwastagereductionapp.customer;
 
-import android.content.Intent;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,67 +13,87 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.foodwastagereductionapp.R;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
+/**
+ * Shows a list that mixes section titles (String) and orders (Order),
+ * e.g. "Current orders", the in-progress orders, "Past orders", the finished orders.
+ */
+public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final List<Order> orders;
+    private static final int TYPE_HEADER = 0;
+    private static final int TYPE_ORDER = 1;
 
-    public OrderAdapter(List<Order> orders) {
-        this.orders = orders;
+    private final List<Object> rows = new ArrayList<>();
+
+    public void setRows(List<Object> newRows) {
+        rows.clear();
+        rows.addAll(newRows);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return rows.get(position) instanceof String ? TYPE_HEADER : TYPE_ORDER;
     }
 
     @NonNull
     @Override
-    public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_order, parent, false);
-        return new OrderViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        if (viewType == TYPE_HEADER) {
+            return new HeaderViewHolder(inflater.inflate(R.layout.item_section_header, parent, false));
+        }
+        return new OrderViewHolder(inflater.inflate(R.layout.item_order, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull OrderViewHolder h, int position) {
-        Order o = orders.get(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof HeaderViewHolder) {
+            ((HeaderViewHolder) holder).txtTitle.setText((String) rows.get(position));
+        } else {
+            bindOrder((OrderViewHolder) holder, (Order) rows.get(position));
+        }
+    }
+
+    private void bindOrder(OrderViewHolder h, Order o) {
+        Context context = h.itemView.getContext();
 
         h.imgRestaurant.setImageResource(o.imageRes);
         h.txtRestaurantName.setText(o.restaurantName);
-        h.txtOrderNumber.setText("Order #" + o.orderNumber);
+        h.txtOrderNumber.setText(context.getString(R.string.fmtOrderNumber, o.orderNumber));
 
-        String items = o.itemCount + (o.itemCount == 1 ? " item" : " items");
-        h.txtDateItems.setText(o.date + " · " + items);
-        h.txtTotal.setText(String.format(Locale.CANADA, "$%.2f", o.total));
+        String items = context.getResources()
+                .getQuantityString(R.plurals.fmtItemCount, o.itemCount, o.itemCount);
+        h.txtDateItems.setText(context.getString(R.string.fmtOrderDateTimeItems, o.date, o.time, items));
+        h.txtTotal.setText(PriceFormatter.format(o.total));
 
         // Status text + colour
         h.txtStatus.setText(o.status);
-        int colorRes;
-        switch (o.status) {
-            case "Completed": colorRes = R.color.text_success; break; // green primary
-            case "Rejected":  colorRes = R.color.text_warning; break; // red
-            default:          colorRes = R.color.text_tertiary; break; // grey (Pending)
-        }
-        h.txtStatus.setTextColor(ContextCompat.getColor(h.itemView.getContext(), colorRes));
+        h.txtStatus.setTextColor(ContextCompat.getColor(context, OrderStatus.textColor(o.status)));
 
-        // Open detail screen
-        h.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), CustomerOrderDetailActivity.class);
-            intent.putExtra("orderNumber", o.orderNumber);
-            intent.putExtra("restaurantName", o.restaurantName);
-            intent.putExtra("date", o.date);
-            intent.putExtra("status", o.status);
-            intent.putExtra("total", o.total);
-            v.getContext().startActivity(intent);
-        });
+        // Current orders open the live status screen, finished orders open the detail screen
+        h.itemView.setOnClickListener(v -> OrderNavigator.open(v.getContext(), o.orderNumber));
     }
 
     @Override
     public int getItemCount() {
-        return orders.size();
+        return rows.size();
+    }
+
+    static class HeaderViewHolder extends RecyclerView.ViewHolder {
+        final TextView txtTitle;
+
+        HeaderViewHolder(@NonNull View v) {
+            super(v);
+            txtTitle = v.findViewById(R.id.txtSectionTitle);
+        }
     }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgRestaurant;
-        TextView txtRestaurantName, txtStatus, txtOrderNumber, txtDateItems, txtTotal;
+        final ImageView imgRestaurant;
+        final TextView txtRestaurantName, txtStatus, txtOrderNumber, txtDateItems, txtTotal;
 
         OrderViewHolder(@NonNull View v) {
             super(v);

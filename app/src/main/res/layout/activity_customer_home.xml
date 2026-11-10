@@ -76,7 +76,7 @@
                     android:padding="10dp"
                     android:src="@drawable/icon_bell"
                     app:tint="@color/text_primary"
-                    android:contentDescription="@string/txtProfile" />
+                    android:contentDescription="@string/contentDescNotifications" />
 
             </LinearLayout>
 
