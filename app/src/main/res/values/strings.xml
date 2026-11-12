@@ -211,4 +211,5 @@
     <string name="dialogLogoutMessage">You’ll need to log in again to order food.</string>
     <string name="btnLogoutConfirm">Log out</string>
     <string name="btnCancel">Cancel</string>
+    <string name="titleRestaurants">Restaurants</string>
 </resources>

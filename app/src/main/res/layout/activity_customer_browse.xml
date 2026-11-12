@@ -13,6 +13,8 @@
         layout="@layout/component_header"
         android:layout_width="0dp"
         android:layout_height="56dp"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginEnd="@dimen/screen_padding"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -50,40 +52,23 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    style="@style/Text.HeadlineLg"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/titleSearchFood" />
-
-                <ImageView
-                    android:id="@+id/btnNotification"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:padding="10dp"
-                    android:src="@drawable/icon_bell"
-                    app:tint="@color/text_primary"
-                    android:contentDescription="@string/contentDescNotifications" />
-
-            </LinearLayout>
+                android:orientation="horizontal"/>
 
             <!-- Search -->
+
+            <!-- Nearby Header -->
             <EditText
                 android:id="@+id/editSearch"
                 style="@style/Input.Default"
                 android:layout_width="match_parent"
                 android:layout_marginTop="24dp"
+                android:autofillHints=""
                 android:drawableStart="@drawable/icon_search"
                 android:drawablePadding="12dp"
-                android:hint="@string/hintSearchRestaurants"
-                android:inputType="text"
                 android:focusable="false"
-                android:autofillHints="" />
+                android:hint="@string/hintSearchRestaurants"
+                android:inputType="text" />
 
-            <!-- Nearby Header -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
