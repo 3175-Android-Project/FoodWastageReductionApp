@@ -56,13 +56,13 @@
 
     <!-- Forgot Password -->
     <string name="forgotPasswordTitle">Forgot Password?</string>
-    <string name="forgotPasswordDesc">Enter your email address and\nwe’ll send you a link to reset your password.</string>
-    <string name="btnSendResetLink">Send Reset Link</string>
+    <string name="forgotPasswordDesc">Enter your email address and\nwe’ll send you a Code to reset your password.</string>
+    <string name="btnSendResetCode">Send Reset Code</string>
 
     <!-- Reset Link Sent -->
-    <string name="resetLinkSentTitle">Reset link sent</string>
-    <string name="resetLinkSentMessage">If an account exists for\n%s,\nyou\'ll receive a link to reset your password shortly.</string>
-    <string name="btnResendLink">Resend link</string>
+    <string name="resetCodeSentTitle">Reset Code sent</string>
+    <string name="resetLinkSentMessage">If an account exists for\n%s,\nyou\'ll receive a Code to reset your password shortly.</string>
+    <string name="btnResendCode">Resend Code</string>
 
     <!-- Reset Password -->
     <string name="resetPasswordTitle">Reset Password</string>

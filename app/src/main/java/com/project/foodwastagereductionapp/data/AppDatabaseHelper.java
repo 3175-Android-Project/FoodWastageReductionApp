@@ -182,4 +182,25 @@ public final class AppDatabaseHelper extends SQLiteOpenHelper {
     public static final class DuplicateEmailException extends IllegalArgumentException {
         public DuplicateEmailException() { super("Email already registered"); }
     }
+
+    public boolean updatePasswordByEmail(String email, String newPasswordHash) {
+
+        if (!validEmail(email)
+                || newPasswordHash == null
+                || !newPasswordHash.startsWith("pbkdf2_sha1$")) {
+            throw new IllegalArgumentException("Invalid password reset details");
+        }
+
+        ContentValues values = new ContentValues();
+        values.put("password_hash", newPasswordHash);
+
+        int updatedRows = getWritableDatabase().update(
+                "users",
+                values,
+                "email = ?",
+                new String[]{normalizeEmail(email)}
+        );
+
+        return updatedRows == 1;
+    }
 }
