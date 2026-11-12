@@ -33,7 +33,7 @@
                 android:layout_height="32dp"
                 android:layout_gravity="center"
                 android:src="@drawable/icon_mail_check"
-                android:contentDescription="@string/resetLinkSentTitle"
+                android:contentDescription="@string/resetCodeSentTitle"
                 app:tint="@color/background_accent1" />
 
         </FrameLayout>
@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_xl"
-            android:text="@string/resetLinkSentTitle"
+            android:text="@string/resetCodeSentTitle"
             android:textColor="@color/text_primary" />
 
         <TextView
@@ -72,7 +72,7 @@
             android:layout_marginTop="@dimen/space_md"
             android:background="@drawable/bg_role_default"
             android:fontFamily="@font/pretendard_semibold"
-            android:text="@string/btnResendLink"
+            android:text="@string/btnResendCode"
             android:textAllCaps="false"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_body_sm"
