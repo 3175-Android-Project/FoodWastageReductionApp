@@ -32,6 +32,8 @@
     <string name="actionCreateAccount">Create account</string>
     <string name="mainTitle">Grabbit</string>
     <string name="mainDescription">Delicious food at a lower price \n - for a greener tomorrow.</string>
+    <string name="msgAccountNotFound">No account found with this email</string>
+    <string name="msgIncorrectPassword">Incorrect password</string>
 
     <!-- Sign Up -->
     <string name="titleCreateAccount">Create your account</string>

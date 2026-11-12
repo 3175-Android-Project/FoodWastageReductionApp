@@ -58,31 +58,130 @@ public class LoginActivity extends AppCompatActivity {
         if (savedInstanceState == null && getIntent().hasExtra("email")) {
             editEmail.setText(getIntent().getStringExtra("email"));
         }
+
         Button btnLogin = findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(v -> {
-            String email = AppDatabaseHelper.normalizeEmail(editEmail.getText().toString());
-            String password = editPassword.getText().toString();
+
+            String email =
+                    AppDatabaseHelper.normalizeEmail(
+                            editEmail.getText().toString()
+                    );
+
+            String password =
+                    editPassword.getText().toString();
+
+
+            // Email format validation
             if (!AppDatabaseHelper.validEmail(email)) {
-                editEmail.setError(getString(R.string.msgInvalidEmail));
+
+                editEmail.setError(
+                        getString(R.string.msgInvalidEmail)
+                );
+
+                editEmail.requestFocus();
+
                 return;
             }
+
+
+            // Password empty validation
             if (password.isEmpty()) {
-                editPassword.setError(getString(R.string.msgCompleteAllFields));
+
+                editPassword.setError(
+                        getString(R.string.msgCompleteAllFields)
+                );
+
+                editPassword.requestFocus();
+
                 return;
             }
-            AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
-            AuthTasks.run(this, btnLogin, () -> {
-                User user = db.authenticate(email, password);
-                return user == null ? null : new LoginResult(user, AuthNavigator.destination(db, user));
-            }, result -> {
-                if (result == null) {
-                    editPassword.setError(getString(R.string.msgInvalidCredentials));
-                    return;
-                }
-                if (result.user.emailVerified) session.start(result.user.id);
-                editPassword.setText("");
-                AuthNavigator.open(this, result.screen, result.user.id);
-            });
+
+
+            AppDatabaseHelper db =
+                    AppDatabaseHelper.getInstance(this);
+
+
+            AuthTasks.run(
+                    this,
+                    btnLogin,
+
+                    () -> {
+
+                        // 1. Check if account exists
+                        if (!db.emailExists(email)) {
+
+                            return LoginResult.accountNotFound();
+                        }
+
+
+                        // 2. Check password
+                        User user =
+                                db.authenticate(
+                                        email,
+                                        password
+                                );
+
+
+                        if (user == null) {
+
+                            return LoginResult.wrongPassword();
+                        }
+
+
+                        // 3. Login success
+                        return LoginResult.success(
+                                user,
+                                AuthNavigator.destination(
+                                        db,
+                                        user
+                                )
+                        );
+                    },
+
+                    result -> {
+
+                        if (result.accountNotFound) {
+
+                            editEmail.setError(
+                                    getString(R.string.msgAccountNotFound)
+                            );
+
+                            editEmail.requestFocus();
+
+                            return;
+                        }
+
+
+                        if (result.wrongPassword) {
+
+                            editPassword.setError(
+                                    getString(R.string.msgIncorrectPassword)
+                            );
+
+                            editPassword.requestFocus();
+
+                            return;
+                        }
+
+
+                        if (result.user.emailVerified) {
+
+                            session.start(
+                                    result.user.id
+                            );
+                        }
+
+
+                        editPassword.setText("");
+
+
+                        AuthNavigator.open(
+                                this,
+                                result.screen,
+                                result.user.id
+                        );
+                    }
+            );
         });
 
         // Forgot Password
@@ -106,8 +205,60 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
     private static final class LoginResult {
+
         final User user;
         final Class<?> screen;
-        LoginResult(User user, Class<?> screen) { this.user = user; this.screen = screen; }
+
+        final boolean accountNotFound;
+        final boolean wrongPassword;
+
+
+        private LoginResult(
+                User user,
+                Class<?> screen,
+                boolean accountNotFound,
+                boolean wrongPassword
+        ) {
+            this.user = user;
+            this.screen = screen;
+            this.accountNotFound = accountNotFound;
+            this.wrongPassword = wrongPassword;
+        }
+
+
+        static LoginResult accountNotFound() {
+
+            return new LoginResult(
+                    null,
+                    null,
+                    true,
+                    false
+            );
+        }
+
+
+        static LoginResult wrongPassword() {
+
+            return new LoginResult(
+                    null,
+                    null,
+                    false,
+                    true
+            );
+        }
+
+
+        static LoginResult success(
+                User user,
+                Class<?> screen
+        ) {
+
+            return new LoginResult(
+                    user,
+                    screen,
+                    false,
+                    false
+            );
+        }
     }
 }
