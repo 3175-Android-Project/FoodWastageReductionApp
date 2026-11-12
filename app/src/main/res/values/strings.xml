@@ -30,8 +30,8 @@
     <string name="txtForgotPassword">Forgot password?</string>
     <string name="txtNoAccount">Don’t have an account? </string>
     <string name="actionCreateAccount">Create account</string>
-    <string name="mainTitle">Good Food\nLess Waste</string>
-    <string name="mainDescription">Delicious food at a lower price\n—for a greener tomorrow.</string>
+    <string name="mainTitle">Grabbit</string>
+    <string name="mainDescription">Delicious food at a lower price \n - for a greener tomorrow.</string>
 
     <!-- Sign Up -->
     <string name="titleCreateAccount">Create your account</string>
@@ -126,6 +126,8 @@
     <string name="hintCuisineType">Cuisine type</string>
     <string name="hintRestaurantDescription">Restaurant description</string>
     <string name="btnGoToDashboard">Go to dashboard</string>
+    <string name="imgLogo">logo</string>
+
     <!-- Local SQLite authentication -->
     <string name="msgInvalidEmail">Enter a valid email address</string>
     <string name="msgPasswordTooShort">Use at least 6 characters</string>
