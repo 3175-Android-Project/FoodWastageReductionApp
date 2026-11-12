@@ -12,7 +12,7 @@ import java.util.Locale;
 /** Shared SQLite connection. Call from a worker thread, not the main UI thread. */
 public final class AppDatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "grabbit.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static AppDatabaseHelper instance;
     private static final String[] USER_COLUMNS = {"id", "email", "role", "full_name",
             "city", "province", "postal_code", "email_verified"};
@@ -33,6 +33,7 @@ public final class AppDatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override public void onCreate(SQLiteDatabase db) {
+        // user
         db.execSQL("CREATE TABLE users ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "email TEXT NOT NULL COLLATE NOCASE UNIQUE,"
@@ -41,17 +42,24 @@ public final class AppDatabaseHelper extends SQLiteOpenHelper {
                 + "full_name TEXT NOT NULL, city TEXT NOT NULL,"
                 + "province TEXT NOT NULL, postal_code TEXT NOT NULL,"
                 + "email_verified INTEGER NOT NULL DEFAULT 0 CHECK(email_verified IN (0,1)))");
+        // restaurants - manager
         db.execSQL("CREATE TABLE restaurants ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "manager_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,"
                 + "name TEXT NOT NULL, city TEXT NOT NULL, province TEXT NOT NULL,"
                 + "postal_code TEXT NOT NULL, phone TEXT NOT NULL, cuisine_type TEXT NOT NULL,"
-                + "description TEXT NOT NULL DEFAULT '')");
+                + "description TEXT NOT NULL DEFAULT '',"
+                + "image_uri TEXT NOT NULL DEFAULT '')");
     }
 
-    @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Version 1 is the first schema. Future versions must add explicit, non-destructive migrations.
-        throw new IllegalStateException("Missing migration from " + oldVersion + " to " + newVersion);
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion < 2) {
+            db.execSQL(
+                    "ALTER TABLE restaurants " +
+                            "ADD COLUMN image_uri TEXT NOT NULL DEFAULT ''"
+            );
+        }
     }
 
     public static String normalizeEmail(String email) {
@@ -143,6 +151,13 @@ public final class AppDatabaseHelper extends SQLiteOpenHelper {
             values.put("phone", required(restaurant.phone));
             values.put("cuisine_type", required(restaurant.cuisineType));
             values.put("description", restaurant.description == null ? "" : restaurant.description.trim());
+            values.put(
+                    "image_uri",
+                    restaurant.imageUri == null
+                            ? ""
+                            : restaurant.imageUri
+            );
+
             int count = db.update("restaurants", values, "manager_id = ?",
                     new String[]{Long.toString(restaurant.managerId)});
             if (count == 0) db.insertOrThrow("restaurants", null, values);
@@ -156,10 +171,18 @@ public final class AppDatabaseHelper extends SQLiteOpenHelper {
         try (Cursor c = getReadableDatabase().query("restaurants", null, "manager_id = ?",
                 new String[]{Long.toString(managerId)}, null, null, null)) {
             if (!c.moveToFirst()) return null;
-            return new Restaurant(c.getLong(c.getColumnIndexOrThrow("id")), managerId,
-                    string(c, "name"), string(c, "city"), string(c, "province"),
-                    string(c, "postal_code"), string(c, "phone"), string(c, "cuisine_type"),
-                    string(c, "description"));
+            return new Restaurant(
+                    c.getLong(c.getColumnIndexOrThrow("id")),
+                    managerId,
+                    string(c, "name"),
+                    string(c, "city"),
+                    string(c, "province"),
+                    string(c, "postal_code"),
+                    string(c, "phone"),
+                    string(c, "cuisine_type"),
+                    string(c, "description"),
+                    string(c, "image_uri")
+            );
         }
     }
 

@@ -32,6 +32,8 @@
     <string name="actionCreateAccount">Create account</string>
     <string name="mainTitle">Grabbit</string>
     <string name="mainDescription">Delicious food at a lower price \n - for a greener tomorrow.</string>
+    <string name="msgAccountNotFound">No account found with this email</string>
+    <string name="msgIncorrectPassword">Incorrect password</string>
 
     <!-- Sign Up -->
     <string name="titleCreateAccount">Create your account</string>
@@ -140,7 +142,9 @@
     <string name="emailCodePrompt">Tap Send code to get a 6-digit code at\n%1$s</string>
     <string name="emailCodeSending">Sending a 6-digit code to\n%1$s</string>
     <string name="btnSendingEmailCode">Sending code…</string>
-    <string name="emailCodeSent">A code was sent to\n%1$s\nEnter it within 5 minutes. If you can’t find it, check Spam.</string>
+    <string name="emailCodeSent">
+        A code was sent to\n%1$s\nEnter it within 5 minutes.\nIf you can’t find it, check Spam.
+    </string>
     <string name="hintEmailVerificationCode">6-digit code</string>
     <string name="btnVerifyEmailCode">Verify code</string>
     <string name="btnSendEmailCode">Send code</string>
