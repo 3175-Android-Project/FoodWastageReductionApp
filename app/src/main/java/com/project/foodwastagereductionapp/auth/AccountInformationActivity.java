@@ -15,6 +15,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.User;
 
 public class AccountInformationActivity extends AppCompatActivity {
 
@@ -48,8 +50,12 @@ public class AccountInformationActivity extends AppCompatActivity {
         String email =
                 getIntent().getStringExtra("email");
 
-        String password =
-                getIntent().getStringExtra("password");
+        String passwordHash = getIntent().getStringExtra(AuthNavigator.EXTRA_PASSWORD_HASH);
+        if (!AppDatabaseHelper.validEmail(email) || passwordHash == null
+                || !(User.CUSTOMER.equals(selectedRole) || User.MANAGER.equals(selectedRole))) {
+            AuthNavigator.open(this, SignUpActivity.class, -1);
+            return;
+        }
 
         // Header
         TextView txtHeaderTitle =
@@ -106,23 +112,11 @@ public class AccountInformationActivity extends AppCompatActivity {
                 return;
             }
 
-            // Actual account creation will be added with SQLite later
-
-            Intent intent = new Intent(
-                    AccountInformationActivity.this,
-                    EmailVerificationActivity.class
-            );
-
-            intent.putExtra("selectedRole", selectedRole);
-            intent.putExtra("email", email);
-            intent.putExtra("password", password);
-
-            intent.putExtra("fullName", fullName);
-            intent.putExtra("city", city);
-            intent.putExtra("province", province);
-            intent.putExtra("postalCode", postalCode);
-
-            startActivity(intent);
+            AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+            AuthTasks.run(this, btnCreateAccount,
+                    () -> db.createUser(email, passwordHash, selectedRole, fullName,
+                            city, province, postalCode),
+                    userId -> AuthNavigator.open(this, EmailVerificationActivity.class, userId));
         });
     }
 }

@@ -118,4 +118,14 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">12dp</item>
     </style>
+    <style name="Button.Warning">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:background">@drawable/bg_button_warning</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+        <item name="android:textColor">@color/text_warning</item>
+        <item name="android:textSize">@dimen/text_body_md</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
 </resources>

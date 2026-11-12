@@ -3,6 +3,7 @@ package com.project.foodwastagereductionapp.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,7 +14,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.project.foodwastagereductionapp.R;
-import com.project.foodwastagereductionapp.customer.CustomerHomeActivity;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.User;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -48,11 +50,39 @@ public class LoginActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        // Login → Customer Home
+        // Entering Login ends any previous account session.
+        SessionManager session = new SessionManager(this);
+        session.clear();
+        EditText editEmail = findViewById(R.id.editEmail);
+        EditText editPassword = findViewById(R.id.editPassword);
+        if (savedInstanceState == null && getIntent().hasExtra("email")) {
+            editEmail.setText(getIntent().getStringExtra("email"));
+        }
         Button btnLogin = findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, CustomerHomeActivity.class);
-            startActivity(intent);
+            String email = AppDatabaseHelper.normalizeEmail(editEmail.getText().toString());
+            String password = editPassword.getText().toString();
+            if (!AppDatabaseHelper.validEmail(email)) {
+                editEmail.setError(getString(R.string.msgInvalidEmail));
+                return;
+            }
+            if (password.isEmpty()) {
+                editPassword.setError(getString(R.string.msgCompleteAllFields));
+                return;
+            }
+            AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+            AuthTasks.run(this, btnLogin, () -> {
+                User user = db.authenticate(email, password);
+                return user == null ? null : new LoginResult(user, AuthNavigator.destination(db, user));
+            }, result -> {
+                if (result == null) {
+                    editPassword.setError(getString(R.string.msgInvalidCredentials));
+                    return;
+                }
+                if (result.user.emailVerified) session.start(result.user.id);
+                editPassword.setText("");
+                AuthNavigator.open(this, result.screen, result.user.id);
+            });
         });
 
         // Forgot Password
@@ -74,5 +104,10 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
             startActivity(intent);
         });
+    }
+    private static final class LoginResult {
+        final User user;
+        final Class<?> screen;
+        LoginResult(User user, Class<?> screen) { this.user = user; this.screen = screen; }
     }
 }

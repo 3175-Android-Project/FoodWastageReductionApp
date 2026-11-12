@@ -14,6 +14,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 
 public class ChooseRoleActivity extends AppCompatActivity {
 
@@ -57,8 +58,14 @@ public class ChooseRoleActivity extends AppCompatActivity {
         String email =
                 getIntent().getStringExtra("email");
 
-        String password =
-                getIntent().getStringExtra("password");
+        String passwordHash = getIntent().getStringExtra(AuthNavigator.EXTRA_PASSWORD_HASH);
+        if (!AppDatabaseHelper.validEmail(email) || passwordHash == null) {
+            AuthNavigator.open(this, SignUpActivity.class, -1);
+            return;
+        }
+        if (savedInstanceState != null) {
+            selectedRole = savedInstanceState.getString("selectedRole", "customer");
+        }
 
         // Header
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
@@ -104,10 +111,16 @@ public class ChooseRoleActivity extends AppCompatActivity {
 
             intent.putExtra("selectedRole", selectedRole);
             intent.putExtra("email", email);
-            intent.putExtra("password", password);
+            intent.putExtra(AuthNavigator.EXTRA_PASSWORD_HASH, passwordHash);
 
             startActivity(intent);
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("selectedRole", selectedRole);
+        super.onSaveInstanceState(outState);
     }
 
     private void updateRoleUI() {

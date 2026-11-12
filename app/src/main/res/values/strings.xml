@@ -50,9 +50,9 @@
     <string name="accountInformationDesc">A few details to complete your account.</string>
 
     <!-- Email Verification -->
-    <string name="emailVerificationTitle">Check your email</string>
-    <string name="emailVerificationMessage">We sent a verification link to\n%s.\nTap the link to verify your account, then log in.</string>
-    <string name="btnResendVerification">Resend verification email</string>
+    <string name="emailVerificationTitle">Confirm your email (local demo)</string>
+    <string name="emailVerificationMessage">Account saved for\n%1$s.\nThis local demo does not send email. Tap below to confirm and continue.</string>
+    <string name="btnResendVerification">About email verification</string>
 
     <!-- Forgot Password -->
     <string name="forgotPasswordTitle">Forgot Password?</string>
@@ -127,4 +127,89 @@
     <string name="hintRestaurantDescription">Restaurant description</string>
     <string name="btnGoToDashboard">Go to dashboard</string>
     <string name="imgLogo">logo</string>
+
+    <!-- Local SQLite authentication -->
+    <string name="msgInvalidEmail">Enter a valid email address</string>
+    <string name="msgPasswordTooShort">Use at least 6 characters</string>
+    <string name="msgPasswordsDoNotMatch">Passwords do not match</string>
+    <string name="msgEmailExists">An account already exists for this email. Log in to continue.</string>
+    <string name="msgInvalidCredentials">Incorrect email or password</string>
+    <string name="msgDatabaseError">Unable to save or load local data. Please try again.</string>
+    <string name="profileLocation">%1$s, %2$s %3$s</string>
+    <string name="emailCodeTitle">Verify your email</string>
+    <string name="emailCodePrompt">Tap Send code to get a 6-digit code at\n%1$s</string>
+    <string name="emailCodeSending">Sending a 6-digit code to\n%1$s</string>
+    <string name="btnSendingEmailCode">Sending code…</string>
+    <string name="emailCodeSent">A code was sent to\n%1$s\nEnter it within 5 minutes. If you can’t find it, check Spam.</string>
+    <string name="hintEmailVerificationCode">6-digit code</string>
+    <string name="btnVerifyEmailCode">Verify code</string>
+    <string name="btnSendEmailCode">Send code</string>
+    <string name="btnResendEmailCode">Resend code</string>
+    <string name="btnEmailCodeWait">Send again in %1$d s</string>
+    <string name="msgEnterEmailCode">Enter the 6-digit code</string>
+    <string name="msgIncorrectEmailCode">Incorrect code. Check your email and try again.</string>
+    <string name="msgRequestNewEmailCode">This code can no longer be used. Request a new code.</string>
+    <string name="msgEmailCertificateError">Gmail connection could not be verified. Check the mail server terminal.</string>
+    <string name="msgEmailDeliveryFailed">Could not send the email. Check the mail server and try again.</string>
+    <string name="msgEmailServerUnavailable">Could not reach the verification service. Check your connection and try again.</string>
+    <string name="msgEmailServerTimedOut">The verification service took too long to respond. Please try again.</string>
+    <string name="msgEmailServerUnconfigured">Email verification is unavailable. Ask your project team to configure the mail server.</string>
+    <string name="msgEmailCodeWait">Please wait before sending another code.</string>
+    <!-- Orders (current + past) -->
+    <string name="txtOrdersTitle">Orders</string>
+    <string name="titleCurrentOrders">Current orders</string>
+    <string name="titlePastOrders">Past orders</string>
+    <string name="fmtOrderNumber">Order #%s</string>
+    <string name="fmtOrderDateTimeItems">%1$s · %2$s · %3$s</string>
+    <string name="fmtDateTime">%1$s · %2$s</string>
+    <string name="fmtContact">%1$s · %2$s</string>
+    <string name="txtMethodPickup">Pickup</string>
+    <plurals name="fmtItemCount">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+
+    <!-- Order Status -->
+    <string name="titleOrderStatus">Order Status</string>
+    <string name="titleStatusPending">Waiting for the restaurant</string>
+    <string name="msgStatusPending">We’ll update you when the restaurant responds.</string>
+    <string name="titleStatusAccepted">Waiting for food ready</string>
+    <string name="msgStatusAccepted">We’ll update you when there’s an update.</string>
+    <string name="titleStatusPreparing">Preparing your order</string>
+    <string name="msgStatusPreparing">The restaurant is getting your food ready.</string>
+    <string name="titleStatusReady">Ready for pickup!</string>
+    <string name="msgStatusReady">Show order #%1$s at the restaurant\nto collect your food.</string>
+    <string name="titleStatusCompleted">Order picked up</string>
+    <string name="msgStatusCompleted">Thanks for helping reduce food waste!</string>
+    <string name="titleStatusCancelled">Order cancelled</string>
+    <string name="msgStatusCancelled">This order was cancelled before acceptance.</string>
+    <string name="titleStatusRejected">Order rejected</string>
+    <string name="msgStatusRejected">The restaurant couldn’t accept this order.</string>
+    <string name="fmtPickupAt">Pickup · %s</string>
+    <string name="btnCancelOrder">Cancel Order</string>
+    <string name="msgCancelNotAllowed">Orders can only be cancelled before the restaurant accepts them.</string>
+    <string name="dialogCancelOrderTitle">Cancel this order?</string>
+    <string name="dialogCancelOrderMessage">The restaurant will be told the order is cancelled. This can’t be undone.</string>
+    <string name="btnYesCancelOrder">Cancel order</string>
+    <string name="btnKeepOrder">Keep order</string>
+    <string name="msgOrderCancelled">Order cancelled</string>
+    <string name="msgCannotCancel">The restaurant has already accepted this order.</string>
+
+    <!-- Notifications -->
+    <string name="titleNotifications">Notifications</string>
+    <string name="contentDescNotifications">Notifications</string>
+    <string name="msgNoNotifications">No notifications yet</string>
+    <string name="notifOrderAccepted">Order accepted</string>
+    <string name="notifOrderPreparing">Your order is being prepared</string>
+    <string name="notifOrderReady">Your order is ready!</string>
+    <string name="notifOrderRejected">Order rejected</string>
+    <string name="notifOrderCompleted">Order picked up</string>
+    <string name="fmtNotificationReady">%1$s · Pickup %2$s</string>
+
+    <!-- Profile (more) -->
+    <string name="txtNoAddress">No address added</string>
+    <string name="msgFullNameRequired">Please enter your full name</string>
+    <string name="dialogLogoutTitle">Log out?</string>
+    <string name="dialogLogoutMessage">You’ll need to log in again to order food.</string>
+    <string name="btnLogoutConfirm">Log out</string>
 </resources>
