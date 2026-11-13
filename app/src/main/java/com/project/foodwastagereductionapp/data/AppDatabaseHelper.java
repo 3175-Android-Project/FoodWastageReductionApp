@@ -1,6 +1,7 @@
 package com.project.foodwastagereductionapp.data;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Patterns;
 
 import java.util.Locale;
@@ -128,15 +129,13 @@ public final class AppDatabaseHelper {
     }
 
     // Customer search: matches restaurant name, city, province or cuisine type. Empty query returns all.
+    /** Customer search: matches restaurant name, city, province or cuisine type. Empty query returns all. */
     public java.util.List<RestaurantListing> searchRestaurants(String query) {
-        java.util.List<RestaurantListing> results = new java.util.ArrayList<>();
         String like = "%" + (query == null ? "" : query.trim()) + "%";
-        java.util.List<RestaurantEntity> entities = database.restaurantDao().search(like);
-        for (RestaurantEntity entity : entities) {
-            Restaurant r = new Restaurant(
-                    entity.id, entity.managerId, entity.name, entity.city,
-                    entity.province, entity.postalCode, entity.phone,
-                    entity.cuisineType, entity.description, entity.imageUri);
+        java.util.List<RestaurantListing> results = new java.util.ArrayList<>();
+        for (RestaurantEntity e : database.restaurantDao().search(like)) {
+            Restaurant r = new Restaurant(e.id, e.managerId, e.name, e.city, e.province,
+                    e.postalCode, e.phone, e.cuisineType, e.description, e.imageUri);
             results.add(new RestaurantListing(r, 0, null));
         }
         return results;
