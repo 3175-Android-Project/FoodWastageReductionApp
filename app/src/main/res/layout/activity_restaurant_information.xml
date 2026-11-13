@@ -63,12 +63,13 @@
                 android:layout_marginTop="@dimen/space_xl"
                 android:background="@drawable/bg_image_upload">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/imgRestaurant"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:contentDescription="@string/restaurantInformationTitle" />
+                    android:contentDescription="@string/restaurantInformationTitle"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Rounded12" />
 
                 <TextView
                     android:id="@+id/txtAddImage"
