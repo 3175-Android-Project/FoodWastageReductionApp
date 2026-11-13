@@ -47,8 +47,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void tryAutoLogin() {
-        long userId = new SessionManager(this).getUserId();
-        if (userId == -1) return;
+        SessionManager session = new SessionManager(this);
+        long userId = session.getUserId();
+        if (userId == -1 || !session.shouldAutoLogin()) return;
 
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             return AuthNavigator.destination(db, user);
         }, screen -> {
             if (screen == null) {
-                new SessionManager(this).clear();
+                session.clear();
                 return;
             }
             AuthNavigator.open(this, screen, userId);

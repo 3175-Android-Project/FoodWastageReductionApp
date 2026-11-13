@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -55,6 +56,7 @@ public class LoginActivity extends AppCompatActivity {
         session.clear();
         EditText editEmail = findViewById(R.id.editEmail);
         EditText editPassword = findViewById(R.id.editPassword);
+        AppCompatCheckBox checkKeepSignedIn = findViewById(R.id.checkKeepSignedIn);
         if (savedInstanceState == null && getIntent().hasExtra("email")) {
             editEmail.setText(getIntent().getStringExtra("email"));
         }
@@ -69,6 +71,7 @@ public class LoginActivity extends AppCompatActivity {
 
             String password =
                     editPassword.getText().toString();
+            boolean keepSignedIn = checkKeepSignedIn.isChecked();
 
 
             // Email format validation
@@ -167,7 +170,8 @@ public class LoginActivity extends AppCompatActivity {
                         if (result.user.emailVerified) {
 
                             session.start(
-                                    result.user.id
+                                    result.user.id,
+                                    keepSignedIn
                             );
                         }
 
