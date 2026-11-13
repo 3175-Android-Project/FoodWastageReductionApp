@@ -1,7 +1,10 @@
 package com.project.foodwastagereductionapp.manager;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.view.View;
 import android.widget.TextView;
 
@@ -19,6 +22,7 @@ import com.project.foodwastagereductionapp.auth.RestaurantInformationActivity;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.ui.ConfirmationDialog;
 
 public class ManagerProfileActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +43,8 @@ public class ManagerProfileActivity extends AppCompatActivity {
             intent.putExtra(RestaurantInformationActivity.EXTRA_EDIT_PROFILE, true);
             startActivity(intent);
         });
-        findViewById(R.id.layoutLogout).setOnClickListener(view -> AuthNavigator.logout(this));
+        findViewById(R.id.layoutLogout).setOnClickListener(
+                view -> ConfirmationDialog.showLogout(this, () -> AuthNavigator.logout(this)));
 
         BottomNavigationView nav = findViewById(R.id.bottomNav);
         nav.setItemActiveIndicatorEnabled(false);
@@ -68,6 +73,23 @@ public class ManagerProfileActivity extends AppCompatActivity {
             if (restaurant == null) {
                 AuthNavigator.logout(this);
                 return;
+            }
+            ImageView image = findViewById(R.id.imgManagerProfile);
+            if (restaurant.imageUri == null || restaurant.imageUri.isEmpty()) {
+                image.setImageResource(R.drawable.icon_store);
+                image.setImageTintList(ColorStateList.valueOf(
+                        getColor(R.color.text_primary)
+                ));
+                image.setPadding(
+                        getResources().getDimensionPixelSize(R.dimen.space_xl),
+                        getResources().getDimensionPixelSize(R.dimen.space_xl),
+                        getResources().getDimensionPixelSize(R.dimen.space_xl),
+                        getResources().getDimensionPixelSize(R.dimen.space_xl)
+                );
+            } else {
+                image.setImageURI(Uri.parse(restaurant.imageUri));
+                image.setPadding(0, 0, 0, 0);
+                image.setImageTintList(null);
             }
             ((TextView) findViewById(R.id.txtRestaurantName)).setText(restaurant.name);
             editProfile.setEnabled(true);

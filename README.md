@@ -18,9 +18,10 @@ This `README.md` serves as a practical guide for all team members. It outlines o
 5. [Naming Conventions](#naming-conventions)
 6. [Navigation](#navigation)
 7. [Current Screens & References](#current-screens--references)
-8. [How to Create a New Screen](#how-to-create-a-new-screen)
-9. [Development Guidelines](#development-guidelines)
-10. [Git Workflow](#git-workflow)
+8. [Database Integration](#database-integration)
+9. [How to Create a New Screen](#how-to-create-a-new-screen)
+10. [Development Guidelines](#development-guidelines)
+11. [Git Workflow](#git-workflow)
 
 ---
 
@@ -51,6 +52,9 @@ app/src/main/
 │   │
 │   ├── customer/
 │   │   └── Customer-related activities
+│   │
+│   ├── data/
+│   │   └── Room database, entities, DAOs, and data models
 │   │
 │   └── manager/
 │       └── Manager-related activities
@@ -523,6 +527,74 @@ Reference for:
 
 ---
 
+## Database Integration
+
+The app uses Android Room as its persistence layer, with SQLite underneath. The implementation details and verification checklist are also documented in [`ROOM_INTEGRATION.md`](./ROOM_INTEGRATION.md).
+
+### Storage
+
+- Database file: internal app storage at `databases/grabbit.db`
+- Current schema version: `2`
+- Room database: `data/AppDatabase.java`
+- Room entities and DAOs: `data/UserEntity.java`, `data/RestaurantEntity.java`, `data/UserDao.java`, `data/RestaurantDao.java`
+- Application facade: `data/AppDatabaseHelper.java`
+- Foreign-key constraints are enabled for every database connection.
+- Room operations run through `AuthTasks` on a serial background executor, not the main UI thread.
+- Uninstalling the app or clearing app data removes the local database.
+
+### Schema
+
+#### `users`
+
+Stores customer and manager accounts.
+
+| Column | Description |
+| --- | --- |
+| `id` | Auto-incrementing primary key |
+| `email` | Required, trimmed/lowercased, case-insensitive unique value |
+| `password_hash` | PBKDF2-HMAC-SHA1 hash; plaintext passwords are never stored |
+| `role` | `customer` or `manager` |
+| `full_name` | Required account name |
+| `city`, `province`, `postal_code` | Required account address fields |
+| `email_verified` | `0` or `1` |
+
+#### `restaurants`
+
+Stores the restaurant profile associated with a manager.
+
+| Column | Description |
+| --- | --- |
+| `id` | Auto-incrementing primary key |
+| `manager_id` | Required unique foreign key to `users.id` |
+| `name`, `city`, `province`, `postal_code` | Required restaurant details |
+| `phone`, `cuisine_type` | Required restaurant details |
+| `description` | Optional description, stored as an empty string when omitted |
+| `image_uri` | Optional local image URI |
+
+Each manager can have at most one restaurant. Deleting a user cascades to the associated restaurant. `onUpgrade()` adds new columns while preserving existing data.
+
+### Authentication and Password Flow
+
+1. **Sign up:** validates email and password, generates a salted PBKDF2-HMAC-SHA1 hash using 120,000 iterations and a 256-bit output, then stores the account after profile information is completed.
+2. **Email verification:** the app uses the email verification service to verify the address, then updates `users.email_verified` locally. The local demo verification flow is described in [`ROOM_INTEGRATION.md`](./ROOM_INTEGRATION.md).
+3. **Login:** normalizes the email, verifies the password hash, and routes the user based on role, verification status, and restaurant setup.
+4. **Forgot/reset password:** the verification service confirms ownership of the email address; the new password is hashed and saved through `updatePasswordByEmail()`.
+5. **Session:** `SessionManager` stores only the current account ID in `SharedPreferences`; it never stores a password.
+
+### Database Development Rules
+
+- Use `AppDatabaseHelper.getInstance(context)` for the application database facade.
+- Keep database and password work off the main thread by using `AuthTasks`.
+- Put new queries in Room DAOs rather than accessing `SQLiteDatabase` from Activities.
+- Never store plaintext passwords or commit verification URLs, credentials, or private keys.
+- Add schema changes through `DATABASE_VERSION` and `onUpgrade()` migrations.
+- Use a separate database name in tests so test accounts cannot affect local app data.
+- Keep food listings, orders, and notifications as sample/demo data unless their persistence is explicitly added to Room.
+
+The current Room integration persists accounts and restaurant profiles. Order, food-listing, and notification stores used by the UI are separate demo components and are not part of the Room schema yet.
+
+---
+
 ## How to Create a New Screen
 
 ### Step 1: Choose the Correct Package
@@ -629,9 +701,7 @@ app:menu="@menu/menu_manager_bottom_nav"
 
 ### Step 6: Use Sample Data for Now
 
-Database implementation has not been finalized yet.
-
-For UI development, hard-coded sample data is acceptable.
+The authentication and restaurant-profile flows use Room as described in [Database Integration](#database-integration). For UI features that are not yet connected to Room, hard-coded sample data is acceptable, but keep it local to the screen or feature and label it as sample data.
 
 Example:
 
@@ -641,7 +711,7 @@ String status = "Pending";
 double price = 8.50;
 ```
 
-Database integration will be added later after the database structure has been agreed upon.
+If a new feature needs persistence, add an entity and DAO, then extend `AppDatabase` with an explicit migration instead of creating a second database or accessing SQLite directly from an Activity.
 
 ---
 
@@ -682,11 +752,11 @@ Before submitting your work:
 7. **Follow the Figma wireframes.**  
    Do not redesign screens unless the team agrees on a change.
 
-8. **Hard-coded sample data is acceptable for now.**  
-   Focus on UI and navigation first.
+8. **Use the existing Room integration for persisted account data.**
+   Do not bypass `AppDatabaseHelper` or create a separate database for authentication or restaurant profiles.
 
-9. **Do not implement database logic independently yet.**  
-   Database structure will be decided as a team after the relevant course material is covered.
+9. **Hard-coded sample data is acceptable only for features not connected to Room.**
+   Keep sample data separate from persisted account and restaurant data.
 
 10. **Keep your code readable.**  
     Use meaningful IDs and Activity names.

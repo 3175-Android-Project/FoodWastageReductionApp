@@ -16,6 +16,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
+import android.text.style.ForegroundColorSpan;
 
 import com.project.foodwastagereductionapp.BuildConfig;
 import com.project.foodwastagereductionapp.R;
@@ -146,10 +151,59 @@ public class EmailVerificationActivity extends AppCompatActivity {
     }
 
     private void showCodeMessage() {
+
         int text = R.string.emailCodePrompt;
-        if (sending) text = R.string.emailCodeSending;
-        else if (challengeId != null) text = R.string.emailCodeSent;
-        message.setText(getString(text, verificationEmail));
+
+        if (sending) {
+            text = R.string.emailCodeSending;
+
+        } else if (challengeId != null) {
+            text = R.string.emailCodeSent;
+        }
+
+        String fullText =
+                getString(
+                        text,
+                        verificationEmail
+                );
+
+        SpannableStringBuilder spannable =
+                new SpannableStringBuilder(fullText);
+
+        if (verificationEmail != null
+                && !verificationEmail.isEmpty()) {
+
+            int start =
+                    fullText.indexOf(
+                            verificationEmail
+                    );
+
+            if (start >= 0) {
+
+                int end =
+                        start + verificationEmail.length();
+
+                // Bold
+                spannable.setSpan(
+                        new StyleSpan(Typeface.BOLD),
+                        start,
+                        end,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+
+                // Black color
+                spannable.setSpan(
+                        new ForegroundColorSpan(
+                                getColor(R.color.text_primary)
+                        ),
+                        start,
+                        end,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+            }
+        }
+
+        message.setText(spannable);
     }
 
     private void updateControls() {
@@ -214,7 +268,7 @@ public class EmailVerificationActivity extends AppCompatActivity {
 
     private void continueAfterVerification(User user) {
         if (User.MANAGER.equals(user.role)) {
-            new SessionManager(this).start(user.id);
+            new SessionManager(this).start(user.id, false);
             AuthNavigator.open(this, RestaurantInformationActivity.class, user.id);
         } else {
             new SessionManager(this).clear();

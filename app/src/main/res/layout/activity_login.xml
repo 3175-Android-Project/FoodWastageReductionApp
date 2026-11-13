@@ -60,17 +60,41 @@
         app:layout_constraintTop_toBottomOf="@id/editEmail"
         android:autofillHints="password" />
 
+    <LinearLayout
+        android:id="@+id/layoutKeepSignedIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_gravity="end"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editPassword">
+
+        <TextView
+            style="@style/Text.BodySm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/checkKeepSignedIn" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/checkKeepSignedIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
     <!-- Login -->
     <Button
         android:id="@+id/btnLogin"
         style="@style/Button.Primary"
         android:layout_width="0dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="12dp"
         android:text="@string/actionLogin"
         app:backgroundTint="@null"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/editPassword" />
+        app:layout_constraintTop_toBottomOf="@id/layoutKeepSignedIn" />
 
     <!-- Forgot Password -->
     <TextView

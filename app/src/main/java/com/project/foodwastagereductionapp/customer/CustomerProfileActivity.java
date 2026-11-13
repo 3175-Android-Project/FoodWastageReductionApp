@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -28,6 +27,7 @@ import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.ui.ConfirmationDialog;
 
 public class CustomerProfileActivity extends AppCompatActivity {
 
@@ -108,12 +108,7 @@ public class CustomerProfileActivity extends AppCompatActivity {
     }
 
     private void confirmLogout() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.dialogLogoutTitle)
-                .setMessage(R.string.dialogLogoutMessage)
-                .setPositiveButton(R.string.btnLogoutConfirm, (dialog, which) -> logout())
-                .setNegativeButton(R.string.btnCancel, null)
-                .show();
+        ConfirmationDialog.showLogout(this, this::logout);
     }
 
     private void logout() {

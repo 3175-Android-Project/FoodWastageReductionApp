@@ -28,10 +28,13 @@
     <string name="actionLogin">Login</string>
     <string name="actionLogIn">Log in</string>
     <string name="txtForgotPassword">Forgot password?</string>
+    <string name="checkKeepSignedIn">Keep me signed in</string>
     <string name="txtNoAccount">Don’t have an account? </string>
     <string name="actionCreateAccount">Create account</string>
-    <string name="mainTitle">Good Food\nLess Waste</string>
-    <string name="mainDescription">Delicious food at a lower price\n—for a greener tomorrow.</string>
+    <string name="mainTitle">Grabbit</string>
+    <string name="mainDescription">Delicious food at a lower price \n - for a greener tomorrow.</string>
+    <string name="msgAccountNotFound">No account found with this email</string>
+    <string name="msgIncorrectPassword">Incorrect password</string>
 
     <!-- Sign Up -->
     <string name="titleCreateAccount">Create your account</string>
@@ -56,13 +59,13 @@
 
     <!-- Forgot Password -->
     <string name="forgotPasswordTitle">Forgot Password?</string>
-    <string name="forgotPasswordDesc">Enter your email address and\nwe’ll send you a link to reset your password.</string>
-    <string name="btnSendResetLink">Send Reset Link</string>
+    <string name="forgotPasswordDesc">Enter your email address and\nwe’ll send you a Code to reset your password.</string>
+    <string name="btnSendResetCode">Send Reset Code</string>
 
     <!-- Reset Link Sent -->
-    <string name="resetLinkSentTitle">Reset link sent</string>
-    <string name="resetLinkSentMessage">If an account exists for\n%s,\nyou\'ll receive a link to reset your password shortly.</string>
-    <string name="btnResendLink">Resend link</string>
+    <string name="resetCodeSentTitle">Reset Code sent</string>
+    <string name="resetLinkSentMessage">If an account exists for\n%s,\nyou\'ll receive a Code to reset your password shortly.</string>
+    <string name="btnResendCode">Resend Code</string>
 
     <!-- Reset Password -->
     <string name="resetPasswordTitle">Reset Password</string>
@@ -126,7 +129,9 @@
     <string name="hintCuisineType">Cuisine type</string>
     <string name="hintRestaurantDescription">Restaurant description</string>
     <string name="btnGoToDashboard">Go to dashboard</string>
-    <!-- Local SQLite authentication -->
+    <string name="imgLogo">logo</string>
+
+    <!-- Local Room authentication -->
     <string name="msgInvalidEmail">Enter a valid email address</string>
     <string name="msgPasswordTooShort">Use at least 6 characters</string>
     <string name="msgPasswordsDoNotMatch">Passwords do not match</string>
@@ -138,7 +143,9 @@
     <string name="emailCodePrompt">Tap Send code to get a 6-digit code at\n%1$s</string>
     <string name="emailCodeSending">Sending a 6-digit code to\n%1$s</string>
     <string name="btnSendingEmailCode">Sending code…</string>
-    <string name="emailCodeSent">A code was sent to\n%1$s\nEnter it within 5 minutes. If you can’t find it, check Spam.</string>
+    <string name="emailCodeSent">
+        A code was sent to\n%1$s\nEnter it within 5 minutes.\nIf you can’t find it, check Spam.
+    </string>
     <string name="hintEmailVerificationCode">6-digit code</string>
     <string name="btnVerifyEmailCode">Verify code</string>
     <string name="btnSendEmailCode">Send code</string>
@@ -217,4 +224,5 @@
     <string name="msgNoRestaurants">No restaurants found</string>
     <string name="fmtItemsLeft">%1$d left · until %2$s</string>
 
+    <string name="dialogClose">Close dialog</string>
 </resources>
