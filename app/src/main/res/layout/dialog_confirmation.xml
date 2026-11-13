@@ -48,7 +48,7 @@
                 android:layout_height="@dimen/button_height"
                 android:layout_weight="1"
                 android:background="@drawable/bg_confirmation_cancel"
-                android:backgroundTint="@null"
+                android:backgroundTint="@color/background_secondary"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
                 android:textAllCaps="false" />
@@ -61,7 +61,7 @@
                 android:layout_marginStart="@dimen/space_sm"
                 android:layout_weight="1"
                 android:background="@drawable/bg_confirmation_positive"
-                android:backgroundTint="@null"
+                android:backgroundTint="@color/text_warning"
                 android:textColor="@color/text_inverse"
                 android:textStyle="bold"
                 android:textAllCaps="false" />
