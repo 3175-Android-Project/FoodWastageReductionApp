@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -31,8 +30,8 @@ public final class ConfirmationDialog {
 
         TextView titleView = dialog.findViewById(R.id.dialogTitle);
         TextView messageView = dialog.findViewById(R.id.dialogMessage);
-        Button negativeView = dialog.findViewById(R.id.dialogNegative);
-        Button positiveView = dialog.findViewById(R.id.dialogPositive);
+        TextView negativeView = dialog.findViewById(R.id.dialogNegative);
+        TextView positiveView = dialog.findViewById(R.id.dialogPositive);
         ImageButton closeView = dialog.findViewById(R.id.dialogClose);
 
         titleView.setText(title);

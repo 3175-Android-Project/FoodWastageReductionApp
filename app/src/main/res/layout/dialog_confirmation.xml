@@ -41,19 +41,21 @@
             android:layout_marginTop="@dimen/space_xl"
             android:orientation="horizontal">
 
-            <Button
+            <TextView
                 android:id="@+id/dialogNegative"
                 style="@style/Text.BodySm"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/button_height"
                 android:layout_weight="1"
                 android:background="@drawable/bg_confirmation_cancel"
-                android:backgroundTint="@color/background_secondary"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
                 android:textAllCaps="false" />
 
-            <Button
+            <TextView
                 android:id="@+id/dialogPositive"
                 style="@style/Text.BodySm"
                 android:layout_width="0dp"
@@ -61,7 +63,9 @@
                 android:layout_marginStart="@dimen/space_sm"
                 android:layout_weight="1"
                 android:background="@drawable/bg_confirmation_positive"
-                android:backgroundTint="@color/text_warning"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
                 android:textColor="@color/text_inverse"
                 android:textStyle="bold"
                 android:textAllCaps="false" />
