@@ -141,7 +141,6 @@ public final class AppDatabaseHelper {
         return results;
     }
 
-
     public int countRestaurants() {
         return database.restaurantDao().count();
     }

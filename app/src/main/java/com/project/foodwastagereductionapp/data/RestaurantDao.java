@@ -23,8 +23,6 @@ interface RestaurantDao {
     @Query("SELECT COUNT(*) FROM restaurants")
     int count();
 
-    // Customer search
-    @Query("SELECT * FROM restaurants WHERE name LIKE :like OR city LIKE :like " +
-            "OR province LIKE :like OR cuisine_type LIKE :like ORDER BY name COLLATE NOCASE")
-    List<RestaurantEntity> search(String like);
+    @Query("SELECT * FROM restaurants WHERE name LIKE :like OR city LIKE :like OR province LIKE :like OR cuisine_type LIKE :like ORDER BY name COLLATE NOCASE")
+    java.util.List<RestaurantEntity> search(String like);
 }
