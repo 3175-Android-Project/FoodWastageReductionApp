@@ -1,7 +1,10 @@
 package com.project.foodwastagereductionapp.manager;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.view.View;
 import android.widget.TextView;
 
@@ -68,6 +71,23 @@ public class ManagerProfileActivity extends AppCompatActivity {
             if (restaurant == null) {
                 AuthNavigator.logout(this);
                 return;
+            }
+            ImageView image = findViewById(R.id.imgManagerProfile);
+            if (restaurant.imageUri == null || restaurant.imageUri.isEmpty()) {
+                image.setImageResource(R.drawable.icon_store);
+                image.setImageTintList(ColorStateList.valueOf(
+                        getColor(R.color.text_primary)
+                ));
+                image.setPadding(
+                        getResources().getDimensionPixelSize(R.dimen.space_xl),
+                        getResources().getDimensionPixelSize(R.dimen.space_xl),
+                        getResources().getDimensionPixelSize(R.dimen.space_xl),
+                        getResources().getDimensionPixelSize(R.dimen.space_xl)
+                );
+            } else {
+                image.setImageURI(Uri.parse(restaurant.imageUri));
+                image.setPadding(0, 0, 0, 0);
+                image.setImageTintList(null);
             }
             ((TextView) findViewById(R.id.txtRestaurantName)).setText(restaurant.name);
             editProfile.setEnabled(true);

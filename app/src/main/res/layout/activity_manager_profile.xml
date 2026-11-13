@@ -37,7 +37,7 @@
             android:paddingTop="@dimen/space_xl"
             android:paddingBottom="@dimen/space_xxl">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imgManagerProfile"
                 android:layout_width="72dp"
                 android:layout_height="72dp"
@@ -46,6 +46,7 @@
                 android:importantForAccessibility="no"
                 android:padding="22dp"
                 android:src="@drawable/icon_store"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Rounded12"
                 app:tint="@color/text_primary" />
 
             <TextView
