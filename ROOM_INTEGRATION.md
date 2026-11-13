@@ -1,12 +1,15 @@
-# Grabbit Local SQLite Integration
+# Grabbit Room Integration
 
 Maintains existing packages (`auth`, `customer`, `manager`), screen XMLs, and resource IDs.
-SQLite uses the native Android `SQLiteOpenHelper` without adding any external DB libraries.
+Room is the persistence layer and uses SQLite underneath.
 
 ## Storage Structure
 
-DB File: Internal app storage `databases/grabbit.db`, schema version 1.
+DB File: Internal app storage `databases/grabbit.db`, Room schema version 1.
 
+- `data/AppDatabase.java`: Room database and database builder.
+- `data/UserEntity.java`, `data/RestaurantEntity.java`: Room entities.
+- `data/UserDao.java`, `data/RestaurantDao.java`: Room queries and writes.
 - `users`: `id`, `email`, `password_hash`, `role`, `full_name`, `city`, `province`, `postal_code`, `email_verified`.
   - Emails are trimmed and normalized to lowercase, and case-insensitive `UNIQUE` constraints are applied at the database level.
   - Roles are restricted to `customer` or `manager`.
@@ -17,13 +20,13 @@ DB File: Internal app storage `databases/grabbit.db`, schema version 1.
 
 ## File Roles
 
-- `data/AppDatabaseHelper.java`: Schema creation, user insertion/duplicate check/login authentication/local email verification, restaurant saving/retrieval.
+- `data/AppDatabaseHelper.java`: Application facade for account and restaurant operations.
 - `data/User.java`, `data/Restaurant.java`: Read-only data models used across screens.
 - `data/PasswordHasher.java`: Random salt + PBKDF2-HMAC-SHA1 (120,000 iterations, 256-bit) hash generation/verification. Supports `minSdk 24`.
-- `auth/AuthTasks.java`: Executes SQLite/hashing tasks serially on a background thread while handling button double-clicks and finished screen callbacks.
+- `auth/AuthTasks.java`: Executes Room/hashing tasks serially on a background thread while handling button double-clicks and finished screen callbacks.
 - `auth/SessionManager.java`: Stores only the current account ID in `SharedPreferences`. Passwords are never stored in the session.
 - `auth/AuthNavigator.java`: Determines target navigation based on role and verification status. Clears back stack history on login, registration completion, and logout.
-- Connected storage, retrieval, and navigation across 6 existing auth screens, Manager Dashboard, and Customer Profile.
+- Connected Room storage, retrieval, and navigation across 6 existing auth screens, Manager Dashboard, and Customer Profile.
 - `AndroidManifest.xml`: Removed `.manager.RestaurantInformationActivity` entry which lacked an actual class. Kept existing `.auth.RestaurantInformationActivity`.
 - `strings.xml`: Added/updated error messages and local email verification copy while preserving existing layouts and IDs.
 
@@ -32,7 +35,7 @@ DB File: Internal app storage `databases/grabbit.db`, schema version 1.
 1. **SignUp**: Required fields, email format, minimum 6-character password with confirmation match, duplicate email check. Hashes password before passing to the next screen.
 2. **ChooseRole**: Role selection. Preserves selection across configuration changes (screen rotation).
 3. **AccountInformation**: Enters name/city/province/postal code and stores unverified account in `users`. Passes `userId` instead of password to subsequent screens.
-4. **EmailVerification**: Local challenge verification screen that does not send real emails. Clicking the button updates `email_verified = 1`.
+4. **EmailVerification**: The verification service confirms the code. Clicking the button updates `email_verified = 1` through Room.
    - Customer → Login with prefilled email.
    - Manager → Session setup then RestaurantInformation.
 5. **RestaurantInformation**: Loads account city/province/postal code from DB as editable default values. Name/city/province/postal code/phone/cuisine type are required; description is optional. Navigates to Dashboard only upon successful save.
@@ -43,7 +46,7 @@ DB File: Internal app storage `databases/grabbit.db`, schema version 1.
    - Verified Manager + Has Restaurant → Manager Dashboard.
 7. **Dashboard / Profile**: Dashboard queries actual restaurant name; Customer Profile queries actual account details. Restaurant profile card in Dashboard allows viewing/editing restaurant info. Logout from Customer Profile or Manager Bottom Profile menu clears session and back stack history.
 
-Accounts and restaurants persist across app restarts. The initial screen remains the existing landing page, allowing users to log in again. Uninstalling or clearing app data deletes the local DB.
+Accounts and restaurants persist across app restarts. The initial screen remains the existing landing page, allowing users to log in again. Uninstalling or clearing app data deletes the local database.
 
 ## Automated Tests
 
@@ -61,7 +64,7 @@ sh ./gradlew --no-configuration-cache :app:lintDebug
 ```
 
 - `PasswordHasherTest`: Correct password/whitespace/Unicode, salt randomness, rejected invalid hashes.
-- `AppDatabaseHelperTest`: Separate test DB save/re-open, email duplicates, malformed/SQL injection strings, local verification status, role-based navigation, restaurant relationships/updates/rollbacks/foreign keys/account isolation.
+- `AppDatabaseHelperTest`: Separate Room database save/re-open, email duplicates, malformed input, local verification status, role-based navigation, restaurant relationships/updates/transactions/foreign keys/account isolation.
 - `AuthFlowTest`: End-to-end Customer/Manager UI flows with unique test accounts, screen recreation after role selection, invalid login, profile, restaurant re-editing, logout/re-login. Cleans up test accounts.
 
 Initial runs may require downloading additional Android test and lint tools, so avoid `--offline` if caches are missing.
@@ -87,8 +90,8 @@ Initial runs may require downloading additional Android test and lint tools, so 
 
 ## Scope of Work
 
-Email verification is a local demo and does not connect to real mail/server authentication. Existing Forgot/Reset Password, Edit Profile saving, restaurant image picking, and order/food data are outside the scope of this SQLite integration. Existing demo behaviors for those screens are maintained.
+Email verification uses the configured verification service. Existing order/food data remains outside the Room schema and uses its existing demo stores.
 
-Since DB v1 is the initial SQLite implementation, there is no legacy DB data to migrate. Future DB version bumps will require migrations in `onUpgrade()` to preserve data.
+The Room database currently uses destructive fallback for databases created by the previous `SQLiteOpenHelper` implementation or for missing migrations. Future Room version bumps should use explicit `Migration` objects to preserve user data.
 
-SQLite connection/foreign key references: [Android SQLiteOpenHelper](https://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper), [SQLiteDatabase](https://developer.android.com/reference/android/database/sqlite/SQLiteDatabase).
+Room references: [Room persistence library](https://developer.android.com/training/data-storage/room), [Room migrations](https://developer.android.com/training/data-storage/room/migrating-db-versions).

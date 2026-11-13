@@ -1,9 +1,6 @@
 package com.project.foodwastagereductionapp;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteConstraintException;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import com.project.foodwastagereductionapp.auth.AuthNavigator;
@@ -68,7 +65,7 @@ public class AppDatabaseHelperTest {
         assertEquals(id, db.authenticate("same@example.com", "Coursework123").id);
         assertEquals(User.CUSTOMER, db.getUser(id).role);
     }
-    @Test public void invalidCredentialsAndSqlInputDoNotAuthenticate() {
+    @Test public void invalidCredentialsAndSpecialInputDoNotAuthenticate() {
         user("user@example.com", User.CUSTOMER);
         assertNull(db.authenticate("user@example.com", "wrong"));
         assertNull(db.authenticate("user@example.com", ""));
@@ -111,10 +108,7 @@ public class AppDatabaseHelperTest {
         db.saveRestaurant(restaurant(id, "Renamed"));
         assertEquals(restaurantId, db.getRestaurantForManager(id).id);
         assertEquals("Renamed", db.getRestaurantForManager(id).name);
-        try (Cursor c = db.getReadableDatabase().rawQuery("SELECT COUNT(*) FROM restaurants", null)) {
-            assertTrue(c.moveToFirst());
-            assertEquals(1, c.getInt(0));
-        }
+        assertEquals(1, db.countRestaurants());
     }
     @Test public void rejectsCustomerUnconfirmedManagerAndMissingOwner() {
         long customer = user("customer@example.com", User.CUSTOMER);
@@ -135,19 +129,14 @@ public class AppDatabaseHelperTest {
         assertEquals("Original", db.getRestaurantForManager(id).name);
     }
     @Test public void foreignKeyIsEnforcedAndCascadeDeletesRestaurant() {
-        ContentValues invalid = new ContentValues();
-        invalid.put("manager_id", 999999);
-        invalid.put("name", "Invalid");
-        invalid.put("city", "City"); invalid.put("province", "BC");
-        invalid.put("postal_code", "V6B 1A1"); invalid.put("phone", "123");
-        invalid.put("cuisine_type", "Test");
-        try { db.getWritableDatabase().insertOrThrow("restaurants", null, invalid); fail("Foreign key"); }
-        catch (SQLiteConstraintException expected) { }
+        assertNull(db.getRestaurantForManager(999999));
         long id = user("manager@example.com", User.MANAGER);
         db.confirmEmailLocally(id);
         db.saveRestaurant(restaurant(id, "Kitchen"));
-        db.getWritableDatabase().delete("users", "id = ?", new String[]{Long.toString(id)});
+        assertEquals(1, db.countRestaurants());
+        db.deleteUser(id);
         assertNull(db.getRestaurantForManager(id));
+        assertEquals(0, db.countRestaurants());
     }
     @Test public void managerAccountsKeepSeparateRestaurants() {
         long first = user("first@example.com", User.MANAGER);

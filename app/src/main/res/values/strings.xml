@@ -130,7 +130,7 @@
     <string name="btnGoToDashboard">Go to dashboard</string>
     <string name="imgLogo">logo</string>
 
-    <!-- Local SQLite authentication -->
+    <!-- Local Room authentication -->
     <string name="msgInvalidEmail">Enter a valid email address</string>
     <string name="msgPasswordTooShort">Use at least 6 characters</string>
     <string name="msgPasswordsDoNotMatch">Passwords do not match</string>

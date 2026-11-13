@@ -1,6 +1,6 @@
 # Grabbit email verification
 
-Grabbit stores accounts and restaurants in SQLite. Only the email address and verification request go to the mail service.
+Grabbit stores accounts and restaurants through Room, with SQLite underneath. Only the email address and verification request go to the mail service.
 
 ## Shared Google Apps Script service
 
