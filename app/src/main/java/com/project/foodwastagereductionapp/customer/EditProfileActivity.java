@@ -9,6 +9,7 @@ import com.project.foodwastagereductionapp.data.CustomerProfile;
 
 
 import android.os.Bundle;
+import android.widget.EditText;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,12 +19,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.material.textfield.TextInputEditText;
 import com.project.foodwastagereductionapp.R;
 
 public class EditProfileActivity extends AppCompatActivity {
 
-    private TextInputEditText inputFullName, etAddress, etCity, etProvince, etPostalCode, etPhone;
+    private EditText inputFullName, etAddress, etCity, etProvince, etPostalCode, etPhone;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +79,7 @@ public class EditProfileActivity extends AppCompatActivity {
         finish(); // back to Profile
     }
 
-    private String textOf(TextInputEditText field) {
+    private String textOf(EditText field) {
         return field.getText() == null ? "" : field.getText().toString().trim();
     }
 }
