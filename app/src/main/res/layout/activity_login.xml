@@ -62,20 +62,19 @@
 
     <LinearLayout
         android:id="@+id/layoutKeepSignedIn"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:layout_gravity="end"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/editPassword">
 
         <TextView
             style="@style/Text.BodySm"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/checkKeepSignedIn" />
 
         <androidx.appcompat.widget.AppCompatCheckBox
