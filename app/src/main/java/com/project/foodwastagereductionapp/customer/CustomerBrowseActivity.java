@@ -1,16 +1,11 @@
 package com.project.foodwastagereductionapp.customer;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.project.foodwastagereductionapp.data.FoodItem;
-import com.project.foodwastagereductionapp.data.CartItem;
-import com.project.foodwastagereductionapp.data.Order;
-import com.project.foodwastagereductionapp.data.OrderStatus;
-import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
-
-
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,10 +15,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.RestaurantListing;
+
+import java.util.List;
 
 public class CustomerBrowseActivity extends AppCompatActivity {
+
+    private RestaurantAdapter adapter;
+    private TextView txtEmpty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +76,34 @@ public class CustomerBrowseActivity extends AppCompatActivity {
             return false;
         });
 
-        // TODO: search restaurants by city + list results
+        // Search results list (card tap is handled inside RestaurantAdapter)
+        txtEmpty = findViewById(R.id.txtEmpty);
+        RecyclerView recycler = findViewById(R.id.recyclerRestaurants);
+        adapter = new RestaurantAdapter();
+        recycler.setAdapter(adapter);
+
+        // Search box: filter as the user types
+        EditText editSearch = findViewById(R.id.editSearch);
+        editSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                loadRestaurants(s.toString());
+            }
+        });
+
+        loadRestaurants(""); // show all restaurants on open
+    }
+
+    private void loadRestaurants(String query) {
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        new Thread(() -> {
+            List<RestaurantListing> results = db.searchRestaurants(query);
+            runOnUiThread(() -> {
+                adapter.setRows(results);
+                txtEmpty.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
+            });
+        }).start();
     }
 
     private void goTo(Class<?> screen) {

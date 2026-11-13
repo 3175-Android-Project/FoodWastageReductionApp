@@ -212,4 +212,9 @@
     <string name="btnLogoutConfirm">Log out</string>
     <string name="btnCancel">Cancel</string>
     <string name="titleRestaurants">Restaurants</string>
+
+    <!-- Customer Browse (Search) -->
+    <string name="msgNoRestaurants">No restaurants found</string>
+    <string name="fmtItemsLeft">%1$d left · until %2$s</string>
+
 </resources>
