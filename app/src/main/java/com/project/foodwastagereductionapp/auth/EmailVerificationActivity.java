@@ -268,7 +268,7 @@ public class EmailVerificationActivity extends AppCompatActivity {
 
     private void continueAfterVerification(User user) {
         if (User.MANAGER.equals(user.role)) {
-            new SessionManager(this).start(user.id);
+            new SessionManager(this).start(user.id, false);
             AuthNavigator.open(this, RestaurantInformationActivity.class, user.id);
         } else {
             new SessionManager(this).clear();

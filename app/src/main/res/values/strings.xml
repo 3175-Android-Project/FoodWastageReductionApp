@@ -28,6 +28,7 @@
     <string name="actionLogin">Login</string>
     <string name="actionLogIn">Log in</string>
     <string name="txtForgotPassword">Forgot password?</string>
+    <string name="checkKeepSignedIn">Keep me signed in</string>
     <string name="txtNoAccount">Don’t have an account? </string>
     <string name="actionCreateAccount">Create account</string>
     <string name="mainTitle">Grabbit</string>
