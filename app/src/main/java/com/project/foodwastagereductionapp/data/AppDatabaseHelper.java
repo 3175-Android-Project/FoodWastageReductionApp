@@ -1,6 +1,7 @@
 package com.project.foodwastagereductionapp.data;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Patterns;
 
 import java.util.Locale;
@@ -128,33 +129,19 @@ public final class AppDatabaseHelper {
     }
 
     // Customer search: matches restaurant name, city, province or cuisine type. Empty query returns all.
+    /** Customer search: matches restaurant name, city, province or cuisine type. Empty query returns all. */
     public java.util.List<RestaurantListing> searchRestaurants(String query) {
-        java.util.List<RestaurantListing> results = new java.util.ArrayList<>();
         String like = "%" + (query == null ? "" : query.trim()) + "%";
-
-        try (Cursor c = getReadableDatabase().query("restaurants", null,
-                "name LIKE ? OR city LIKE ? OR province LIKE ? OR cuisine_type LIKE ?",
-                new String[]{like, like, like, like},
-                null, null, "name COLLATE NOCASE")) {
-            while (c.moveToNext()) {
-                Restaurant r = new Restaurant(
-                        c.getLong(c.getColumnIndexOrThrow("id")),
-                        c.getLong(c.getColumnIndexOrThrow("manager_id")),
-                        string(c, "name"), string(c, "city"), string(c, "province"),
-                        string(c, "postal_code"), string(c, "phone"),
-                        string(c, "cuisine_type"), string(c, "description"));
-                // No food_items table yet, so no surplus summary
-                results.add(new RestaurantListing(r, 0, null));
-            }
+        java.util.List<RestaurantListing> results = new java.util.ArrayList<>();
+        for (RestaurantEntity e : database.restaurantDao().search(like)) {
+            Restaurant r = new Restaurant(e.id, e.managerId, e.name, e.city, e.province,
+                    e.postalCode, e.phone, e.cuisineType, e.description, e.imageUri);
+            results.add(new RestaurantListing(r, 0, null));
         }
         return results;
     }
 
-    private static User readUser(Cursor c) {
-        return new User(c.getLong(c.getColumnIndexOrThrow("id")), string(c, "email"),
-                string(c, "role"), string(c, "full_name"), string(c, "city"),
-                string(c, "province"), string(c, "postal_code"),
-                c.getInt(c.getColumnIndexOrThrow("email_verified")) == 1);
+
     public int countRestaurants() {
         return database.restaurantDao().count();
     }

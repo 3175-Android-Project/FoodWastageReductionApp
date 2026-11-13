@@ -4,6 +4,8 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 
+import java.util.List;
+
 @Dao
 interface RestaurantDao {
     @Insert
@@ -20,4 +22,9 @@ interface RestaurantDao {
 
     @Query("SELECT COUNT(*) FROM restaurants")
     int count();
+
+    // Customer search
+    @Query("SELECT * FROM restaurants WHERE name LIKE :like OR city LIKE :like " +
+            "OR province LIKE :like OR cuisine_type LIKE :like ORDER BY name COLLATE NOCASE")
+    List<RestaurantEntity> search(String like);
 }
