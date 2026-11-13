@@ -3,7 +3,7 @@ package com.project.foodwastagereductionapp.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-/** Keeps only the current user ID; roles and profile details are always read from SQLite. */
+/** Keeps only the current user ID; roles and profile details are always read from Room. */
 public final class SessionManager {
     private final SharedPreferences preferences;
     public SessionManager(Context context) {

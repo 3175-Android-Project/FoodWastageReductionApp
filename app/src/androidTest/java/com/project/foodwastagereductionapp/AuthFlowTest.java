@@ -34,7 +34,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
-/** Real UI + SQLite integration. Uses unique accounts and removes only those test rows. */
+/** Real UI + Room integration. Uses unique accounts and removes only those test rows. */
 @RunWith(AndroidJUnit4.class)
 public class AuthFlowTest {
     private static final String PASSWORD = "Coursework123";
@@ -62,7 +62,8 @@ public class AuthFlowTest {
         });
         if (scenario != null) scenario.close();
         new SessionManager(context).clear();
-        db.getWritableDatabase().delete("users", "email = ?", new String[]{email});
+        User testUser = db.authenticate(email, PASSWORD);
+        if (testUser != null) db.deleteUser(testUser.id);
     }
 
     @Test public void customerSignupLoginProfileLogoutAndRelogin() {

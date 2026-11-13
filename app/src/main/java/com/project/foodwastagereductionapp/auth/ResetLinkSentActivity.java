@@ -250,7 +250,7 @@ public class ResetLinkSentActivity extends AppCompatActivity {
 
                     /*
                      * ResetPasswordActivity will need this
-                     * to update the correct SQLite account.
+                     * to update the correct Room account.
                      */
                     intent.putExtra(
                             "email",

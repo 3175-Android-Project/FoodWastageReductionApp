@@ -53,6 +53,9 @@ app/src/main/
 │   ├── customer/
 │   │   └── Customer-related activities
 │   │
+│   ├── data/
+│   │   └── Room database, entities, DAOs, and data models
+│   │
 │   └── manager/
 │       └── Manager-related activities
 │
@@ -526,15 +529,17 @@ Reference for:
 
 ## Database Integration
 
-The app uses native Android SQLite through `SQLiteOpenHelper`; no external database library is required. The implementation details and verification checklist are also documented in [`SQLITE_INTEGRATION.md`](./SQLITE_INTEGRATION.md).
+The app uses Android Room as its persistence layer, with SQLite underneath. The implementation details and verification checklist are also documented in [`ROOM_INTEGRATION.md`](./ROOM_INTEGRATION.md).
 
 ### Storage
 
 - Database file: internal app storage at `databases/grabbit.db`
 - Current schema version: `2`
-- Database helper: `data/AppDatabaseHelper.java`
+- Room database: `data/AppDatabase.java`
+- Room entities and DAOs: `data/UserEntity.java`, `data/RestaurantEntity.java`, `data/UserDao.java`, `data/RestaurantDao.java`
+- Application facade: `data/AppDatabaseHelper.java`
 - Foreign-key constraints are enabled for every database connection.
-- Database operations run through `AuthTasks` on a serial background executor, not the main UI thread.
+- Room operations run through `AuthTasks` on a serial background executor, not the main UI thread.
 - Uninstalling the app or clearing app data removes the local database.
 
 ### Schema
@@ -571,22 +576,22 @@ Each manager can have at most one restaurant. Deleting a user cascades to the as
 ### Authentication and Password Flow
 
 1. **Sign up:** validates email and password, generates a salted PBKDF2-HMAC-SHA1 hash using 120,000 iterations and a 256-bit output, then stores the account after profile information is completed.
-2. **Email verification:** the app uses the email verification service to verify the address, then updates `users.email_verified` locally. The local demo verification flow is described in [`SQLITE_INTEGRATION.md`](./SQLITE_INTEGRATION.md).
+2. **Email verification:** the app uses the email verification service to verify the address, then updates `users.email_verified` locally. The local demo verification flow is described in [`ROOM_INTEGRATION.md`](./ROOM_INTEGRATION.md).
 3. **Login:** normalizes the email, verifies the password hash, and routes the user based on role, verification status, and restaurant setup.
 4. **Forgot/reset password:** the verification service confirms ownership of the email address; the new password is hashed and saved through `updatePasswordByEmail()`.
 5. **Session:** `SessionManager` stores only the current account ID in `SharedPreferences`; it never stores a password.
 
 ### Database Development Rules
 
-- Use `AppDatabaseHelper.getInstance(context)` for the application database.
+- Use `AppDatabaseHelper.getInstance(context)` for the application database facade.
 - Keep database and password work off the main thread by using `AuthTasks`.
-- Use parameterized queries and the existing normalization/validation helpers.
+- Put new queries in Room DAOs rather than accessing `SQLiteDatabase` from Activities.
 - Never store plaintext passwords or commit verification URLs, credentials, or private keys.
 - Add schema changes through `DATABASE_VERSION` and `onUpgrade()` migrations.
 - Use a separate database name in tests so test accounts cannot affect local app data.
-- Keep food listings, orders, and notifications as sample/demo data unless their persistence is explicitly added to `AppDatabaseHelper`.
+- Keep food listings, orders, and notifications as sample/demo data unless their persistence is explicitly added to Room.
 
-The current SQLite integration persists accounts and restaurant profiles. Order, food-listing, and notification stores used by the UI are separate demo components and are not part of the SQLite schema yet.
+The current Room integration persists accounts and restaurant profiles. Order, food-listing, and notification stores used by the UI are separate demo components and are not part of the Room schema yet.
 
 ---
 
@@ -696,7 +701,7 @@ app:menu="@menu/menu_manager_bottom_nav"
 
 ### Step 6: Use Sample Data for Now
 
-The authentication and restaurant-profile flows use SQLite as described in [Database Integration](#database-integration). For UI features that are not yet connected to SQLite, hard-coded sample data is acceptable, but keep it local to the screen or feature and label it as sample data.
+The authentication and restaurant-profile flows use Room as described in [Database Integration](#database-integration). For UI features that are not yet connected to Room, hard-coded sample data is acceptable, but keep it local to the screen or feature and label it as sample data.
 
 Example:
 
@@ -706,7 +711,7 @@ String status = "Pending";
 double price = 8.50;
 ```
 
-If a new feature needs persistence, extend `AppDatabaseHelper` with an explicit schema and migration instead of creating a second database or accessing SQLite directly from an Activity.
+If a new feature needs persistence, add an entity and DAO, then extend `AppDatabase` with an explicit migration instead of creating a second database or accessing SQLite directly from an Activity.
 
 ---
 
@@ -747,10 +752,10 @@ Before submitting your work:
 7. **Follow the Figma wireframes.**  
    Do not redesign screens unless the team agrees on a change.
 
-8. **Use the existing SQLite integration for persisted account data.**
+8. **Use the existing Room integration for persisted account data.**
    Do not bypass `AppDatabaseHelper` or create a separate database for authentication or restaurant profiles.
 
-9. **Hard-coded sample data is acceptable only for features not connected to SQLite.**
+9. **Hard-coded sample data is acceptable only for features not connected to Room.**
    Keep sample data separate from persisted account and restaurant data.
 
 10. **Keep your code readable.**  
