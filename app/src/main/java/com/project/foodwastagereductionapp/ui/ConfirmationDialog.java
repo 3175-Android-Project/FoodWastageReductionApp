@@ -10,8 +10,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
-
 import com.project.foodwastagereductionapp.R;
 
 public final class ConfirmationDialog {
@@ -75,11 +73,13 @@ public final class ConfirmationDialog {
     }
 
     public static void showLogout(Activity activity, Runnable onConfirm) {
-        new AlertDialog.Builder(activity)
-                .setTitle(R.string.dialogLogoutTitle)
-                .setMessage(R.string.dialogLogoutMessage)
-                .setNegativeButton(R.string.btnCancel, null)
-                .setPositiveButton(R.string.btnLogoutConfirm, (dialog, which) -> onConfirm.run())
-                .show();
+        show(
+                activity,
+                activity.getString(R.string.dialogLogoutTitle),
+                activity.getString(R.string.dialogLogoutMessage),
+                activity.getString(R.string.btnLogoutConfirm),
+                activity.getString(R.string.btnCancel),
+                onConfirm
+        );
     }
 }
