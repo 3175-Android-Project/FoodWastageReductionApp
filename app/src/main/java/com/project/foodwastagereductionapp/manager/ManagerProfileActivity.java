@@ -22,6 +22,7 @@ import com.project.foodwastagereductionapp.auth.RestaurantInformationActivity;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.ui.ConfirmationDialog;
 
 public class ManagerProfileActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +43,8 @@ public class ManagerProfileActivity extends AppCompatActivity {
             intent.putExtra(RestaurantInformationActivity.EXTRA_EDIT_PROFILE, true);
             startActivity(intent);
         });
-        findViewById(R.id.layoutLogout).setOnClickListener(view -> AuthNavigator.logout(this));
+        findViewById(R.id.layoutLogout).setOnClickListener(
+                view -> ConfirmationDialog.showLogout(this, () -> AuthNavigator.logout(this)));
 
         BottomNavigationView nav = findViewById(R.id.bottomNav);
         nav.setItemActiveIndicatorEnabled(false);
