@@ -55,7 +55,7 @@ public class RestaurantDetailActivity extends AppCompatActivity {
 
         // Food list
         RecyclerView recyclerFood = findViewById(R.id.recyclerFood);
-        FoodItemAdapter adapter = new FoodItemAdapter(this::addToCart);
+        FoodItemAdapter adapter = new FoodItemAdapter(restaurantId, this::addToCart);
         recyclerFood.setAdapter(adapter);
 
         // View Cart button
