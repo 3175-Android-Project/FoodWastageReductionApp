@@ -111,6 +111,10 @@
             android:name=".CustomerBrowseActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".customer.RestaurantDetailActivity$RestaurantDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

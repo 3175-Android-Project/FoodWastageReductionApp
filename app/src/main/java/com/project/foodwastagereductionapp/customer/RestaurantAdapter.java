@@ -62,7 +62,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         // Tap a card to open that restaurant's food items
         h.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), RestaurantDetailActivity.class);
-            intent.putExtra("restaurantId", r.id);
+            intent.putExtra(RestaurantDetailActivity.EXTRA_RESTAURANT_ID, r.id);
             v.getContext().startActivity(intent);
         });
     }

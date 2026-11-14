@@ -115,7 +115,12 @@ public final class AppDatabaseHelper {
                 restaurant.province, restaurant.postalCode, restaurant.phone,
                 restaurant.cuisineType, restaurant.description, restaurant.imageUri);
     }
-
+    public Restaurant getRestaurant(long id) {
+        RestaurantEntity e = database.restaurantDao().findById(id);
+        if (e == null) return null;
+        return new Restaurant(e.id, e.managerId, e.name, e.city, e.province,
+                e.postalCode, e.phone, e.cuisineType, e.description, e.imageUri);
+    }
     public boolean updatePasswordByEmail(String email, String newPasswordHash) {
         if (!validEmail(email) || newPasswordHash == null
                 || !newPasswordHash.startsWith("pbkdf2_sha1$")) {
