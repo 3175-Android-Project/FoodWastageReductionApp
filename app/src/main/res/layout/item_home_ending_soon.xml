@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One "Ending soon" food card on the Home screen (same look as the old fixed card) -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Card.Default"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/imgFood"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:background="@color/background_secondary"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtFoodName"
+            style="@style/Text.HeadlineSm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="Good poke" />
+
+        <TextView
+            android:id="@+id/txtRestaurantInfo"
+            style="@style/Text.BodySm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="Happy Sushi · Coquitlam" />
+
+        <TextView
+            android:id="@+id/txtPriceUntil"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/background_accent1"
+            android:textSize="@dimen/text_body_sm"
+            tools:text="$8.50 · until 7:15 PM" />
+
+    </LinearLayout>
+
+</LinearLayout>

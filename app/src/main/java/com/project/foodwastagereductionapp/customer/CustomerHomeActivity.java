@@ -1,15 +1,13 @@
 package com.project.foodwastagereductionapp.customer;
 
-import com.project.foodwastagereductionapp.data.FoodItem;
-import com.project.foodwastagereductionapp.data.CartItem;
-import com.project.foodwastagereductionapp.data.Order;
-import com.project.foodwastagereductionapp.data.OrderStatus;
-import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
-
-
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,8 +17,40 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.auth.SessionManager;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.FoodItem;
+import com.project.foodwastagereductionapp.data.Restaurant;
+import com.project.foodwastagereductionapp.data.RestaurantListing;
+import com.project.foodwastagereductionapp.data.User;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public class CustomerHomeActivity extends AppCompatActivity {
+
+    private static final int ENDING_SOON_LIMIT = 3;
+
+    private TextView txtLocation, txtNearbyTitle, txtNoNearby, txtEndingSoonTitle;
+    private LinearLayout llNearby, llEndingSoon;
+
+    // A food item plus the restaurant it belongs to (for the Ending soon list).
+    private static final class EndingSoonItem {
+        final Restaurant restaurant;
+        final FoodItem food;
+        final Date until;
+
+        EndingSoonItem(Restaurant restaurant, FoodItem food, Date until) {
+            this.restaurant = restaurant;
+            this.food = food;
+            this.until = until;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +63,13 @@ public class CustomerHomeActivity extends AppCompatActivity {
             return insets;
         });
 
+        txtLocation = findViewById(R.id.txtLocation);
+        txtNearbyTitle = findViewById(R.id.txtNearbyTitle);
+        txtNoNearby = findViewById(R.id.txtNoNearby);
+        txtEndingSoonTitle = findViewById(R.id.txtEndingSoonTitle);
+        llNearby = findViewById(R.id.llNearby);
+        llEndingSoon = findViewById(R.id.llEndingSoon);
+
         // Browse: search box and "See all" open the Browse screen
         findViewById(R.id.editSearch).setOnClickListener(v ->
                 startActivity(new Intent(this, CustomerBrowseActivity.class)));
@@ -42,11 +79,6 @@ public class CustomerHomeActivity extends AppCompatActivity {
         // Bell opens the order notifications
         findViewById(R.id.btnNotification).setOnClickListener(v ->
                 startActivity(new Intent(this, NotificationsActivity.class)));
-
-        // Restaurant cards open the restaurant's food items (ids match SampleData)
-        findViewById(R.id.cardRestaurant1).setOnClickListener(v -> openRestaurant(1));
-        findViewById(R.id.cardRestaurant2).setOnClickListener(v -> openRestaurant(2));
-        findViewById(R.id.cardEndingSoon).setOnClickListener(v -> openRestaurant(3));
 
         // Bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
@@ -69,9 +101,135 @@ public class CustomerHomeActivity extends AppCompatActivity {
         });
     }
 
-    private void openRestaurant(int restaurantId) {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadHome(); // refresh (e.g. after editing the profile city)
+    }
+
+    // Database work on a worker thread (AppDatabaseHelper rule), UI updates on the main thread
+    private void loadHome() {
+        long userId = new SessionManager(this).getUserId();
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        new Thread(() -> {
+            User user = db.getUser(userId);
+            List<RestaurantListing> all = db.searchRestaurants("");
+            runOnUiThread(() -> bindHome(user, all));
+        }).start();
+    }
+
+    private void bindHome(User user, List<RestaurantListing> all) {
+        String city = user != null ? user.city : null;
+        txtLocation.setText(city != null ? city : "");
+
+        // Nearby: restaurants in the customer's city; if none, show all restaurants
+        List<Restaurant> nearby = new ArrayList<>();
+        if (city != null) {
+            for (RestaurantListing l : all) {
+                if (city.trim().equalsIgnoreCase(l.restaurant.city.trim())) nearby.add(l.restaurant);
+            }
+        }
+        if (!nearby.isEmpty()) {
+            txtNearbyTitle.setText(getString(R.string.fmtNearbyIn, city));
+        } else {
+            for (RestaurantListing l : all) nearby.add(l.restaurant);
+            txtNearbyTitle.setText(R.string.titleAllRestaurants);
+        }
+
+        bindNearby(nearby);
+        bindEndingSoon(nearby);
+    }
+
+    private void bindNearby(List<Restaurant> restaurants) {
+        llNearby.removeAllViews();
+        txtNoNearby.setVisibility(restaurants.isEmpty() ? View.VISIBLE : View.GONE);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (Restaurant r : restaurants) {
+            View card = inflater.inflate(R.layout.item_home_restaurant, llNearby, false);
+
+            setImage(card.findViewById(R.id.imgRestaurant), r.imageUri);
+            ((TextView) card.findViewById(R.id.txtRestaurantName)).setText(r.name);
+            ((TextView) card.findViewById(R.id.txtRestaurantAddress))
+                    .setText(getString(R.string.fmtCityProvince, r.city, r.province));
+
+            // Lowest discounted price and total items left (food from SampleData for now)
+            TextView txtPrice = card.findViewById(R.id.txtPrice);
+            TextView txtItemsLeft = card.findViewById(R.id.txtItemsLeft);
+            double lowest = -1;
+            int totalLeft = 0;
+            for (FoodItem f : SampleData.getFoodItems((int) r.id)) {
+                if (f.quantityLeft <= 0) continue;
+                totalLeft += f.quantityLeft;
+                if (lowest < 0 || f.price < lowest) lowest = f.price;
+            }
+            if (totalLeft > 0) {
+                txtPrice.setText(PriceFormatter.format(lowest));
+                txtItemsLeft.setText(getString(R.string.fmtQuantityLeft, totalLeft));
+                txtItemsLeft.setVisibility(View.VISIBLE);
+            } else {
+                txtPrice.setText(r.cuisineType);
+                txtItemsLeft.setVisibility(View.GONE);
+            }
+
+            card.setOnClickListener(v -> openRestaurant(r.id));
+            llNearby.addView(card);
+        }
+    }
+
+    // Top 3 food items (still available) with the soonest "until" time.
+    private void bindEndingSoon(List<Restaurant> restaurants) {
+        SimpleDateFormat format = new SimpleDateFormat("h:mm a", Locale.ENGLISH);
+        List<EndingSoonItem> items = new ArrayList<>();
+        for (Restaurant r : restaurants) {
+            for (FoodItem f : SampleData.getFoodItems((int) r.id)) {
+                if (f.quantityLeft <= 0 || f.availableUntil == null) continue;
+                try {
+                    items.add(new EndingSoonItem(r, f, format.parse(f.availableUntil)));
+                } catch (ParseException ignored) {
+                    // Unknown time format: skip it
+                }
+            }
+        }
+        Collections.sort(items, (a, b) -> a.until.compareTo(b.until));
+
+        llEndingSoon.removeAllViews();
+        boolean hasItems = !items.isEmpty();
+        txtEndingSoonTitle.setVisibility(hasItems ? View.VISIBLE : View.GONE);
+        llEndingSoon.setVisibility(hasItems ? View.VISIBLE : View.GONE);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (int i = 0; i < Math.min(ENDING_SOON_LIMIT, items.size()); i++) {
+            EndingSoonItem e = items.get(i);
+            View card = inflater.inflate(R.layout.item_home_ending_soon, llEndingSoon, false);
+
+            ImageView imgFood = card.findViewById(R.id.imgFood);
+            if (e.food.imageRes != 0) imgFood.setImageResource(e.food.imageRes);
+            ((TextView) card.findViewById(R.id.txtFoodName)).setText(e.food.name);
+            ((TextView) card.findViewById(R.id.txtRestaurantInfo))
+                    .setText(getString(R.string.fmtRestaurantCity, e.restaurant.name, e.restaurant.city));
+            ((TextView) card.findViewById(R.id.txtPriceUntil)).setText(getString(
+                    R.string.fmtPriceUntil, PriceFormatter.format(e.food.price), e.food.availableUntil));
+
+            card.setOnClickListener(v -> openFood(e.restaurant.id, e.food.id));
+            llEndingSoon.addView(card);
+        }
+    }
+
+    private void setImage(ImageView view, String uri) {
+        if (uri != null && !uri.isEmpty()) view.setImageURI(Uri.parse(uri));
+    }
+
+    private void openRestaurant(long restaurantId) {
         Intent intent = new Intent(this, RestaurantDetailActivity.class);
         intent.putExtra(RestaurantDetailActivity.EXTRA_RESTAURANT_ID, restaurantId);
+        startActivity(intent);
+    }
+
+    private void openFood(long restaurantId, int foodId) {
+        Intent intent = new Intent(this, FoodDetailActivity.class);
+        intent.putExtra(FoodDetailActivity.EXTRA_RESTAURANT_ID, restaurantId);
+        intent.putExtra(FoodDetailActivity.EXTRA_FOOD_ID, foodId);
         startActivity(intent);
     }
 

@@ -94,6 +94,14 @@
     <string name="sampleGoodPoke">Good poke</string>
     <string name="samplePokeDetails">$8.50 · until 7:15 PM</string>
 
+    <!-- Customer Home (database) -->
+    <string name="fmtNearbyIn">Nearby in %1$s</string>
+    <string name="titleAllRestaurants">All restaurants</string>
+    <string name="msgNoRestaurantsYet">No restaurants yet</string>
+    <string name="fmtCityProvince">%1$s, %2$s</string>
+    <string name="fmtRestaurantCity">%1$s · %2$s</string>
+    <string name="fmtPriceUntil">%1$s · until %2$s</string>
+
     <!-- Profile -->
     <string name="txtProfile">Profile</string>
     <string name="txtEditProfile">Edit Profile</string>
