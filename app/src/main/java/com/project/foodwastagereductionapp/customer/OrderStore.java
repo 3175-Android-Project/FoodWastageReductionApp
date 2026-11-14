@@ -1,34 +1,17 @@
 package com.project.foodwastagereductionapp.customer;
 
-import com.project.foodwastagereductionapp.data.FoodItem;
+import com.project.foodwastagereductionapp.data.AppNotification;
 import com.project.foodwastagereductionapp.data.CartItem;
+import com.project.foodwastagereductionapp.data.FoodItem;
 import com.project.foodwastagereductionapp.data.Order;
 import com.project.foodwastagereductionapp.data.OrderStatus;
-import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
-
-
 import com.project.foodwastagereductionapp.data.Restaurant;
-import com.project.foodwastagereductionapp.data.FoodItem;
-import com.project.foodwastagereductionapp.data.CartItem;
-import com.project.foodwastagereductionapp.data.Order;
-import com.project.foodwastagereductionapp.data.OrderStatus;
-import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import com.project.foodwastagereductionapp.data.Restaurant;
-import com.project.foodwastagereductionapp.data.FoodItem;
-import com.project.foodwastagereductionapp.data.CartItem;
-import com.project.foodwastagereductionapp.data.Order;
-import com.project.foodwastagereductionapp.data.OrderStatus;
-import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
 
 /**
  * Browse & Checkout / Customer Orders feature - CSIS 3175 Intro to Mobile Development
@@ -42,17 +25,30 @@ import com.project.foodwastagereductionapp.data.CustomerProfile;
  */
 public final class OrderStore {
 
+    /** GST on restaurant food in BC. Used by Checkout and by every saved order total. */
+    public static final double TAX_RATE = 0.05;
+
     public static class PlacedOrder {
         public final Order order;
         public final List<CartItem> items;
         public final String pickupTime;
         public final String restaurantAddress;
+        public final boolean isDelivery;
+        public final String deliveryAddress; // only used when isDelivery is true
 
-        PlacedOrder(Order order, List<CartItem> items, String pickupTime, String restaurantAddress) {
+        PlacedOrder(Order order, List<CartItem> items, String pickupTime, String restaurantAddress,
+                    boolean isDelivery, String deliveryAddress) {
             this.order = order;
             this.items = items;
             this.pickupTime = pickupTime;
             this.restaurantAddress = restaurantAddress;
+            this.isDelivery = isDelivery;
+            this.deliveryAddress = deliveryAddress;
+        }
+
+        /** Pickup order (used by the sample orders). */
+        PlacedOrder(Order order, List<CartItem> items, String pickupTime, String restaurantAddress) {
+            this(order, items, pickupTime, restaurantAddress, false, null);
         }
     }
 
@@ -71,26 +67,39 @@ public final class OrderStore {
 
     private OrderStore() { }
 
-    /** Creates a new Pending order from the checkout cart. */
-    public static PlacedOrder place(Restaurant restaurant, List<CartItem> cartItems, String pickupTime) {
+    /** Tax on a subtotal, rounded to cents. */
+    public static double taxOf(double subtotal) {
+        return Math.round(subtotal * TAX_RATE * 100) / 100.0;
+    }
+
+    /** Creates a new Pending order from the checkout cart (pickup or delivery). Total includes tax. */
+    public static PlacedOrder place(Restaurant restaurant, List<CartItem> cartItems, String pickupTime,
+                                    boolean isDelivery, String deliveryAddress) {
         List<CartItem> copy = new ArrayList<>(cartItems);
         int itemCount = 0;
-        double total = 0;
+        double subtotal = 0;
         for (CartItem c : copy) {
             itemCount += c.quantity;
-            total += c.getLineTotal();
+            subtotal += c.getLineTotal();
         }
+        double total = subtotal + taxOf(subtotal);
 
         Date now = new Date();
         Order order = new Order(String.valueOf(nextOrderNumber++), restaurant.name,
                 formatDate(now), formatTime(now), itemCount, total,
                 OrderStatus.PENDING, 0); // No imageRes in Restaurant
         String address = restaurant.city + ", " + restaurant.province;
-        PlacedOrder placed = new PlacedOrder(order, copy, pickupTime, address);
+        PlacedOrder placed = new PlacedOrder(order, copy, pickupTime, address,
+                isDelivery, deliveryAddress);
         ORDERS.add(0, placed); // newest first
 
         OrderStatusSimulator.start(order.orderNumber); // demo only, see that class
         return placed;
+    }
+
+    /** Pickup order (kept so existing calls still work). */
+    public static PlacedOrder place(Restaurant restaurant, List<CartItem> cartItems, String pickupTime) {
+        return place(restaurant, cartItems, pickupTime, false, null);
     }
 
     /** All orders, newest first. */
@@ -149,7 +158,7 @@ public final class OrderStore {
         return new SimpleDateFormat("h:mm a", Locale.US).format(date);
     }
 
-    // ---- Sample data -------------------------------------------------------------------
+    // Sample data
 
     private static void seedSampleOrders() {
         Date now = new Date();

@@ -133,10 +133,16 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
             llItems.addView(line, lp);
         }
 
-        // Pickup information
-        ((TextView) findViewById(R.id.txtPickupAddress))
-                .setText(getString(R.string.fmtPickupAt, placed.restaurantAddress));
-        ((TextView) findViewById(R.id.txtMethod)).setText(R.string.txtMethodPickup);
+        // Pickup or delivery information
+        TextView txtPickupAddress = findViewById(R.id.txtPickupAddress);
+        TextView txtMethod = findViewById(R.id.txtMethod);
+        if (placed.isDelivery) {
+            txtPickupAddress.setText(getString(R.string.fmtDeliveryTo, placed.deliveryAddress));
+            txtMethod.setText(R.string.txtMethodDelivery);
+        } else {
+            txtPickupAddress.setText(getString(R.string.fmtPickupAt, placed.restaurantAddress));
+            txtMethod.setText(R.string.txtMethodPickup);
+        }
         ((TextView) findViewById(R.id.txtPickupTime)).setText(placed.pickupTime);
 
         ((TextView) findViewById(R.id.txtTotal)).setText(PriceFormatter.format(order.total));

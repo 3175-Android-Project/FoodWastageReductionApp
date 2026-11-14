@@ -71,14 +71,21 @@ public class CustomerOrderDetailActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.txtCustomerContact)).setText(
                 getString(R.string.fmtContact, CustomerProfile.email, CustomerProfile.phone));
 
-        // Pickup method + time
-        ((TextView) findViewById(R.id.txtMethod)).setText(R.string.txtMethodPickup);
+        // Pickup or delivery method + time
+        ((TextView) findViewById(R.id.txtMethod)).setText(
+                placed.isDelivery ? R.string.txtMethodDelivery : R.string.txtMethodPickup);
         ((TextView) findViewById(R.id.txtPickupTime)).setText(placed.pickupTime);
 
         // Items
         LinearLayout llItems = findViewById(R.id.llItems);
+        double subtotal = 0;
         for (CartItem c : placed.items) {
             addItemRow(llItems, c.quantity + " x " + c.item.name, c.getLineTotal());
+            subtotal += c.getLineTotal();
+        }
+        double tax = order.total - subtotal;
+        if (tax > 0.004) {
+            addItemRow(llItems, getString(R.string.lblTax), tax);
         }
 
         // Total

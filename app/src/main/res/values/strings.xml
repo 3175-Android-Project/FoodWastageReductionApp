@@ -260,6 +260,8 @@
     <string name="txtPlus">+</string>
     <string name="contentDescDecrease">Remove one</string>
     <string name="contentDescIncrease">Add one</string>
+    <string name="txtMethodDelivery">Delivery</string>
+    <string name="fmtDeliveryTo">Delivery · %s</string>
 
     <!-- Customer Browse (Search) -->
     <string name="msgNoRestaurants">No restaurants found</string>

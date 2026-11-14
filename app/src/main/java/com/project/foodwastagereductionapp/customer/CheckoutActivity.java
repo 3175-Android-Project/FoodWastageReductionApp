@@ -16,10 +16,15 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.CartItem;
+import com.project.foodwastagereductionapp.data.CustomerProfile;
+import com.project.foodwastagereductionapp.data.Restaurant;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CheckoutActivity extends AppCompatActivity {
-
-    private static final double TAX_RATE = 0.05; // GST 5% on restaurant food in BC
 
     private CartLineAdapter adapter;
     private boolean isDelivery = false;
@@ -27,6 +32,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private TextView txtOrderItemsTitle, txtPickup, txtDelivery;
     private TextView txtTimeLabel, txtTimeValue, txtTimeNote;
     private TextView txtItemsLabel, txtItemsAmount, txtTaxAmount, txtTotalAmount;
+    private Button btnPlaceOrder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +76,7 @@ public class CheckoutActivity extends AppCompatActivity {
         setDelivery(false);
 
         // Place order
-        Button btnPlaceOrder = findViewById(R.id.btnPlaceOrder);
+        btnPlaceOrder = findViewById(R.id.btnPlaceOrder);
         btnPlaceOrder.setOnClickListener(v -> placeOrder());
     }
 
@@ -80,7 +86,7 @@ public class CheckoutActivity extends AppCompatActivity {
         refresh();
     }
 
-    // Re-reads the cart and updates the list, time box and totals.
+    /** Re-reads the cart and updates the list, time box and totals. */
     private void refresh() {
         if (CartManager.count() == 0) {
             finish(); // nothing left to check out
@@ -91,8 +97,9 @@ public class CheckoutActivity extends AppCompatActivity {
         int count = CartManager.count();
         txtOrderItemsTitle.setText(getString(R.string.fmtOrderItems, count));
 
+        // Same tax rule as OrderStore, so Checkout and the saved order always match
         double subtotal = CartManager.subtotal();
-        double tax = Math.round(subtotal * TAX_RATE * 100) / 100.0;
+        double tax = OrderStore.taxOf(subtotal);
         txtItemsLabel.setText(getString(R.string.fmtItemsCount, count));
         txtItemsAmount.setText(PriceFormatter.format(subtotal));
         txtTaxAmount.setText(PriceFormatter.format(tax));
@@ -118,7 +125,7 @@ public class CheckoutActivity extends AppCompatActivity {
         }
     }
 
-    // Pickup/delivery deadline = the soonest "available until" time in the cart.
+    /** Pickup/delivery deadline = the soonest "available until" time in the cart. */
     private void updateTimeBox() {
         String time = CartManager.earliestAvailableUntil();
 
@@ -138,15 +145,48 @@ public class CheckoutActivity extends AppCompatActivity {
         }
     }
 
+    // Restaurant comes from the database (worker thread); the order is saved on the main thread
     private void placeOrder() {
-        // TODO: save the order with the team's OrderStore so it shows in Orders
+        btnPlaceOrder.setEnabled(false); // avoid double orders
+        long restaurantId = CartManager.getRestaurantId();
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+
+        new Thread(() -> {
+            Restaurant restaurant = db.getRestaurant(restaurantId);
+            runOnUiThread(() -> {
+                if (restaurant == null) {
+                    Toast.makeText(this, R.string.msgDatabaseError, Toast.LENGTH_SHORT).show();
+                    btnPlaceOrder.setEnabled(true);
+                    return;
+                }
+                saveOrderAndOpenStatus(restaurant);
+            });
+        }).start();
+    }
+
+    private void saveOrderAndOpenStatus(Restaurant restaurant) {
+        // Cart -> the team's CartItem list
+        List<CartItem> items = new ArrayList<>();
+        for (CartManager.CartLine line : CartManager.getLines()) {
+            items.add(new CartItem(line.item, line.quantity));
+        }
+
+        String time = CartManager.earliestAvailableUntil();
+        String pickupTime = time != null ? getString(R.string.fmtTodayAt, time)
+                : getString(R.string.txtNotSet);
+        String deliveryAddress = isDelivery ? CustomerProfile.getAddressLine() : null;
+
+        OrderStore.PlacedOrder placed = OrderStore.place(
+                restaurant, items, pickupTime, isDelivery, deliveryAddress);
         CartManager.clear();
         Toast.makeText(this, R.string.msgOrderPlaced, Toast.LENGTH_SHORT).show();
 
-        // Go to the Orders tab and clear the screens behind it
-        Intent intent = new Intent(this, CustomerOrderActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+        // Orders tab underneath, the new order's status on top (Back -> Orders)
+        Intent orders = new Intent(this, CustomerOrderActivity.class);
+        orders.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        Intent status = new Intent(this, CustomerOrderStatusActivity.class);
+        status.putExtra(CustomerOrderStatusActivity.EXTRA_ORDER_NUMBER, placed.order.orderNumber);
+        startActivities(new Intent[]{orders, status});
         finish();
     }
 }
