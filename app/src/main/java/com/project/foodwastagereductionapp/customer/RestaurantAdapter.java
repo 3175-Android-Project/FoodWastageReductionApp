@@ -50,6 +50,11 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
 
         h.txtRestaurantName.setText(r.name);
         h.txtRestaurantAddress.setText(r.city + ", " + r.province);
+        if (r.imageUri != null && !r.imageUri.isEmpty()) {
+            h.imgRestaurant.setImageURI(android.net.Uri.parse(r.imageUri));
+        } else {
+            h.imgRestaurant.setImageResource(R.drawable.icon_store);
+        }
 
         // Surplus food summary (falls back to cuisine type until food items exist)
         if (item.itemsLeft > 0 && item.availableUntil != null) {

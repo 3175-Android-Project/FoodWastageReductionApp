@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import com.project.foodwastagereductionapp.ui.ConfirmationDialog;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -233,12 +233,14 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
     }
 
     private void confirmCancel() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.dialogCancelOrderTitle)
-                .setMessage(R.string.dialogCancelOrderMessage)
-                .setPositiveButton(R.string.btnYesCancelOrder, (dialog, which) -> cancelOrder())
-                .setNegativeButton(R.string.btnKeepOrder, null)
-                .show();
+        ConfirmationDialog.show(
+                this,
+                getString(R.string.dialogCancelOrderTitle),
+                getString(R.string.dialogCancelOrderMessage),
+                getString(R.string.btnYesCancelOrder),
+                getString(R.string.btnKeepOrder),
+                this::cancelOrder
+        );
     }
 
     private void cancelOrder() {

@@ -69,19 +69,17 @@ public class RestaurantInformationActivity extends AppCompatActivity {
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
                 (v, insets) -> {
-
                     Insets systemBars =
                             insets.getInsets(
                                     WindowInsetsCompat.Type.systemBars()
                             );
-
+                    int keyboard = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
                     v.setPadding(
                             systemBars.left,
                             systemBars.top,
                             systemBars.right,
-                            systemBars.bottom
+                            Math.max(systemBars.bottom, keyboard)
                     );
-
                     return insets;
                 }
         );

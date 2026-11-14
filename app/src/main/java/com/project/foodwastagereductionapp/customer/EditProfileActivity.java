@@ -33,7 +33,8 @@ public class EditProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_profile);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            int keyboard = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+            v.setPadding(bars.left, bars.top, bars.right, Math.max(bars.bottom, keyboard));
             return insets;
         });
 
