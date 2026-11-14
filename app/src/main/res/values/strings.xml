@@ -231,6 +231,7 @@
     <string name="msgCartOtherRestaurant">Your cart has food from another restaurant. Check out or clear it first.</string>
     <string name="contentDescCart">Cart</string>
     <string name="contentDescAddToCart">Add to cart</string>
+    <string name="fmtQuantityLeftUntil">%1$d left · Until %2$s</string>
 
     <!-- Customer Browse (Search) -->
     <string name="msgNoRestaurants">No restaurants found</string>

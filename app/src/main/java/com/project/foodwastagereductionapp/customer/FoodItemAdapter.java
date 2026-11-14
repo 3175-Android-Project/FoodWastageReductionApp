@@ -67,9 +67,15 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
             h.txtOriginalPrice.setVisibility(View.GONE);
         }
 
-        // Quantity left
+        // Quantity left + pickup time
         if (f.quantityLeft > 0) {
-            h.txtQuantityLeft.setText(context.getString(R.string.fmtQuantityLeft, f.quantityLeft));
+            if (f.availableUntil != null && !f.availableUntil.isEmpty()) {
+                h.txtQuantityLeft.setText(context.getString(
+                        R.string.fmtQuantityLeftUntil, f.quantityLeft, f.availableUntil));
+            } else {
+                h.txtQuantityLeft.setText(context.getString(
+                        R.string.fmtQuantityLeft, f.quantityLeft));
+            }
             h.btnAdd.setEnabled(true);
             h.btnAdd.setAlpha(1f);
         } else {
