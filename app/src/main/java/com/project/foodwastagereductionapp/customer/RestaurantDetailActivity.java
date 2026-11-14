@@ -1,5 +1,6 @@
 package com.project.foodwastagereductionapp.customer;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -133,7 +134,7 @@ public class RestaurantDetailActivity extends AppCompatActivity {
     }
 
     private void openCart() {
-        // TODO: open the cart/checkout screen once it exists
-        Toast.makeText(this, getString(R.string.fmtViewCart, CartManager.count()), Toast.LENGTH_SHORT).show();
+        if (CartManager.count() == 0) return;
+        startActivity(new Intent(this, CheckoutActivity.class));
     }
 }

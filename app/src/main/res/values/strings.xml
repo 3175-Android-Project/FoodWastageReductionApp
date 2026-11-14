@@ -242,6 +242,25 @@
     <string name="btnAddOneToCart">Add 1 to cart</string>
     <string name="msgAddedToCart">Added to cart</string>
 
+    <!-- Checkout -->
+    <string name="titleCheckout">Checkout</string>
+    <string name="fmtOrderItems">Order Items (%1$d)</string>
+    <string name="titlePickupOrDelivery">Pickup or Delivery</string>
+    <string name="txtPickupOption">Pickup</string>
+    <string name="txtDeliveryOption">Delivery</string>
+    <string name="lblPickUpBy">Pick up by</string>
+    <string name="lblDeliverBy">Deliver by</string>
+    <string name="fmtPickupBefore">Please pick up your order before %1$s.</string>
+    <string name="msgDeliveryNote">Your order will be delivered to the address in your profile.</string>
+    <string name="fmtItemsCount">Items (%1$d)</string>
+    <string name="lblTax" formatted="false">Tax (5%)</string>
+    <string name="btnPlaceOrder">Place Order</string>
+    <string name="msgOrderPlaced">Order placed!</string>
+    <string name="txtMinus">−</string>
+    <string name="txtPlus">+</string>
+    <string name="contentDescDecrease">Remove one</string>
+    <string name="contentDescIncrease">Add one</string>
+
     <!-- Customer Browse (Search) -->
     <string name="msgNoRestaurants">No restaurants found</string>
     <string name="fmtItemsLeft">%1$d left · until %2$s</string>
