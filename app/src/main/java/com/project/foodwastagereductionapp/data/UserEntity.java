@@ -25,4 +25,10 @@ final class UserEntity {
     String postalCode;
     @ColumnInfo(name = "email_verified")
     boolean emailVerified;
+
+    // Added in database
+    @ColumnInfo(name = "address")
+    String address;
+    @ColumnInfo(name = "phone")
+    String phone;
 }

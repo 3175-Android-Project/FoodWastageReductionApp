@@ -22,6 +22,12 @@ interface UserDao {
     @Query("UPDATE users SET password_hash = :passwordHash WHERE email = :email")
     int updatePassword(String email, String passwordHash);
 
+    // Edit Profile
+    @Query("UPDATE users SET full_name = :fullName, address = :address, city = :city, "
+            + "province = :province, postal_code = :postalCode, phone = :phone WHERE id = :id")
+    int updateProfile(long id, String fullName, String address, String city,
+                      String province, String postalCode, String phone);
+
     @Query("DELETE FROM users WHERE id = :id")
     int deleteById(long id);
 

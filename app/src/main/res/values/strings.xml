@@ -103,6 +103,15 @@
     <string name="txtAddress">Customer Address</string>
     <string name="txtEditProfileTitle">Edit Profile</string>
     <string name="msgProfileSaved">Profile saved</string>
+    <string name="txtNoAddress">No address added</string>
+    <string name="msgFullNameRequired">Please enter your full name</string>
+    <string name="dialogLogoutTitle">Log out?</string>
+    <string name="dialogLogoutMessage">You’ll need to log in again to order food.</string>
+    <string name="btnLogoutConfirm">Log out</string>
+    <string name="btnCancel">Cancel</string>
+    <string name="titleRestaurants">Restaurants</string>
+    <string name="fmtFullAddress">%1$s, %2$s, %3$s %4$s</string>
+    <string name="msgAddAddressFirst">Add your street address in Profile → Edit Profile to use delivery.</string>
 
     <!-- Order History -->
     <string name="txtOrderHistoryTitle">Order history</string>
@@ -210,15 +219,6 @@
     <string name="notifOrderRejected">Order rejected</string>
     <string name="notifOrderCompleted">Order picked up</string>
     <string name="fmtNotificationReady">%1$s · Pickup %2$s</string>
-
-    <!-- Profile (more) -->
-    <string name="txtNoAddress">No address added</string>
-    <string name="msgFullNameRequired">Please enter your full name</string>
-    <string name="dialogLogoutTitle">Log out?</string>
-    <string name="dialogLogoutMessage">You’ll need to log in again to order food.</string>
-    <string name="btnLogoutConfirm">Log out</string>
-    <string name="btnCancel">Cancel</string>
-    <string name="titleRestaurants">Restaurants</string>
 
 
     <!-- Restaurant Detail -->

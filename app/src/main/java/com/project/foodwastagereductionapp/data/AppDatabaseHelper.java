@@ -134,7 +134,6 @@ public final class AppDatabaseHelper {
     }
 
     // Customer search: matches restaurant name, city, province or cuisine type. Empty query returns all.
-    /** Customer search: matches restaurant name, city, province or cuisine type. Empty query returns all. */
     public java.util.List<RestaurantListing> searchRestaurants(String query) {
         String like = "%" + (query == null ? "" : query.trim()) + "%";
         java.util.List<RestaurantListing> results = new java.util.ArrayList<>();
@@ -157,9 +156,19 @@ public final class AppDatabaseHelper {
     private static User toUser(UserEntity user) {
         if (user == null) return null;
         return new User(user.id, user.email, user.role, user.fullName, user.city,
-                user.province, user.postalCode, user.emailVerified);
+                user.province, user.postalCode, user.emailVerified,
+                user.address, user.phone);
     }
 
+    // Edit Profile: name, city, province and postal code are required; address and phone are optional.
+    public User updateProfile(long userId, String fullName, String address, String city,
+                              String province, String postalCode, String phone) {
+        int updated = database.userDao().updateProfile(userId, required(fullName),
+                address == null ? "" : address.trim(), required(city), required(province),
+                required(postalCode), phone == null ? "" : phone.trim());
+        if (updated != 1) throw new IllegalArgumentException("Account no longer exists");
+        return getUser(userId);
+    }
     private static String required(String value) {
         if (value == null || value.trim().isEmpty()) throw new IllegalArgumentException("Required field");
         return value.trim();

@@ -16,10 +16,12 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.CartItem;
 import com.project.foodwastagereductionapp.data.CustomerProfile;
 import com.project.foodwastagereductionapp.data.Restaurant;
+import com.project.foodwastagereductionapp.data.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,26 +147,34 @@ public class CheckoutActivity extends AppCompatActivity {
         }
     }
 
-    // Restaurant comes from the database (worker thread); the order is saved on the main thread
+    // Restaurant + customer come from the database (worker thread); the order is saved on the main thread
     private void placeOrder() {
         btnPlaceOrder.setEnabled(false); // avoid double orders
         long restaurantId = CartManager.getRestaurantId();
+        long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
 
         new Thread(() -> {
             Restaurant restaurant = db.getRestaurant(restaurantId);
+            User user = db.getUser(userId);
             runOnUiThread(() -> {
-                if (restaurant == null) {
+                if (restaurant == null || user == null) {
                     Toast.makeText(this, R.string.msgDatabaseError, Toast.LENGTH_SHORT).show();
                     btnPlaceOrder.setEnabled(true);
                     return;
                 }
-                saveOrderAndOpenStatus(restaurant);
+                // Delivery needs a street address
+                if (isDelivery && !user.hasAddress()) {
+                    Toast.makeText(this, R.string.msgAddAddressFirst, Toast.LENGTH_LONG).show();
+                    btnPlaceOrder.setEnabled(true);
+                    return;
+                }
+                saveOrderAndOpenStatus(restaurant, user);
             });
         }).start();
     }
 
-    private void saveOrderAndOpenStatus(Restaurant restaurant) {
+    private void saveOrderAndOpenStatus(Restaurant restaurant, User user) {
         // Cart -> the team's CartItem list
         List<CartItem> items = new ArrayList<>();
         for (CartManager.CartLine line : CartManager.getLines()) {
@@ -174,7 +184,7 @@ public class CheckoutActivity extends AppCompatActivity {
         String time = CartManager.earliestAvailableUntil();
         String pickupTime = time != null ? getString(R.string.fmtTodayAt, time)
                 : getString(R.string.txtNotSet);
-        String deliveryAddress = isDelivery ? CustomerProfile.getAddressLine() : null;
+        String deliveryAddress = isDelivery ? user.getAddressLine() : null;
 
         OrderStore.PlacedOrder placed = OrderStore.place(
                 restaurant, items, pickupTime, isDelivery, deliveryAddress);

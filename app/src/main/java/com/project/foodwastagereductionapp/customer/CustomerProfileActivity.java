@@ -105,7 +105,13 @@ public class CustomerProfileActivity extends AppCompatActivity {
             }
             txtCustomerName.setText(user.fullName);
             txtEmail.setText(user.email);
-            txtAddress.setText(getString(R.string.profileLocation, user.city, user.province, user.postalCode));
+            if (user.hasAddress()) {
+                txtAddress.setText(getString(R.string.fmtFullAddress,
+                        user.address, user.city, user.province, user.postalCode));
+            } else {
+                txtAddress.setText(getString(R.string.profileLocation,
+                        user.city, user.province, user.postalCode));
+            }
         });
     }
 
