@@ -220,6 +220,19 @@
     <string name="btnCancel">Cancel</string>
     <string name="titleRestaurants">Restaurants</string>
 
+
+    <!-- Restaurant Detail -->
+    <string name="titleAvailableFood">Available food</string>
+    <string name="msgNoFoodAvailable">No food available right now</string>
+    <string name="fmtViewCart">View Cart (%1$d)</string>
+    <string name="fmtQuantityLeft">%1$d left</string>
+    <string name="msgSoldOut">Sold out</string>
+    <string name="msgNoMoreStock">No more left for this item</string>
+    <string name="msgCartOtherRestaurant">Your cart has food from another restaurant. Check out or clear it first.</string>
+    <string name="contentDescCart">Cart</string>
+    <string name="contentDescAddToCart">Add to cart</string>
+    <string name="fmtQuantityLeftUntil">%1$d left · Until %2$s</string>
+
     <!-- Customer Browse (Search) -->
     <string name="msgNoRestaurants">No restaurants found</string>
     <string name="fmtItemsLeft">%1$d left · until %2$s</string>
