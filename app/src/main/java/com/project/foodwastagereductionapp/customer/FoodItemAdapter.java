@@ -1,6 +1,7 @@
 package com.project.foodwastagereductionapp.customer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,9 +28,11 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
     }
 
     private final List<FoodItem> rows = new ArrayList<>();
+    private final long restaurantId;
     private final OnAddClick onAdd;
 
-    public FoodItemAdapter(OnAddClick onAdd) {
+    public FoodItemAdapter(long restaurantId, OnAddClick onAdd) {
+        this.restaurantId = restaurantId;
         this.onAdd = onAdd;
     }
 
@@ -85,6 +88,14 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
         }
 
         h.btnAdd.setOnClickListener(v -> onAdd.onAdd(f));
+
+        // Tap the row to open Food Detail
+        h.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), FoodDetailActivity.class);
+            intent.putExtra(FoodDetailActivity.EXTRA_RESTAURANT_ID, restaurantId);
+            intent.putExtra(FoodDetailActivity.EXTRA_FOOD_ID, f.id);
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override

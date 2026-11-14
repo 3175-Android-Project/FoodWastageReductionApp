@@ -233,6 +233,15 @@
     <string name="contentDescAddToCart">Add to cart</string>
     <string name="fmtQuantityLeftUntil">%1$d left · Until %2$s</string>
 
+    <!-- Food Detail -->
+    <string name="titleFoodDetails">Food details</string>
+    <string name="lblAvailableUntil">Available Until</string>
+    <string name="lblAvailability">Availability</string>
+    <string name="fmtTodayAt">Today, %1$s</string>
+    <string name="txtNotSet">Not set</string>
+    <string name="btnAddOneToCart">Add 1 to cart</string>
+    <string name="msgAddedToCart">Added to cart</string>
+
     <!-- Customer Browse (Search) -->
     <string name="msgNoRestaurants">No restaurants found</string>
     <string name="fmtItemsLeft">%1$d left · until %2$s</string>
