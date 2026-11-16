@@ -34,10 +34,7 @@ public class FoodAdapter
         );
     }
 
-    private final List<FoodItemEntity> rows =
-            new ArrayList<>();
-
-    private final OnEditClick onEditClick;
+    private final List<FoodItemEntity> rows = new ArrayList<>();
     private final OnDeleteClick onDeleteClick;
     private final OnAvailabilityChange onAvailabilityChange;
 
