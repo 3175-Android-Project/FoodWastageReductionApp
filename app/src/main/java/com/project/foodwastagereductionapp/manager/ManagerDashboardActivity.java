@@ -40,6 +40,10 @@ public class ManagerDashboardActivity extends AppCompatActivity {
             }
             return false;
         });
+
+        findViewById(R.id.cardManageItems).setOnClickListener(v -> {
+            startActivity(new Intent(this, ManageFoodItemsActivity.class));
+        });
     }
 
     @Override protected void onResume() {
@@ -57,6 +61,8 @@ public class ManagerDashboardActivity extends AppCompatActivity {
             }
             ((TextView) findViewById(R.id.txtRestaurantName)).setText(restaurant.name);
         });
+
+
     }
 
     private void openProfile() {
