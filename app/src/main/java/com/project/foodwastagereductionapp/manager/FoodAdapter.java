@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -17,8 +16,7 @@ import com.project.foodwastagereductionapp.data.FoodItemEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FoodAdapter
-        extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder> {
+public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder> {
     public interface OnDeleteClick {
         void onDelete(FoodItemEntity item);
     }
@@ -76,15 +74,14 @@ public class FoodAdapter
         return rows.size();
     }
 
-    static class FoodViewHolder extends RecyclerView.ViewHolder {
+    public static class FoodViewHolder extends RecyclerView.ViewHolder {
         final TextView txtFoodName;
         final TextView txtFoodPrice;
         final TextView txtQuantity;
         final Switch switchAvailable;
         final Button btnDelete;
 
-        FoodViewHolder(
-                @NonNull View v) { super(v);
+        public FoodViewHolder(@NonNull View v) { super(v);
 
             txtFoodName = v.findViewById(R.id.txtFoodName);
             txtFoodPrice = v.findViewById(R.id.txtFoodPrice);
