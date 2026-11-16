@@ -3,6 +3,7 @@ package com.project.foodwastagereductionapp.manager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -70,10 +71,7 @@ public class FoodAdapter
         h.txtFoodPrice.setText("$" + food.discountedPrice);
         h.txtQuantity.setText("Qty Left: " + food.quantityLeft);
         h.switchAvailable.setChecked(food.available);
-        h.btnEdit.setOnClickListener(v ->
-                onEditClick.onEdit(food));
-        h.btnDelete.setOnClickListener(v ->
-                onDeleteClick.onDelete(food));
+        h.btnDelete.setOnClickListener(v -> onDeleteClick.onDelete(food));
         h.switchAvailable.setOnCheckedChangeListener((buttonView, isChecked) ->
                                 onAvailabilityChange.onAvailabilityChanged(food, isChecked));
     }
@@ -83,24 +81,20 @@ public class FoodAdapter
         return rows.size();
     }
 
-    static class FoodViewHolder
-            extends RecyclerView.ViewHolder {
+    static class FoodViewHolder extends RecyclerView.ViewHolder {
         final TextView txtFoodName;
         final TextView txtFoodPrice;
         final TextView txtQuantity;
         final Switch switchAvailable;
-        final ImageView btnEdit;
-        final ImageView btnDelete;
+        final Button btnDelete;
 
         FoodViewHolder(
-                @NonNull View v) {
-            super(v);
+                @NonNull View v) { super(v);
 
             txtFoodName = v.findViewById(R.id.txtFoodName);
             txtFoodPrice = v.findViewById(R.id.txtFoodPrice);
             txtQuantity = v.findViewById(R.id.txtQuantity);
             switchAvailable = v.findViewById(R.id.switchAvailable);
-            btnEdit = v.findViewById(R.id.btnEdit);
             btnDelete = v.findViewById(R.id.btnDelete);
         }
     }
