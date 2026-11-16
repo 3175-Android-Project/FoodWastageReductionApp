@@ -19,11 +19,6 @@ import java.util.List;
 
 public class FoodAdapter
         extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder> {
-
-    public interface OnEditClick {
-        void onEdit(FoodItemEntity item);
-    }
-
     public interface OnDeleteClick {
         void onDelete(FoodItemEntity item);
     }
