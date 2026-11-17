@@ -5,7 +5,6 @@ import com.project.foodwastagereductionapp.data.CartItem;
 import com.project.foodwastagereductionapp.data.Order;
 import com.project.foodwastagereductionapp.data.OrderStatus;
 import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
 
 
 import android.content.Intent;
@@ -22,6 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.auth.AuthTasks;
+import com.project.foodwastagereductionapp.auth.SessionManager;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +34,15 @@ import java.util.List;
 public class CustomerOrderActivity extends AppCompatActivity {
 
     private final OrderAdapter adapter = new OrderAdapter();
-    // Keeps the list up to date when an order's status changes while this screen is open
-    private final OrderStore.Listener orderListener = this::refreshOrders;
+    private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+    // Re-reads the orders every few seconds so status changes show up while the screen is open
+    private final Runnable poll = new Runnable() {
+        @Override
+        public void run() {
+            refreshOrders();
+            handler.postDelayed(this, OrderStatusSimulator.POLL_MS);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,21 +80,29 @@ public class CustomerOrderActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        OrderStore.addListener(orderListener);
-        refreshOrders(); // also picks up changes made while another screen was open
+        handler.post(poll); // also picks up changes made while another screen was open
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        OrderStore.removeListener(orderListener);
+        handler.removeCallbacks(poll);
     }
 
     /** Splits the orders into "Current orders" and "Past orders" sections. */
     private void refreshOrders() {
+        long customerId = new SessionManager(this).getUserId();
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        AuthTasks.run(this, null, () -> {
+            OrderStatusSimulator.catchUp(db, customerId); // demo restaurant (see that class)
+            return db.getOrders(customerId);
+        }, this::showOrders);
+    }
+
+    private void showOrders(List<Order> orders) {
         List<Order> current = new ArrayList<>();
         List<Order> past = new ArrayList<>();
-        for (Order o : OrderStore.getOrders()) { // newest first
+        for (Order o : orders) { // newest first
             if (OrderStatus.isActive(o.status)) current.add(o);
             else past.add(o);
         }

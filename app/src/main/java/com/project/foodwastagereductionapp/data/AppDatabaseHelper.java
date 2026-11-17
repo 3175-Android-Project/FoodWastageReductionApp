@@ -4,6 +4,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Patterns;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -147,6 +151,158 @@ public final class AppDatabaseHelper {
 
     public int countRestaurants() {
         return database.restaurantDao().count();
+    }
+
+
+    // ---------------------------------------------------------------- Customer orders
+
+    /**
+     * Saves a new Pending order with its food lines. Restaurant details and item names/prices are
+     * copied so the order history never changes later. The total includes tax.
+     *
+     * @return the new order id
+     */
+    public long placeOrder(long customerId, long restaurantId, List<OrderLine> lines,
+                           String pickupTime, boolean isDelivery, String deliveryAddress) {
+        return placeOrder(customerId, restaurantId, lines, pickupTime, isDelivery,
+                deliveryAddress, System.currentTimeMillis());
+    }
+
+    public long placeOrder(long customerId, long restaurantId, List<OrderLine> lines,
+                           String pickupTime, boolean isDelivery, String deliveryAddress,
+                           long placedAt) {
+        if (lines == null || lines.isEmpty()) throw new IllegalArgumentException("Order is empty");
+        final long[] orderId = new long[1];
+        database.runInTransaction(() -> {
+            User customer = getUser(customerId);
+            if (customer == null || !User.CUSTOMER.equals(customer.role)) {
+                throw new IllegalArgumentException("A customer account is required");
+            }
+            RestaurantEntity restaurant = database.restaurantDao().findById(restaurantId);
+            if (restaurant == null) throw new IllegalArgumentException("Restaurant no longer exists");
+            if (isDelivery && (deliveryAddress == null || deliveryAddress.trim().isEmpty())) {
+                throw new IllegalArgumentException("Delivery address is required");
+            }
+
+            int itemCount = 0;
+            double subtotal = 0;
+            for (OrderLine line : lines) {
+                if (line.quantity < 1) throw new IllegalArgumentException("Invalid quantity");
+                itemCount += line.quantity;
+                subtotal += line.getLineTotal();
+            }
+
+            OrderEntity order = new OrderEntity();
+            order.customerId = customerId;
+            order.restaurantId = restaurant.id;
+            order.restaurantName = restaurant.name;
+            order.restaurantAddress = restaurant.city + ", " + restaurant.province;
+            order.restaurantImageUri = restaurant.imageUri;
+            order.placedAt = placedAt;
+            order.itemCount = itemCount;
+            order.total = OrderPricing.totalWithTax(subtotal);
+            order.status = OrderStatus.PENDING;
+            order.pickupTime = pickupTime;
+            order.isDelivery = isDelivery;
+            order.deliveryAddress = isDelivery ? deliveryAddress.trim() : null;
+            long id = database.orderDao().insert(order);
+
+            List<OrderItemEntity> items = new ArrayList<>();
+            for (OrderLine line : lines) {
+                OrderItemEntity item = new OrderItemEntity();
+                item.orderId = id;
+                item.foodItemId = line.foodItemId;
+                item.name = line.name;
+                item.unitPrice = line.unitPrice;
+                item.quantity = line.quantity;
+                items.add(item);
+            }
+            database.orderDao().insertItems(items);
+            orderId[0] = id;
+        });
+        return orderId[0];
+    }
+
+    /** All of this customer's orders, newest first. */
+    public List<Order> getOrders(long customerId) {
+        List<Order> result = new ArrayList<>();
+        for (OrderEntity e : database.orderDao().findByCustomer(customerId)) result.add(toOrder(e));
+        return result;
+    }
+
+    /** Null if the order does not exist or belongs to someone else. */
+    public OrderDetails getOrderDetails(long customerId, long orderId) {
+        OrderEntity e = database.orderDao().findForCustomer(customerId, orderId);
+        if (e == null) return null;
+        List<OrderLine> lines = new ArrayList<>();
+        for (OrderItemEntity i : database.orderDao().itemsFor(orderId)) {
+            lines.add(new OrderLine(i.foodItemId, i.name, i.unitPrice, i.quantity));
+        }
+        User customer = getUser(customerId);
+        return new OrderDetails(toOrder(e), lines, e.pickupTime, e.restaurantAddress,
+                e.isDelivery, e.deliveryAddress,
+                customer == null ? "" : customer.fullName,
+                customer == null ? "" : customer.email,
+                customer == null || customer.phone == null ? "" : customer.phone);
+    }
+
+    /** Customers can only cancel their own order while it is still Pending. */
+    public boolean cancelOrder(long customerId, long orderId) {
+        final boolean[] cancelled = new boolean[1];
+        database.runInTransaction(() -> {
+            OrderEntity e = database.orderDao().findForCustomer(customerId, orderId);
+            if (e == null || !OrderStatus.canCancel(e.status)) return;
+            cancelled[0] = database.orderDao()
+                    .updateStatus(orderId, OrderStatus.CANCELLED, e.status) == 1;
+        });
+        return cancelled[0];
+    }
+
+    /**
+     * Moves an order to its next status (restaurant side or the demo simulator) and adds a
+     * notification for the customer. Moves that skip steps or leave a finished order are ignored.
+     *
+     * @return true if the status changed
+     */
+    public boolean updateOrderStatus(long orderId, String newStatus) {
+        return updateOrderStatus(orderId, newStatus, System.currentTimeMillis());
+    }
+
+    public boolean updateOrderStatus(long orderId, String newStatus, long atMillis) {
+        final boolean[] changed = new boolean[1];
+        database.runInTransaction(() -> {
+            OrderEntity e = database.orderDao().findById(orderId);
+            if (e == null || !OrderStatus.canMoveTo(e.status, newStatus)) return;
+            if (database.orderDao().updateStatus(orderId, newStatus, e.status) != 1) return;
+            if (OrderStatus.shouldNotify(newStatus)) {
+                NotificationEntity n = new NotificationEntity();
+                n.customerId = e.customerId;
+                n.orderId = orderId;
+                n.status = newStatus;
+                n.createdAt = atMillis;
+                database.notificationDao().insert(n);
+            }
+            changed[0] = true;
+        });
+        return changed[0];
+    }
+
+    /** Order-status updates and pickup reminders, newest first. */
+    public List<AppNotification> getNotifications(long customerId) {
+        List<AppNotification> result = new ArrayList<>();
+        for (NotificationRow r : database.notificationDao().findByCustomer(customerId)) {
+            result.add(new AppNotification(r.id, r.status, r.restaurantName, r.orderId,
+                    r.pickupTime, r.timeMillis, r.orderStatus));
+        }
+        return result;
+    }
+
+    private static Order toOrder(OrderEntity e) {
+        Date placed = new Date(e.placedAt);
+        return new Order(e.id, e.restaurantName,
+                new SimpleDateFormat("MMM d, yyyy", Locale.US).format(placed),
+                new SimpleDateFormat("h:mm a", Locale.US).format(placed),
+                e.placedAt, e.itemCount, e.total, e.status, e.restaurantImageUri);
     }
 
     public void close() {
