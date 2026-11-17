@@ -5,7 +5,6 @@ import com.project.foodwastagereductionapp.data.CartItem;
 import com.project.foodwastagereductionapp.data.Order;
 import com.project.foodwastagereductionapp.data.OrderStatus;
 import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
 
 
 import android.content.Intent;
@@ -48,9 +47,7 @@ public class CustomerProfileActivity extends AppCompatActivity {
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
         txtHeaderTitle.setText(R.string.txtProfile);
 
-        // Back button → Home
-        View btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> goToHome());
+        findViewById(R.id.btnBack).setVisibility(View.GONE);
 
         txtCustomerName = findViewById(R.id.txtCustomerName);
         txtEmail = findViewById(R.id.txtEmail);

@@ -273,6 +273,7 @@
 
     <!-- Customer Browse (Search) -->
     <string name="msgNoRestaurants">No restaurants found</string>
+    <string name="msgNoOrders">No orders yet</string>
     <string name="fmtItemsLeft">%1$d left · until %2$s</string>
 
     <string name="dialogClose">Close dialog</string>

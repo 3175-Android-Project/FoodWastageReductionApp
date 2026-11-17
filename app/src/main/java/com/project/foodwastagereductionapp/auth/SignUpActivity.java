@@ -18,8 +18,9 @@ import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.PasswordHasher;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
-public class SignUpActivity extends AppCompatActivity {
+public class SignUpActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

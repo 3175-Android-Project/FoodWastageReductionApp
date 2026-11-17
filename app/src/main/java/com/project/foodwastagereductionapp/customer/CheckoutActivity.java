@@ -16,17 +16,18 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
-import com.project.foodwastagereductionapp.data.CartItem;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
-import com.project.foodwastagereductionapp.data.Restaurant;
+import com.project.foodwastagereductionapp.data.OrderLine;
+import com.project.foodwastagereductionapp.data.OrderPricing;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CheckoutActivity extends AppCompatActivity {
+public class CheckoutActivity extends BaseActivity {
 
     private CartLineAdapter adapter;
     private boolean isDelivery = false;
@@ -100,13 +101,13 @@ public class CheckoutActivity extends AppCompatActivity {
         int count = CartManager.count();
         txtOrderItemsTitle.setText(getString(R.string.fmtOrderItems, count));
 
-        // Same tax rule as OrderStore, so Checkout and the saved order always match
+        // Same tax rule as the saved order (OrderPricing), so Checkout and the saved order always match
         double subtotal = CartManager.subtotal();
-        double tax = OrderStore.taxOf(subtotal);
+        double tax = OrderPricing.taxOf(subtotal);
         txtItemsLabel.setText(getString(R.string.fmtItemsCount, count));
         txtItemsAmount.setText(PriceFormatter.format(subtotal));
         txtTaxAmount.setText(PriceFormatter.format(tax));
-        txtTotalAmount.setText(PriceFormatter.format(subtotal + tax));
+        txtTotalAmount.setText(PriceFormatter.format(OrderPricing.totalWithTax(subtotal)));
 
         updateTimeBox();
     }
@@ -148,47 +149,39 @@ public class CheckoutActivity extends AppCompatActivity {
         }
     }
 
-    // Restaurant + customer come from the database (worker thread); the order is saved on the main thread
+    // Everything database-related runs on the worker thread; the screen changes on the main thread
     private void placeOrder() {
-        btnPlaceOrder.setEnabled(false); // avoid double orders
         long restaurantId = CartManager.getRestaurantId();
         long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
 
-        new Thread(() -> {
-            Restaurant restaurant = db.getRestaurant(restaurantId);
-            User user = db.getUser(userId);
-            runOnUiThread(() -> {
-                if (restaurant == null || user == null) {
-                    Toast.makeText(this, R.string.msgDatabaseError, Toast.LENGTH_SHORT).show();
-                    btnPlaceOrder.setEnabled(true);
-                    return;
-                }
-                // Delivery needs a street address
-                if (isDelivery && !user.hasAddress()) {
-                    Toast.makeText(this, R.string.msgAddAddressFirst, Toast.LENGTH_LONG).show();
-                    btnPlaceOrder.setEnabled(true);
-                    return;
-                }
-                saveOrderAndOpenStatus(restaurant, user);
-            });
-        }).start();
-    }
-
-    private void saveOrderAndOpenStatus(Restaurant restaurant, User user) {
-        // Cart -> the team's CartItem list
-        List<CartItem> items = new ArrayList<>();
+        // Cart -> order lines (name and price are copied into the order)
+        List<OrderLine> lines = new ArrayList<>();
         for (CartManager.CartLine line : CartManager.getLines()) {
-            items.add(new CartItem(line.item, line.quantity));
+            lines.add(new OrderLine(line.item.id, line.item.name, line.item.price, line.quantity));
         }
-
         String time = CartManager.earliestAvailableUntil();
         String pickupTime = time != null ? getString(R.string.fmtTodayAt, time)
                 : getString(R.string.txtNotSet);
-        String deliveryAddress = isDelivery ? user.getAddressLine() : null;
+        boolean delivery = isDelivery;
 
-        OrderStore.PlacedOrder placed = OrderStore.place(
-                restaurant, items, pickupTime, isDelivery, deliveryAddress);
+        AuthTasks.run(this, btnPlaceOrder, () -> {
+            User user = db.getUser(userId);
+            if (user == null) throw new IllegalStateException("Account no longer exists");
+            // Delivery needs a street address
+            if (delivery && !user.hasAddress()) return -1L;
+            return db.placeOrder(userId, restaurantId, lines, pickupTime, delivery,
+                    delivery ? user.getAddressLine() : null);
+        }, orderId -> {
+            if (orderId < 0) {
+                Toast.makeText(this, R.string.msgAddAddressFirst, Toast.LENGTH_LONG).show();
+                return;
+            }
+            openStatus(orderId);
+        });
+    }
+
+    private void openStatus(long orderId) {
         CartManager.clear();
         Toast.makeText(this, R.string.msgOrderPlaced, Toast.LENGTH_SHORT).show();
 
@@ -196,7 +189,7 @@ public class CheckoutActivity extends AppCompatActivity {
         Intent orders = new Intent(this, CustomerOrderActivity.class);
         orders.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         Intent status = new Intent(this, CustomerOrderStatusActivity.class);
-        status.putExtra(CustomerOrderStatusActivity.EXTRA_ORDER_NUMBER, placed.order.orderNumber);
+        status.putExtra(CustomerOrderStatusActivity.EXTRA_ORDER_ID, orderId);
         startActivities(new Intent[]{orders, status});
         finish();
     }

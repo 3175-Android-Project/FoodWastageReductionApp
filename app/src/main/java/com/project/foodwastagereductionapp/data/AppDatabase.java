@@ -10,13 +10,16 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(
-        entities = {UserEntity.class, RestaurantEntity.class, FoodItemEntity.class},
+        entities = {UserEntity.class, RestaurantEntity.class, OrderEntity.class,
+                OrderItemEntity.class, NotificationEntity.class, FoodItemEntity.class},
         version = 4,
         exportSchema = false
 )
 abstract class AppDatabase extends RoomDatabase {
     abstract UserDao userDao();
     abstract RestaurantDao restaurantDao();
+    abstract OrderDao orderDao();
+    abstract NotificationDao notificationDao();
     abstract FoodItemDao foodItemDao();
 
     /** Version 3: users get address + phone (Edit Profile). Keeps all existing accounts and restaurants. */
@@ -28,24 +31,44 @@ abstract class AppDatabase extends RoomDatabase {
         }
     };
 
-    /** Version 4:  managers get to manage food items. */
+    /** Version 4: customer orders, their food lines and notifications. Keeps all existing data. */
     static final Migration MIGRATION_3_4 = new Migration(3, 4) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase db) {
-
+            db.execSQL("CREATE TABLE IF NOT EXISTS `orders` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                    + "`customer_id` INTEGER NOT NULL, `restaurant_id` INTEGER, `restaurant_name` TEXT, "
+                    + "`restaurant_address` TEXT, `restaurant_image_uri` TEXT, `placed_at` INTEGER NOT NULL, "
+                    + "`item_count` INTEGER NOT NULL, `total` REAL NOT NULL, `status` TEXT, `pickup_time` TEXT, "
+                    + "`is_delivery` INTEGER NOT NULL, `delivery_address` TEXT, "
+                    + "FOREIGN KEY(`customer_id`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, "
+                    + "FOREIGN KEY(`restaurant_id`) REFERENCES `restaurants`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_orders_customer_id` ON `orders` (`customer_id`)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_orders_restaurant_id` ON `orders` (`restaurant_id`)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS `order_items` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                    + "`order_id` INTEGER NOT NULL, `food_item_id` INTEGER NOT NULL, `name` TEXT, "
+                    + "`unit_price` REAL NOT NULL, `quantity` INTEGER NOT NULL, "
+                    + "FOREIGN KEY(`order_id`) REFERENCES `orders`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_order_items_order_id` ON `order_items` (`order_id`)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS `notifications` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                    + "`customer_id` INTEGER NOT NULL, `order_id` INTEGER NOT NULL, `status` TEXT, "
+                    + "`created_at` INTEGER NOT NULL, "
+                    + "FOREIGN KEY(`customer_id`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, "
+                    + "FOREIGN KEY(`order_id`) REFERENCES `orders`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_notifications_customer_id` ON `notifications` (`customer_id`)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_notifications_order_id` ON `notifications` (`order_id`)");
             db.execSQL(
-                    "CREATE TABLE food_items (" +
-                            "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-                            "restaurantId INTEGER NOT NULL, " +
-                            "name TEXT, " +
-                            "description TEXT, " +
-                            "category TEXT, " +
-                            "originalPrice REAL NOT NULL, " +
-                            "discountedPrice REAL NOT NULL, " +
-                            "quantityLeft INTEGER NOT NULL, " +
-                            "availableUntil TEXT, " +
-                            "available INTEGER NOT NULL, " +
-                            "imageUri TEXT)"
+                    "CREATE TABLE IF NOT EXISTS `food_items` (" +
+                            "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "`restaurantId` INTEGER NOT NULL, " +
+                            "`name` TEXT, " +
+                            "`description` TEXT, " +
+                            "`category` TEXT, " +
+                            "`originalPrice` REAL NOT NULL, " +
+                            "`discountedPrice` REAL NOT NULL, " +
+                            "`quantityLeft` INTEGER NOT NULL, " +
+                            "`availableUntil` TEXT, " +
+                            "`available` INTEGER NOT NULL, " +
+                            "`imageUri` TEXT)"
             );
         }
     };

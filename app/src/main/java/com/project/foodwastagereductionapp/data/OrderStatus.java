@@ -56,6 +56,29 @@ public final class OrderStatus {
         return isNegative(status) ? R.color.pill_red_bg : R.color.pill_green_bg;
     }
 
+    /** Allowed moves: Pending -> Accepted -> Preparing -> Ready -> Completed; Rejected/Cancelled only from Pending. */
+    public static boolean canMoveTo(String from, String to) {
+        if (from == null || to == null) return false;
+        switch (from) {
+            case PENDING:
+                return ACCEPTED.equals(to) || REJECTED.equals(to) || CANCELLED.equals(to);
+            case ACCEPTED:
+                return PREPARING.equals(to);
+            case PREPARING:
+                return READY.equals(to);
+            case READY:
+                return COMPLETED.equals(to);
+            default: // Completed, Rejected, Cancelled are final
+                return false;
+        }
+    }
+
+    /** The customer cancelling their own order does not need a notification. */
+    public static boolean shouldNotify(String status) {
+        return ACCEPTED.equals(status) || PREPARING.equals(status) || READY.equals(status)
+                || REJECTED.equals(status) || COMPLETED.equals(status);
+    }
+
     private static int indexInFlow(String status) {
         for (int i = 0; i < STEPS.length; i++) {
             if (STEPS[i].equals(status)) return i;

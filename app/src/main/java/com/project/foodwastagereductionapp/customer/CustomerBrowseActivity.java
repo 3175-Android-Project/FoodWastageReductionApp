@@ -21,13 +21,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.RestaurantListing;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
 import java.util.List;
 
-public class CustomerBrowseActivity extends AppCompatActivity {
+public class CustomerBrowseActivity extends BaseActivity {
 
     private RestaurantAdapter adapter;
     private TextView txtEmpty;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
+    private RecyclerView recyclerRestaurants;
+    private static List<RestaurantListing> cachedRestaurants = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +49,7 @@ public class CustomerBrowseActivity extends AppCompatActivity {
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
         txtHeaderTitle.setText(R.string.titleRestaurants);
 
-        ImageView btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> goTo(CustomerHomeActivity.class));
+        findViewById(R.id.btnBack).setVisibility(View.GONE);
 
         // System back (gesture/button) -> Home, not exit
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -78,9 +81,10 @@ public class CustomerBrowseActivity extends AppCompatActivity {
 
         // Search results list (card tap is handled inside RestaurantAdapter)
         txtEmpty = findViewById(R.id.txtEmpty);
-        RecyclerView recycler = findViewById(R.id.recyclerRestaurants);
+        shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
+        recyclerRestaurants = findViewById(R.id.recyclerRestaurants);
         adapter = new RestaurantAdapter();
-        recycler.setAdapter(adapter);
+        recyclerRestaurants.setAdapter(adapter);
 
         // Search box: filter as the user types
         EditText editSearch = findViewById(R.id.editSearch);
@@ -96,13 +100,36 @@ public class CustomerBrowseActivity extends AppCompatActivity {
     }
 
     private void loadRestaurants(String query) {
+        boolean isColdLoad = (query.isEmpty() && cachedRestaurants == null);
+        if (!query.isEmpty() || cachedRestaurants == null) {
+            shimmerViewContainer.setVisibility(View.VISIBLE);
+            shimmerViewContainer.startShimmer();
+            recyclerRestaurants.setVisibility(View.GONE);
+            txtEmpty.setVisibility(View.GONE);
+        } else {
+            shimmerViewContainer.stopShimmer();
+            shimmerViewContainer.setVisibility(View.GONE);
+            recyclerRestaurants.setVisibility(View.VISIBLE);
+            adapter.setRows(cachedRestaurants);
+            txtEmpty.setVisibility(cachedRestaurants.isEmpty() ? View.VISIBLE : View.GONE);
+        }
+
+        long startTime = System.currentTimeMillis();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         new Thread(() -> {
             List<RestaurantListing> results = db.searchRestaurants(query);
-            runOnUiThread(() -> {
+            if (query.isEmpty()) {
+                cachedRestaurants = results;
+            }
+            long elapsed = System.currentTimeMillis() - startTime;
+            long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                shimmerViewContainer.stopShimmer();
+                shimmerViewContainer.setVisibility(View.GONE);
+                recyclerRestaurants.setVisibility(View.VISIBLE);
                 adapter.setRows(results);
                 txtEmpty.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
-            });
+            }, delay);
         }).start();
     }
 

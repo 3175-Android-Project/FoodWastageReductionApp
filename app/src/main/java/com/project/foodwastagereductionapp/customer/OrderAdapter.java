@@ -1,14 +1,7 @@
 package com.project.foodwastagereductionapp.customer;
 
-import com.project.foodwastagereductionapp.data.FoodItem;
-import com.project.foodwastagereductionapp.data.CartItem;
-import com.project.foodwastagereductionapp.data.Order;
-import com.project.foodwastagereductionapp.data.OrderStatus;
-import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
-
-
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +13,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.data.Order;
+import com.project.foodwastagereductionapp.data.OrderStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +63,12 @@ public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private void bindOrder(OrderViewHolder h, Order o) {
         Context context = h.itemView.getContext();
 
-        h.imgRestaurant.setImageResource(o.imageRes);
+        // Restaurant photo (same fallback as the restaurant list)
+        if (o.imageUri != null && !o.imageUri.isEmpty()) {
+            h.imgRestaurant.setImageURI(Uri.parse(o.imageUri));
+        } else {
+            h.imgRestaurant.setImageResource(R.drawable.icon_store);
+        }
         h.txtRestaurantName.setText(o.restaurantName);
         h.txtOrderNumber.setText(context.getString(R.string.fmtOrderNumber, o.orderNumber));
 
@@ -82,7 +82,7 @@ public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         h.txtStatus.setTextColor(ContextCompat.getColor(context, OrderStatus.textColor(o.status)));
 
         // Current orders open the live status screen, finished orders open the detail screen
-        h.itemView.setOnClickListener(v -> OrderNavigator.open(v.getContext(), o.orderNumber));
+        h.itemView.setOnClickListener(v -> OrderNavigator.open(v.getContext(), o.id, o.status));
     }
 
     @Override

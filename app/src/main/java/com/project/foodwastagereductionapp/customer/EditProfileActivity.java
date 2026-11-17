@@ -18,9 +18,10 @@ import com.project.foodwastagereductionapp.auth.AuthNavigator;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
 /** Edits the logged-in customer's account (saved in the database). */
-public class EditProfileActivity extends AppCompatActivity {
+public class EditProfileActivity extends BaseActivity {
 
     private EditText inputFullName, etAddress, etCity, etProvince, etPostalCode, etPhone;
     private Button btnSaveChanges;

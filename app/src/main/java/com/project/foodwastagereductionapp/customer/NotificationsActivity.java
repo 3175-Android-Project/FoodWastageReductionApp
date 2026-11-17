@@ -5,7 +5,6 @@ import com.project.foodwastagereductionapp.data.CartItem;
 import com.project.foodwastagereductionapp.data.Order;
 import com.project.foodwastagereductionapp.data.OrderStatus;
 import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
 
 
 import android.os.Bundle;
@@ -20,6 +19,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.auth.AuthTasks;
+import com.project.foodwastagereductionapp.auth.SessionManager;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 
 import java.util.List;
 
@@ -55,8 +57,14 @@ public class NotificationsActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Reload every time so updates that arrived while away (e.g. on the status screen) show up
-        List<AppNotification> notifications = NotificationStore.getAll();
-        rvNotifications.setAdapter(new NotificationAdapter(notifications));
-        txtEmpty.setVisibility(notifications.isEmpty() ? View.VISIBLE : View.GONE);
+        long customerId = new SessionManager(this).getUserId();
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        AuthTasks.run(this, null, () -> {
+            OrderStatusSimulator.catchUp(db, customerId); // demo restaurant (see that class)
+            return db.getNotifications(customerId);
+        }, notifications -> {
+            rvNotifications.setAdapter(new NotificationAdapter(notifications));
+            txtEmpty.setVisibility(notifications.isEmpty() ? View.VISIBLE : View.GONE);
+        });
     }
 }
