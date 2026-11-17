@@ -1,12 +1,5 @@
 package com.project.foodwastagereductionapp.customer;
 
-import com.project.foodwastagereductionapp.data.FoodItem;
-import com.project.foodwastagereductionapp.data.CartItem;
-import com.project.foodwastagereductionapp.data.Order;
-import com.project.foodwastagereductionapp.data.OrderStatus;
-import com.project.foodwastagereductionapp.data.AppNotification;
-
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -24,6 +17,8 @@ import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.Order;
+import com.project.foodwastagereductionapp.data.OrderStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +32,7 @@ public class CustomerOrderActivity extends AppCompatActivity {
     private TextView txtEmpty;
     private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
     private RecyclerView rvOrders;
+    private static List<Order> cachedOrders = null;
     private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
     // Re-reads the orders every few seconds so status changes show up while the screen is open
     private final Runnable poll = new Runnable() {
@@ -68,6 +64,18 @@ public class CustomerOrderActivity extends AppCompatActivity {
         txtEmpty = findViewById(R.id.txtEmpty);
         shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
 
+        if (cachedOrders != null) {
+            shimmerViewContainer.stopShimmer();
+            shimmerViewContainer.setVisibility(View.GONE);
+            rvOrders.setVisibility(View.VISIBLE);
+            showOrders(cachedOrders);
+        } else {
+            shimmerViewContainer.setVisibility(View.VISIBLE);
+            shimmerViewContainer.startShimmer();
+            rvOrders.setVisibility(View.GONE);
+            txtEmpty.setVisibility(View.GONE);
+        }
+
         // Bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setSelectedItemId(R.id.nav_orders);
@@ -96,18 +104,16 @@ public class CustomerOrderActivity extends AppCompatActivity {
     /** Splits the orders into "Current orders" and "Past orders" sections. */
     private void refreshOrders() {
         long startTime = System.currentTimeMillis();
-        shimmerViewContainer.setVisibility(View.VISIBLE);
-        shimmerViewContainer.startShimmer();
-        rvOrders.setVisibility(View.GONE);
-        txtEmpty.setVisibility(View.GONE);
+        boolean isColdLoad = (cachedOrders == null);
         long customerId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
             OrderStatusSimulator.catchUp(db, customerId); // demo restaurant (see that class)
             return db.getOrders(customerId);
         }, orders -> {
+            cachedOrders = orders;
             long elapsed = System.currentTimeMillis() - startTime;
-            long delay = Math.max(0, 350 - elapsed);
+            long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);

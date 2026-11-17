@@ -21,15 +21,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.RestaurantListing;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
 import java.util.List;
 
-public class CustomerBrowseActivity extends AppCompatActivity {
+public class CustomerBrowseActivity extends BaseActivity {
 
     private RestaurantAdapter adapter;
     private TextView txtEmpty;
     private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
     private RecyclerView recyclerRestaurants;
+    private static List<RestaurantListing> cachedRestaurants = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,16 +100,29 @@ public class CustomerBrowseActivity extends AppCompatActivity {
     }
 
     private void loadRestaurants(String query) {
+        boolean isColdLoad = (query.isEmpty() && cachedRestaurants == null);
+        if (!query.isEmpty() || cachedRestaurants == null) {
+            shimmerViewContainer.setVisibility(View.VISIBLE);
+            shimmerViewContainer.startShimmer();
+            recyclerRestaurants.setVisibility(View.GONE);
+            txtEmpty.setVisibility(View.GONE);
+        } else {
+            shimmerViewContainer.stopShimmer();
+            shimmerViewContainer.setVisibility(View.GONE);
+            recyclerRestaurants.setVisibility(View.VISIBLE);
+            adapter.setRows(cachedRestaurants);
+            txtEmpty.setVisibility(cachedRestaurants.isEmpty() ? View.VISIBLE : View.GONE);
+        }
+
         long startTime = System.currentTimeMillis();
-        shimmerViewContainer.setVisibility(View.VISIBLE);
-        shimmerViewContainer.startShimmer();
-        recyclerRestaurants.setVisibility(View.GONE);
-        txtEmpty.setVisibility(View.GONE);
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         new Thread(() -> {
             List<RestaurantListing> results = db.searchRestaurants(query);
+            if (query.isEmpty()) {
+                cachedRestaurants = results;
+            }
             long elapsed = System.currentTimeMillis() - startTime;
-            long delay = Math.max(0, 350 - elapsed);
+            long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);

@@ -40,6 +40,13 @@ public class CustomerHomeActivity extends AppCompatActivity {
     private LinearLayout llNearby, llEndingSoon;
     private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
     private View scrollContent;
+    private static List<RestaurantListing> cachedHomeRestaurants = null;
+    private static User cachedHomeUser = null;
+
+    public static void invalidateCache() {
+        cachedHomeRestaurants = null;
+        cachedHomeUser = null;
+    }
 
     // A food item plus the restaurant it belongs to (for the Ending soon list).
     private static final class EndingSoonItem {
@@ -113,17 +120,28 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
     // Database work on a worker thread (AppDatabaseHelper rule), UI updates on the main thread
     private void loadHome() {
+        boolean isColdLoad = (cachedHomeRestaurants == null || cachedHomeUser == null);
+        if (isColdLoad) {
+            shimmerViewContainer.setVisibility(View.VISIBLE);
+            shimmerViewContainer.startShimmer();
+            scrollContent.setVisibility(View.GONE);
+        } else {
+            shimmerViewContainer.stopShimmer();
+            shimmerViewContainer.setVisibility(View.GONE);
+            scrollContent.setVisibility(View.VISIBLE);
+            bindHome(cachedHomeUser, cachedHomeRestaurants);
+        }
+
         long startTime = System.currentTimeMillis();
-        shimmerViewContainer.setVisibility(View.VISIBLE);
-        shimmerViewContainer.startShimmer();
-        scrollContent.setVisibility(View.GONE);
         long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         new Thread(() -> {
             User user = db.getUser(userId);
             List<RestaurantListing> all = db.searchRestaurants("");
+            cachedHomeUser = user;
+            cachedHomeRestaurants = all;
             long elapsed = System.currentTimeMillis() - startTime;
-            long delay = Math.max(0, 350 - elapsed);
+            long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
