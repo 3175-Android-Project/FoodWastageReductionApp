@@ -45,8 +45,7 @@ public class CustomerBrowseActivity extends AppCompatActivity {
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
         txtHeaderTitle.setText(R.string.titleRestaurants);
 
-        ImageView btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> goTo(CustomerHomeActivity.class));
+        findViewById(R.id.btnBack).setVisibility(View.GONE);
 
         // System back (gesture/button) -> Home, not exit
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {

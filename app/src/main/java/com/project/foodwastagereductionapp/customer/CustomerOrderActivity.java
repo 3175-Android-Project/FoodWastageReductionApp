@@ -58,8 +58,7 @@ public class CustomerOrderActivity extends AppCompatActivity {
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
         txtHeaderTitle.setText(R.string.txtOrdersTitle);
 
-        View btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> goTo(CustomerHomeActivity.class));
+        findViewById(R.id.btnBack).setVisibility(View.GONE);
 
         RecyclerView rvOrders = findViewById(R.id.rvOrders);
         rvOrders.setAdapter(adapter);

@@ -34,6 +34,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_order" />
 
+    <!-- Empty state (shown when no orders) -->
+    <TextView
+        android:id="@+id/txtEmpty"
+        style="@style/Text.BodyXs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/msgNoOrders"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/rvOrders"
+        app:layout_constraintBottom_toBottomOf="@id/rvOrders"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <View
+        android:id="@+id/navDivider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/background_secondary"
+        app:layout_constraintBottom_toTopOf="@id/bottomNav"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="0dp"
