@@ -84,14 +84,26 @@ abstract class AppDatabase extends RoomDatabase {
                 if (result == null || !result.isOpen()
                         || !databaseName.equals(result.getOpenHelper().getDatabaseName())) {
                     if (result != null) result.close();
-                    result = Room.databaseBuilder(
-                                    context.getApplicationContext(),
-                                    AppDatabase.class,
-                                    databaseName
-                            )
-                            .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
-                            .fallbackToDestructiveMigration()
-                            .build();
+                    try {
+                        result = Room.databaseBuilder(
+                                        context.getApplicationContext(),
+                                        AppDatabase.class,
+                                        databaseName
+                                )
+                                .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                                .fallbackToDestructiveMigration()
+                                .build();
+                        result.getOpenHelper().getWritableDatabase();
+                    } catch (Exception e) {
+                        context.deleteDatabase(databaseName);
+                        result = Room.databaseBuilder(
+                                        context.getApplicationContext(),
+                                        AppDatabase.class,
+                                        databaseName
+                                )
+                                .fallbackToDestructiveMigration()
+                                .build();
+                    }
                     instance = result;
                 }
             }
