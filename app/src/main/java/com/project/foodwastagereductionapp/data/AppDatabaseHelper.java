@@ -335,4 +335,52 @@ public final class AppDatabaseHelper {
             super("Email already registered");
         }
     }
+
+    // Generating food item object from FoodItemEntity
+    public long createFoodItem(
+            long restaurantId,
+            String name,
+            String description,
+            String category,
+            double originalPrice,
+            double discountedPrice,
+            int quantityLeft,
+            String availableUntil,
+            boolean available,
+            String imageUri){
+
+        FoodItemEntity item = new FoodItemEntity();
+
+        item.restaurantId = restaurantId;
+        item.name = name;
+        item.description = description;
+        item.category = category;
+        item.originalPrice = originalPrice;
+        item.discountedPrice = discountedPrice;
+        item.quantityLeft = quantityLeft;
+        item.availableUntil = availableUntil;
+        item.available = available;
+        item.imageUri = imageUri;
+
+        return database.foodItemDao().insert(item);
+    }
+
+    // Getting restaurant food items
+    public java.util.List<FoodItemEntity> getFoodItemsForRestaurant(long restaurantId){
+        return database.foodItemDao().getRestaurantFoodItems(restaurantId);
+    }
+
+    //Deleting food items
+    public void deleteFoodItem(long foodItemId){
+        FoodItemEntity item = database.foodItemDao().getFoodItem(foodItemId);
+
+        if(item != null){
+            database.foodItemDao().delete(item);
+        }
+    }
+
+    //Updating foodItems
+    public void updateFoodItem(FoodItemEntity item){
+        database.foodItemDao().update(item);
+    }
 }

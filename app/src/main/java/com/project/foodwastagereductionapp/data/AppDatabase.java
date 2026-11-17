@@ -11,7 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(
         entities = {UserEntity.class, RestaurantEntity.class, OrderEntity.class,
-                OrderItemEntity.class, NotificationEntity.class},
+                OrderItemEntity.class, NotificationEntity.class, FoodItemEntity.class},
         version = 4,
         exportSchema = false
 )
@@ -20,6 +20,7 @@ abstract class AppDatabase extends RoomDatabase {
     abstract RestaurantDao restaurantDao();
     abstract OrderDao orderDao();
     abstract NotificationDao notificationDao();
+    abstract FoodItemDao foodItemDao();
 
     /** Version 3: users get address + phone (Edit Profile). Keeps all existing accounts and restaurants. */
     static final Migration MIGRATION_2_3 = new Migration(2, 3) {
@@ -55,6 +56,20 @@ abstract class AppDatabase extends RoomDatabase {
                     + "FOREIGN KEY(`order_id`) REFERENCES `orders`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)");
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_notifications_customer_id` ON `notifications` (`customer_id`)");
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_notifications_order_id` ON `notifications` (`order_id`)");
+            db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `food_items` (" +
+                            "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "`restaurantId` INTEGER NOT NULL, " +
+                            "`name` TEXT, " +
+                            "`description` TEXT, " +
+                            "`category` TEXT, " +
+                            "`originalPrice` REAL NOT NULL, " +
+                            "`discountedPrice` REAL NOT NULL, " +
+                            "`quantityLeft` INTEGER NOT NULL, " +
+                            "`availableUntil` TEXT, " +
+                            "`available` INTEGER NOT NULL, " +
+                            "`imageUri` TEXT)"
+            );
         }
     };
 
