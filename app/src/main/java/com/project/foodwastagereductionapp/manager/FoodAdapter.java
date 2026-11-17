@@ -1,5 +1,6 @@
 package com.project.foodwastagereductionapp.manager;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,9 @@ import com.project.foodwastagereductionapp.data.FoodItemEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder> {
+public class FoodAdapter
+        extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder> {
+
     public interface OnDeleteClick {
         void onDelete(FoodItemEntity item);
     }
@@ -28,7 +31,9 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
         );
     }
 
-    private final List<FoodItemEntity> rows = new ArrayList<>();
+    private final List<FoodItemEntity> rows =
+            new ArrayList<>();
+
     private final OnDeleteClick onDeleteClick;
     private final OnAvailabilityChange onAvailabilityChange;
 
@@ -42,6 +47,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
 
     public void setRows(
             List<FoodItemEntity> newRows) {
+
         rows.clear();
         rows.addAll(newRows);
         notifyDataSetChanged();
@@ -49,24 +55,80 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
 
     @NonNull
     @Override
-    public FoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        return new FoodViewHolder(inflater.inflate(R.layout.item_food, parent, false)
+    public FoodViewHolder onCreateViewHolder(
+            @NonNull ViewGroup parent,
+            int viewType) {
+
+        LayoutInflater inflater =
+                LayoutInflater.from(parent.getContext());
+
+        return new FoodViewHolder(
+                inflater.inflate(
+                        R.layout.item_food_manager,
+                        parent,
+                        false
+                )
         );
     }
 
     @Override
     public void onBindViewHolder(
-            @NonNull FoodViewHolder h,
+            @NonNull FoodViewHolder holder,
             int position) {
-        FoodItemEntity food = rows.get(position);
-        h.txtFoodName.setText(food.name);
-        h.txtFoodPrice.setText("$" + food.discountedPrice);
-        h.txtQuantity.setText("Qty Left: " + food.quantityLeft);
-        h.switchAvailable.setChecked(food.available);
-        h.btnDelete.setOnClickListener(v -> onDeleteClick.onDelete(food));
-        h.switchAvailable.setOnCheckedChangeListener((buttonView, isChecked) ->
-                                onAvailabilityChange.onAvailabilityChanged(food, isChecked));
+
+        FoodItemEntity food =
+                rows.get(position);
+
+        holder.txtFoodName.setText(
+                food.name
+        );
+
+        holder.txtFoodPrice.setText(
+                "$" +
+                        food.discountedPrice +
+                        " • " +
+                        food.quantityLeft +
+                        " left"
+        );
+
+        if (food.available) {
+
+            holder.txtQuantity.setText(
+                    "Available"
+            );
+
+            holder.txtQuantity.setTextColor(
+                    Color.parseColor("#4CAF50")
+            );
+
+        } else {
+
+            holder.txtQuantity.setText(
+                    "Out of stock"
+            );
+
+            holder.txtQuantity.setTextColor(
+                    Color.parseColor("#F44336")
+            );
+        }
+
+        holder.switchAvailable.setChecked(
+                food.available
+        );
+
+        holder.btnDelete.setOnClickListener(
+                v -> onDeleteClick.onDelete(food)
+        );
+
+        holder.switchAvailable
+                .setOnCheckedChangeListener(
+                        (buttonView, isChecked) ->
+                                onAvailabilityChange
+                                        .onAvailabilityChanged(
+                                                food,
+                                                isChecked
+                                        )
+                );
     }
 
     @Override
@@ -74,20 +136,36 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
         return rows.size();
     }
 
-    public static class FoodViewHolder extends RecyclerView.ViewHolder {
+    static class FoodViewHolder
+            extends RecyclerView.ViewHolder {
+
         final TextView txtFoodName;
         final TextView txtFoodPrice;
         final TextView txtQuantity;
+
         final Switch switchAvailable;
+
         final Button btnDelete;
 
-        public FoodViewHolder(@NonNull View v) { super(v);
+        FoodViewHolder(
+                @NonNull View v) {
 
-            txtFoodName = v.findViewById(R.id.txtFoodName);
-            txtFoodPrice = v.findViewById(R.id.txtFoodPrice);
-            txtQuantity = v.findViewById(R.id.txtQuantity);
-            switchAvailable = v.findViewById(R.id.switchAvailable);
-            btnDelete = v.findViewById(R.id.btnDelete);
+            super(v);
+
+            txtFoodName =
+                    v.findViewById(R.id.txtFoodName);
+
+            txtFoodPrice =
+                    v.findViewById(R.id.txtFoodPrice);
+
+            txtQuantity =
+                    v.findViewById(R.id.txtQuantity);
+
+            switchAvailable =
+                    v.findViewById(R.id.switchAvailable);
+
+            btnDelete =
+                    v.findViewById(R.id.btnDelete);
         }
     }
 }

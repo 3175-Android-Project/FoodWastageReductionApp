@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Patterns;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -226,5 +227,19 @@ public final class AppDatabaseHelper {
     //Updating foodItems
     public void updateFoodItem(FoodItemEntity item){
         database.foodItemDao().update(item);
+    }
+
+    //Using order entity
+    public long createOrder(OrderEntity order){
+        return database.orderDao().insert(order);
+    }
+    public List<OrderEntity> getOrderHistory(long restaurantId){
+        return database.orderDao().getOrderHistory(restaurantId);
+    }
+    public OrderEntity getOrder(long orderId){
+        return database.orderDao().getOrder(orderId);
+    }
+    public void updateOrder(OrderEntity order){
+        database.orderDao().update(order);
     }
 }

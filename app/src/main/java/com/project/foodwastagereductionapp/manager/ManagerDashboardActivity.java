@@ -15,6 +15,9 @@ import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthNavigator;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
+import com.project.foodwastagereductionapp.customer.CustomerBrowseActivity;
+import com.project.foodwastagereductionapp.customer.CustomerOrderActivity;
+import com.project.foodwastagereductionapp.customer.CustomerProfileActivity;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.User;
 
@@ -51,6 +54,10 @@ public class ManagerDashboardActivity extends AppCompatActivity {
         findViewById(R.id.cardManageItems).setOnClickListener(v -> {
             startActivity(new Intent(this, ManageFoodItemsActivity.class));
         });
+
+        findViewById(R.id.cardOrderHistory).setOnClickListener(v -> {
+            startActivity(new Intent(this, OrderHistoryActivity.class));
+                });
     }
 
     @Override protected void onResume() {
@@ -69,11 +76,35 @@ public class ManagerDashboardActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.txtRestaurantName)).setText(restaurant.name);
         });
 
-
+        // Bottom navigation
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav.setSelectedItemId(R.id.nav_home);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                return true; // already here
+            } else if (id == R.id.nav_items) {
+                goTo(ManageFoodItemsActivity.class);
+                return true;
+            } else if (id == R.id.nav_orders) {
+                goTo(OrderHistoryActivity.class);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                goTo(ManagerProfileActivity.class);
+                return true;
+            }
+            return false;
+        });
     }
 
     private void openProfile() {
         startActivity(new Intent(this, ManagerProfileActivity.class));
+        overridePendingTransition(0, 0);
+        finish();
+    }
+
+    private void goTo(Class<?> screen) {
+        startActivity(new Intent(this, screen));
         overridePendingTransition(0, 0);
         finish();
     }

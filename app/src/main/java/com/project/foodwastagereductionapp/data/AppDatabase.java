@@ -10,14 +10,15 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(
-        entities = {UserEntity.class, RestaurantEntity.class, FoodItemEntity.class},
-        version = 4,
+        entities = {UserEntity.class, RestaurantEntity.class, FoodItemEntity.class, OrderEntity.class},
+        version = 5,
         exportSchema = false
 )
 abstract class AppDatabase extends RoomDatabase {
     abstract UserDao userDao();
     abstract RestaurantDao restaurantDao();
     abstract FoodItemDao foodItemDao();
+    abstract OrderDao orderDao();
 
     /** Version 3: users get address + phone (Edit Profile). Keeps all existing accounts and restaurants. */
     static final Migration MIGRATION_2_3 = new Migration(2, 3) {
@@ -50,6 +51,29 @@ abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    /** Version 5: managers can see order history */
+    static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase db) {
+
+                    db.execSQL(
+                            "CREATE TABLE orders (" +
+                            "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+                            "customerId INTEGER NOT NULL," +
+                            "restaurantId INTEGER NOT NULL," +
+                            "orderNumber TEXT," +
+                            "customerName TEXT," +
+                            "foodItems TEXT," +
+                            "date TEXT," +
+                            "time TEXT," +
+                            "itemCount INTEGER NOT NULL," +
+                            "total REAL NOT NULL," +
+                            "status TEXT," +
+                            "pickupMethod TEXT)"
+                    );
+                }
+    };
+
     private static volatile AppDatabase instance;
 
     static AppDatabase getInstance(Context context, String databaseName) {
@@ -66,7 +90,7 @@ abstract class AppDatabase extends RoomDatabase {
                                     AppDatabase.class,
                                     databaseName
                             )
-                            .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                             .fallbackToDestructiveMigration()
                             .build();
                     instance = result;

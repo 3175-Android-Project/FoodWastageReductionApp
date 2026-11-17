@@ -3,6 +3,7 @@ package com.project.foodwastagereductionapp.manager;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,6 +48,12 @@ public class AddFoodItemActivity extends AppCompatActivity {
         etAvailableUntil = findViewById(R.id.etAvailableUntil);
         btnSaveFood = findViewById(R.id.btnSaveFood);
         btnSaveFood.setOnClickListener(v -> saveFoodItem());
+
+        ((TextView) findViewById(R.id.txtHeaderTitle))
+                .setText(R.string.txtAddFoodItemTitle);
+
+        findViewById(R.id.btnBack)
+                .setOnClickListener(v -> finish());
     }
 
     private void saveFoodItem() {

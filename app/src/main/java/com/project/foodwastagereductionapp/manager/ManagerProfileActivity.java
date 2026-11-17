@@ -20,6 +20,7 @@ import com.project.foodwastagereductionapp.auth.AuthNavigator;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.RestaurantInformationActivity;
 import com.project.foodwastagereductionapp.auth.SessionManager;
+import com.project.foodwastagereductionapp.customer.CustomerOrderActivity;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.User;
 import com.project.foodwastagereductionapp.ui.ConfirmationDialog;
@@ -58,6 +59,26 @@ public class ManagerProfileActivity extends AppCompatActivity {
                 startActivity(new Intent(this, ManageFoodItemsActivity.class));
                 overridePendingTransition(0, 0);
                 finish();
+                return true;
+            }
+            return false;
+        });
+
+        // Bottom navigation
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav.setSelectedItemId(R.id.nav_home);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                return true; // already here
+            } else if (id == R.id.nav_items) {
+                goTo(ManageFoodItemsActivity.class);
+                return true;
+            } else if (id == R.id.nav_orders) {
+                goTo(CustomerOrderActivity.class);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                goTo(ManagerProfileActivity.class);
                 return true;
             }
             return false;
@@ -105,6 +126,12 @@ public class ManagerProfileActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ManagerDashboardActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
+        overridePendingTransition(0, 0);
+        finish();
+    }
+
+    private void goTo(Class<?> screen) {
+        startActivity(new Intent(this, screen));
         overridePendingTransition(0, 0);
         finish();
     }

@@ -286,4 +286,7 @@
     <string name="hintFoodQuantity">Quantity</string>
     <string name="hintFoodAvailableUntil">Available Until</string>
     <string name="txtAddFoodItemTitle">Add Food Item</string>
+    <string name="txtFoodItemsTitle">Food Items</string>
+    <string name="txtProfiletitle">Profile</string>
+    <string name="txtAddFoodCaption">Create a new food item for customers</string>
 </resources>
