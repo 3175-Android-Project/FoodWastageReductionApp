@@ -38,6 +38,8 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
     private TextView txtLocation, txtNearbyTitle, txtNoNearby, txtEndingSoonTitle;
     private LinearLayout llNearby, llEndingSoon;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
+    private View scrollContent;
 
     // A food item plus the restaurant it belongs to (for the Ending soon list).
     private static final class EndingSoonItem {
@@ -69,6 +71,8 @@ public class CustomerHomeActivity extends AppCompatActivity {
         txtEndingSoonTitle = findViewById(R.id.txtEndingSoonTitle);
         llNearby = findViewById(R.id.llNearby);
         llEndingSoon = findViewById(R.id.llEndingSoon);
+        shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
+        scrollContent = findViewById(R.id.scrollContent);
 
         // Browse: search box and "See all" open the Browse screen
         findViewById(R.id.editSearch).setOnClickListener(v ->
@@ -109,12 +113,20 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
     // Database work on a worker thread (AppDatabaseHelper rule), UI updates on the main thread
     private void loadHome() {
+        shimmerViewContainer.setVisibility(View.VISIBLE);
+        shimmerViewContainer.startShimmer();
+        scrollContent.setVisibility(View.GONE);
         long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         new Thread(() -> {
             User user = db.getUser(userId);
             List<RestaurantListing> all = db.searchRestaurants("");
-            runOnUiThread(() -> bindHome(user, all));
+            runOnUiThread(() -> {
+                shimmerViewContainer.stopShimmer();
+                shimmerViewContainer.setVisibility(View.GONE);
+                scrollContent.setVisibility(View.VISIBLE);
+                bindHome(user, all);
+            });
         }).start();
     }
 

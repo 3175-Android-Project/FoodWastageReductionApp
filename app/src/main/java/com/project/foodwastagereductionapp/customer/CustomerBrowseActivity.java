@@ -28,6 +28,8 @@ public class CustomerBrowseActivity extends AppCompatActivity {
 
     private RestaurantAdapter adapter;
     private TextView txtEmpty;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
+    private RecyclerView recyclerRestaurants;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +79,10 @@ public class CustomerBrowseActivity extends AppCompatActivity {
 
         // Search results list (card tap is handled inside RestaurantAdapter)
         txtEmpty = findViewById(R.id.txtEmpty);
-        RecyclerView recycler = findViewById(R.id.recyclerRestaurants);
+        shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
+        recyclerRestaurants = findViewById(R.id.recyclerRestaurants);
         adapter = new RestaurantAdapter();
-        recycler.setAdapter(adapter);
+        recyclerRestaurants.setAdapter(adapter);
 
         // Search box: filter as the user types
         EditText editSearch = findViewById(R.id.editSearch);
@@ -95,10 +98,17 @@ public class CustomerBrowseActivity extends AppCompatActivity {
     }
 
     private void loadRestaurants(String query) {
+        shimmerViewContainer.setVisibility(View.VISIBLE);
+        shimmerViewContainer.startShimmer();
+        recyclerRestaurants.setVisibility(View.GONE);
+        txtEmpty.setVisibility(View.GONE);
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         new Thread(() -> {
             List<RestaurantListing> results = db.searchRestaurants(query);
             runOnUiThread(() -> {
+                shimmerViewContainer.stopShimmer();
+                shimmerViewContainer.setVisibility(View.GONE);
+                recyclerRestaurants.setVisibility(View.VISIBLE);
                 adapter.setRows(results);
                 txtEmpty.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
             });

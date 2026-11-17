@@ -34,6 +34,9 @@ import java.util.List;
 public class CustomerOrderActivity extends AppCompatActivity {
 
     private final OrderAdapter adapter = new OrderAdapter();
+    private TextView txtEmpty;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
+    private RecyclerView rvOrders;
     private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
     // Re-reads the orders every few seconds so status changes show up while the screen is open
     private final Runnable poll = new Runnable() {
@@ -60,8 +63,10 @@ public class CustomerOrderActivity extends AppCompatActivity {
 
         findViewById(R.id.btnBack).setVisibility(View.GONE);
 
-        RecyclerView rvOrders = findViewById(R.id.rvOrders);
+        rvOrders = findViewById(R.id.rvOrders);
         rvOrders.setAdapter(adapter);
+        txtEmpty = findViewById(R.id.txtEmpty);
+        shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
 
         // Bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
@@ -90,12 +95,21 @@ public class CustomerOrderActivity extends AppCompatActivity {
 
     /** Splits the orders into "Current orders" and "Past orders" sections. */
     private void refreshOrders() {
+        shimmerViewContainer.setVisibility(View.VISIBLE);
+        shimmerViewContainer.startShimmer();
+        rvOrders.setVisibility(View.GONE);
+        txtEmpty.setVisibility(View.GONE);
         long customerId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
             OrderStatusSimulator.catchUp(db, customerId); // demo restaurant (see that class)
             return db.getOrders(customerId);
-        }, this::showOrders);
+        }, orders -> {
+            shimmerViewContainer.stopShimmer();
+            shimmerViewContainer.setVisibility(View.GONE);
+            rvOrders.setVisibility(View.VISIBLE);
+            showOrders(orders);
+        });
     }
 
     private void showOrders(List<Order> orders) {
@@ -116,6 +130,7 @@ public class CustomerOrderActivity extends AppCompatActivity {
             rows.addAll(past);
         }
         adapter.setRows(rows);
+        txtEmpty.setVisibility(orders.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void goTo(Class<?> screen) {
