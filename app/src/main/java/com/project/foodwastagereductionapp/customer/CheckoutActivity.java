@@ -22,11 +22,12 @@ import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.OrderLine;
 import com.project.foodwastagereductionapp.data.OrderPricing;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CheckoutActivity extends AppCompatActivity {
+public class CheckoutActivity extends BaseActivity {
 
     private CartLineAdapter adapter;
     private boolean isDelivery = false;

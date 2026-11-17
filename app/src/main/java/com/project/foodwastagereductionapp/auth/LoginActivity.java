@@ -2,6 +2,7 @@ package com.project.foodwastagereductionapp.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -17,8 +18,9 @@ import androidx.core.view.WindowInsetsCompat;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
