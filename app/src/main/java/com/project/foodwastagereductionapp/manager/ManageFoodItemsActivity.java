@@ -2,7 +2,8 @@ package com.project.foodwastagereductionapp.manager;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ListView;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,8 @@ import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.customer.FoodItemAdapter;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import android.widget.TextView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.data.Restaurant;
 
 public class ManageFoodItemsActivity extends AppCompatActivity {
@@ -31,6 +34,29 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+
+        ((TextView) findViewById(R.id.txtHeaderTitle)).setText(R.string.managerFoodItemsActivity);
+        findViewById(R.id.btnBack).setVisibility(View.GONE);
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav.setItemActiveIndicatorEnabled(false);
+        bottomNav.setSelectedItemId(R.id.nav_items);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_items) return true;
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, ManagerDashboardActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ManagerProfileActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
+            }
+            return false;
         });
 
         recyclerFoods = findViewById(R.id.recyclerFoods);
