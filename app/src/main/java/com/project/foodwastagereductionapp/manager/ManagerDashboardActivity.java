@@ -34,11 +34,22 @@ public class ManagerDashboardActivity extends AppCompatActivity {
         BottomNavigationView nav = findViewById(R.id.bottomNav);
         nav.setSelectedItemId(R.id.nav_home);
         nav.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.nav_home) return true;
-            if (item.getItemId() == R.id.nav_profile) {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) return true;
+            if (id == R.id.nav_items) {
+                startActivity(new Intent(this, ManageFoodItemsActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
+            } else if (id == R.id.nav_profile) {
                 openProfile();
+                return true;
             }
             return false;
+        });
+
+        findViewById(R.id.cardManageItems).setOnClickListener(v -> {
+            startActivity(new Intent(this, ManageFoodItemsActivity.class));
         });
     }
 
@@ -57,9 +68,13 @@ public class ManagerDashboardActivity extends AppCompatActivity {
             }
             ((TextView) findViewById(R.id.txtRestaurantName)).setText(restaurant.name);
         });
+
+
     }
 
     private void openProfile() {
         startActivity(new Intent(this, ManagerProfileActivity.class));
+        overridePendingTransition(0, 0);
+        finish();
     }
 }

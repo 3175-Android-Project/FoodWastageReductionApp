@@ -29,14 +29,13 @@ public class ManagerProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_manager_profile);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (view, insets) -> {
-            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-            // The root handles system bars, including the bottom navigation area.
-            return WindowInsetsCompat.CONSUMED;
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
         });
         ((TextView) findViewById(R.id.txtHeaderTitle)).setText(R.string.txtProfile);
-        findViewById(R.id.btnBack).setOnClickListener(view -> goHome());
+        findViewById(R.id.btnBack).setVisibility(View.GONE);
         findViewById(R.id.layoutEditProfile).setEnabled(false);
         findViewById(R.id.layoutEditProfile).setOnClickListener(view -> {
             Intent intent = new Intent(this, RestaurantInformationActivity.class);
@@ -50,9 +49,15 @@ public class ManagerProfileActivity extends AppCompatActivity {
         nav.setItemActiveIndicatorEnabled(false);
         nav.setSelectedItemId(R.id.nav_profile);
         nav.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.nav_profile) return true;
-            if (item.getItemId() == R.id.nav_home) {
+            int id = item.getItemId();
+            if (id == R.id.nav_profile) return true;
+            if (id == R.id.nav_home) {
                 goHome();
+                return true;
+            } else if (id == R.id.nav_items) {
+                startActivity(new Intent(this, ManageFoodItemsActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
                 return true;
             }
             return false;
@@ -100,6 +105,7 @@ public class ManagerProfileActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ManagerDashboardActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
+        overridePendingTransition(0, 0);
         finish();
     }
 }
