@@ -95,6 +95,7 @@ public class CustomerOrderActivity extends AppCompatActivity {
 
     /** Splits the orders into "Current orders" and "Past orders" sections. */
     private void refreshOrders() {
+        long startTime = System.currentTimeMillis();
         shimmerViewContainer.setVisibility(View.VISIBLE);
         shimmerViewContainer.startShimmer();
         rvOrders.setVisibility(View.GONE);
@@ -105,10 +106,14 @@ public class CustomerOrderActivity extends AppCompatActivity {
             OrderStatusSimulator.catchUp(db, customerId); // demo restaurant (see that class)
             return db.getOrders(customerId);
         }, orders -> {
-            shimmerViewContainer.stopShimmer();
-            shimmerViewContainer.setVisibility(View.GONE);
-            rvOrders.setVisibility(View.VISIBLE);
-            showOrders(orders);
+            long elapsed = System.currentTimeMillis() - startTime;
+            long delay = Math.max(0, 350 - elapsed);
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                shimmerViewContainer.stopShimmer();
+                shimmerViewContainer.setVisibility(View.GONE);
+                rvOrders.setVisibility(View.VISIBLE);
+                showOrders(orders);
+            }, delay);
         });
     }
 

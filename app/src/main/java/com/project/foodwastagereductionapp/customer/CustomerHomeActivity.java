@@ -113,6 +113,7 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
     // Database work on a worker thread (AppDatabaseHelper rule), UI updates on the main thread
     private void loadHome() {
+        long startTime = System.currentTimeMillis();
         shimmerViewContainer.setVisibility(View.VISIBLE);
         shimmerViewContainer.startShimmer();
         scrollContent.setVisibility(View.GONE);
@@ -121,12 +122,14 @@ public class CustomerHomeActivity extends AppCompatActivity {
         new Thread(() -> {
             User user = db.getUser(userId);
             List<RestaurantListing> all = db.searchRestaurants("");
-            runOnUiThread(() -> {
+            long elapsed = System.currentTimeMillis() - startTime;
+            long delay = Math.max(0, 350 - elapsed);
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
                 scrollContent.setVisibility(View.VISIBLE);
                 bindHome(user, all);
-            });
+            }, delay);
         }).start();
     }
 

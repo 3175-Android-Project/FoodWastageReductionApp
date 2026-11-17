@@ -98,6 +98,7 @@ public class CustomerBrowseActivity extends AppCompatActivity {
     }
 
     private void loadRestaurants(String query) {
+        long startTime = System.currentTimeMillis();
         shimmerViewContainer.setVisibility(View.VISIBLE);
         shimmerViewContainer.startShimmer();
         recyclerRestaurants.setVisibility(View.GONE);
@@ -105,13 +106,15 @@ public class CustomerBrowseActivity extends AppCompatActivity {
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         new Thread(() -> {
             List<RestaurantListing> results = db.searchRestaurants(query);
-            runOnUiThread(() -> {
+            long elapsed = System.currentTimeMillis() - startTime;
+            long delay = Math.max(0, 350 - elapsed);
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
                 recyclerRestaurants.setVisibility(View.VISIBLE);
                 adapter.setRows(results);
                 txtEmpty.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
-            });
+            }, delay);
         }).start();
     }
 
