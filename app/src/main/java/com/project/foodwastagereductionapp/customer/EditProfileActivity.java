@@ -27,7 +27,6 @@ public class EditProfileActivity extends BaseActivity {
     private Button btnSaveChanges;
     private long userId;
     private boolean restoringForm;
-    private com.project.foodwastagereductionapp.profile.ProfilePhotoPicker photoPicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +55,7 @@ public class EditProfileActivity extends BaseActivity {
         etPhone = findViewById(R.id.etPhone);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
 
-        photoPicker = new com.project.foodwastagereductionapp.profile.ProfilePhotoPicker(this, savedInstanceState);
         btnSaveChanges.setEnabled(false);
-        findViewById(R.id.btnChangePassword).setOnClickListener(v -> startActivity(
-                new android.content.Intent(this, com.project.foodwastagereductionapp.auth.ChangePasswordActivity.class)));
         restoringForm = savedInstanceState != null;
         userId = new SessionManager(this).getUserId();
         loadProfile();
@@ -83,14 +79,11 @@ public class EditProfileActivity extends BaseActivity {
                 etPostalCode.setText(user.postalCode);
                 etPhone.setText(emptyIfNull(user.phone));
             }
-            photoPicker.setInitial(user.profilePhotoUri);
             btnSaveChanges.setEnabled(true);
         });
     }
 
     private void saveProfile() {
-        if (photoPicker.isBusy()) return;
-        String photoUri = photoPicker.getPhotoUri();
         String fullName = textOf(inputFullName);
         String address = textOf(etAddress);
         String city = textOf(etCity);
@@ -111,17 +104,12 @@ public class EditProfileActivity extends BaseActivity {
 
         AuthTasks.run(this, btnSaveChanges,
                 () -> AppDatabaseHelper.getInstance(this).updateProfile(
-                        userId, fullName, address, city, province, postalCode, phone, photoUri),
+                        userId, fullName, address, city, province, postalCode, phone),
                 user -> {
                     SessionManager.invalidateCaches();
                     Toast.makeText(this, R.string.msgProfileSaved, Toast.LENGTH_SHORT).show();
                     finish(); // back to Profile, which reloads in onResume()
                 });
-    }
-
-    @Override protected void onSaveInstanceState(Bundle state) {
-        if (photoPicker != null) photoPicker.saveState(state);
-        super.onSaveInstanceState(state);
     }
 
     private static String emptyIfNull(String value) {

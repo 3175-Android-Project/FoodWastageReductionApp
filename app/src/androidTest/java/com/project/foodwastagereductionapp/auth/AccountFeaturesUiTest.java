@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.*;
 import android.os.*;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.view.View;
 import android.widget.*;
 import androidx.test.core.app.ActivityScenario;
@@ -73,44 +72,50 @@ public class AccountFeaturesUiTest {
     }
     private void awaitProfileValue(long id,String name){long end=SystemClock.uptimeMillis()+10000;while(SystemClock.uptimeMillis()<end){if(name.equals(db.getUser(id).fullName))return;SystemClock.sleep(50);}fail("Profile not saved");}
 
-    @Test public void editProfilePhotoAndAddressSurviveRotationAndReopen() throws Exception {
+    @Test public void editProfileDetailsSurviveRotationAndReopenWithoutPhotoControls() {
         session.start(customer,false);
-        ActivityScenario<EditProfileActivity> scenario=ActivityScenario.launch(EditProfileActivity.class);
-        EditProfileActivity activity=(EditProfileActivity)await(EditProfileActivity.class,R.id.btnSaveChanges);
-        File source=new File(context.getCacheDir(),"selected-account-photo.png");
-        Bitmap bitmap=Bitmap.createBitmap(40,40,Bitmap.Config.ARGB_8888);bitmap.eraseColor(android.graphics.Color.BLUE);
-        try(OutputStream out=new FileOutputStream(source)){bitmap.compress(Bitmap.CompressFormat.PNG,100,out);}bitmap.recycle();
-        // Deliver a standard GetContent result, avoiding dependency on a device's gallery app.
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(()->{
-            Bundle registry=new Bundle();activity.getActivityResultRegistry().onSaveInstanceState(registry);
-            ArrayList<Integer> requestCodes=registry.getIntegerArrayList("KEY_COMPONENT_ACTIVITY_REGISTERED_RCS");
-            ArrayList<String> keys=registry.getStringArrayList("KEY_COMPONENT_ACTIVITY_REGISTERED_KEYS");
-            assertNotNull(requestCodes);assertNotNull(keys);
-            int photoIndex=keys.indexOf("activity_rq#0");assertTrue(photoIndex>=0);
-            registry.putStringArrayList("KEY_COMPONENT_ACTIVITY_LAUNCHED_KEYS",
-                    new ArrayList<>(Collections.singletonList(keys.get(photoIndex))));
-            activity.getActivityResultRegistry().onRestoreInstanceState(registry);
-            activity.getActivityResultRegistry().dispatchResult(requestCodes.get(photoIndex),Activity.RESULT_OK,
-                    new Intent().setData(Uri.fromFile(source)));
-        });
-        long end=SystemClock.uptimeMillis()+10000;
-        while(SystemClock.uptimeMillis()<end){AtomicBoolean ready=new AtomicBoolean();scenario.onActivity(a->ready.set(a.findViewById(R.id.btnChoosePhoto).isEnabled()));if(ready.get())break;SystemClock.sleep(50);}
+        ActivityScenario.launch(CustomerProfileActivity.class);
+        await(CustomerProfileActivity.class,R.id.layoutChangePassword);
+        tap(R.id.layoutEditProfile);
+        await(EditProfileActivity.class,R.id.btnSaveChanges);
+        onView(withId(R.id.btnChoosePhoto)).check(doesNotExist());
+        onView(withId(R.id.btnRemovePhoto)).check(doesNotExist());
         fill(R.id.inputFullName,"Customer Edited");fill(R.id.etAddress,"123 New Street");
-        scenario.recreate();await(EditProfileActivity.class,R.id.btnSaveChanges);
+        fill(R.id.etPhone,"6045550123");
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(()->{
+            for(Activity a:ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED))
+                if(a instanceof EditProfileActivity)a.recreate();
+        });
+        await(EditProfileActivity.class,R.id.btnSaveChanges);
         onView(withId(R.id.etAddress)).check(matches(withText("123 New Street")));
+        onView(withId(R.id.etPhone)).check(matches(withText("6045550123")));
         capture("account-edit-profile.png");
         tap(R.id.btnSaveChanges);awaitProfileValue(customer,"Customer Edited");
-        User saved=db.getUser(customer);assertFalse(saved.profilePhotoUri.isEmpty());assertEquals("123 New Street",saved.address);
-        assertTrue(new File(Uri.parse(saved.profilePhotoUri).getPath()).isFile());source.delete();
-        ActivityScenario.launch(CustomerProfileActivity.class);await(CustomerProfileActivity.class,R.id.layoutEditProfile);SystemClock.sleep(300);
+        await(CustomerProfileActivity.class,R.id.layoutChangePassword);
+        User saved=db.getUser(customer);
+        assertEquals("123 New Street",saved.address);assertEquals("6045550123",saved.phone);
+        onView(withId(R.id.txtCustomerName)).check(matches(withText("Customer Edited")));
         onView(withId(R.id.txtAddress)).check(matches(withSubstring("123 New Street")));
-        tap(R.id.layoutEditProfile);await(EditProfileActivity.class,R.id.btnSaveChanges);tap(R.id.btnRemovePhoto);tap(R.id.btnSaveChanges);SystemClock.sleep(500);
-        assertEquals("",db.getUser(customer).profilePhotoUri);
-        assertEquals("",db.getUser(manager).profilePhotoUri);
+        tap(R.id.layoutEditProfile);await(EditProfileActivity.class,R.id.btnSaveChanges);
+        onView(withId(R.id.inputFullName)).check(matches(withText("Customer Edited")));
+        onView(withId(R.id.etAddress)).check(matches(withText("123 New Street")));
+        onView(withId(R.id.etPhone)).check(matches(withText("6045550123")));
+        onView(withId(R.id.btnChoosePhoto)).check(doesNotExist());
+        assertEquals("Manager A",db.getUser(manager).fullName);
     }
     @Test public void changePasswordRejectsWrongCurrentAndMismatchThenSignsOut() {
-        session.start(customer,false);ActivityScenario.launch(EditProfileActivity.class);await(EditProfileActivity.class,R.id.btnSaveChanges);
-        tap(R.id.btnChangePassword);await(ChangePasswordActivity.class,R.id.btnChangePassword);
+        session.start(customer,false);
+        ActivityScenario<CustomerProfileActivity> scenario=ActivityScenario.launch(CustomerProfileActivity.class);
+        await(CustomerProfileActivity.class,R.id.layoutChangePassword);
+        scenario.onActivity(activity->{
+            android.view.ViewGroup card=(android.view.ViewGroup)activity.findViewById(R.id.layoutEditProfile).getParent();
+            int edit=card.indexOfChild(activity.findViewById(R.id.layoutEditProfile));
+            int change=card.indexOfChild(activity.findViewById(R.id.layoutChangePassword));
+            int logout=card.indexOfChild(activity.findViewById(R.id.layoutLogout));
+            assertTrue(edit<change && change<logout);
+        });
+        capture("customer-profile.png");
+        tap(R.id.layoutChangePassword);await(ChangePasswordActivity.class,R.id.btnChangePassword);
         capture("change-password.png");
         fill(R.id.editCurrentPassword,"wrong");fill(R.id.editNewPassword,"Changed123");fill(R.id.editConfirmNewPassword,"Changed123");tap(R.id.btnChangePassword);await(ChangePasswordActivity.class,R.id.btnChangePassword);
         onView(withId(R.id.editCurrentPassword)).check(matches(hasErrorText(context.getString(R.string.msgIncorrectPassword))));
@@ -121,6 +126,9 @@ public class AccountFeaturesUiTest {
         assertEquals(-1,session.getUserId());assertNull(db.authenticate(email,"Original123"));
         fill(R.id.editEmail,email);fill(R.id.editPassword,"Changed123");tap(R.id.btnLogin);await(CustomerHomeActivity.class,R.id.bottomNav);
         assertEquals(customer,session.getUserId());
+        tap(R.id.nav_profile);await(CustomerProfileActivity.class,R.id.layoutChangePassword);
+        tap(R.id.layoutLogout);tap(R.id.dialogPositive);await(LoginActivity.class,R.id.btnLogin);
+        assertEquals(-1,session.getUserId());
     }
     @Test public void managerProfileChangesPasswordWithoutChangingRestaurant() {
         session.start(manager,false);
