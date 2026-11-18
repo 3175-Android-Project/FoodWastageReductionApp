@@ -340,6 +340,7 @@ public final class AppDatabaseHelper {
             if (e == null || !OrderStatus.canCancel(e.status)) return;
             cancelled[0] = database.orderDao()
                     .updateStatus(orderId, OrderStatus.CANCELLED, e.status) == 1;
+            if (cancelled[0]) restoreStock(orderId); // the food is available again
         });
         return cancelled[0];
     }
@@ -360,6 +361,7 @@ public final class AppDatabaseHelper {
             OrderEntity e = database.orderDao().findById(orderId);
             if (e == null || !OrderStatus.canMoveTo(e.status, newStatus)) return;
             if (database.orderDao().updateStatus(orderId, newStatus, e.status) != 1) return;
+            if (OrderStatus.REJECTED.equals(newStatus)) restoreStock(orderId); // food available again
             if (OrderStatus.shouldNotify(newStatus)) {
                 NotificationEntity n = new NotificationEntity();
                 n.customerId = e.customerId;
@@ -371,6 +373,52 @@ public final class AppDatabaseHelper {
             changed[0] = true;
         });
         return changed[0];
+    }
+    // ---- Restaurant (manager) side: process incoming orders --------------------------------
+
+    /**
+     * Manager moves one of their own restaurant's orders to the next status
+     * (Accept, Reject, Start preparing, Mark ready, Picked up / Delivered = Completed).
+     * Orders of other restaurants and moves that skip steps are ignored.
+     *
+     * @return true if the status changed
+     */
+    public boolean updateOrderStatusForRestaurant(long managerId, long orderId, String newStatus) {
+        if (!isOrderOfManager(managerId, orderId)) return false;
+        return updateOrderStatus(orderId, newStatus);
+    }
+
+    /**
+     * Manager reminds the customer to collect a Ready order: adds a "Your order is ready"
+     * notification to the customer's bell.
+     *
+     * @return true if the reminder was added
+     */
+    public boolean sendPickupReminder(long managerId, long orderId) {
+        if (!isOrderOfManager(managerId, orderId)) return false;
+        OrderEntity e = database.orderDao().findById(orderId);
+        if (e == null || !OrderStatus.READY.equals(e.status)) return false;
+        NotificationEntity n = new NotificationEntity();
+        n.customerId = e.customerId;
+        n.orderId = orderId;
+        n.status = OrderStatus.READY;
+        n.createdAt = System.currentTimeMillis();
+        database.notificationDao().insert(n);
+        return true;
+    }
+
+    private boolean isOrderOfManager(long managerId, long orderId) {
+        RestaurantEntity restaurant = database.restaurantDao().findByManagerId(managerId);
+        OrderEntity e = database.orderDao().findById(orderId);
+        return restaurant != null && e != null && e.restaurantId != null
+                && e.restaurantId == restaurant.id;
+    }
+
+    /** Gives the order's food back to the restaurant's stock (rejected / cancelled orders). */
+    private void restoreStock(long orderId) {
+        for (OrderItemEntity item : database.orderDao().itemsFor(orderId)) {
+            database.foodItemDao().increaseStock(item.foodItemId, item.quantity);
+        }
     }
 
     /** Order-status updates and pickup reminders, newest first. */

@@ -314,4 +314,18 @@
     <string name="msgResetWait">Please wait before requesting another code.</string>
     <string name="msgResetCodeSent">A new reset code was sent.</string>
     <string name="msgExpiredEmailCode">This code has expired. Please request a new code.</string>
+
+    <!-- Incoming order actions (manager) -->
+    <string name="fmtIncomingOrderInfo">Customer · %1$d items · %2$s</string>
+    <string name="btnAcceptOrder">Accept</string>
+    <string name="btnRejectOrder">Reject</string>
+    <string name="btnStartPreparing">Start preparing</string>
+    <string name="btnMarkReady">Mark ready</string>
+    <string name="btnMarkPickedUp">Picked up</string>
+    <string name="btnMarkDelivered">Delivered</string>
+    <string name="btnSendReminder">Send reminder</string>
+    <string name="dialogRejectOrderTitle">Reject this order?</string>
+    <string name="dialogRejectOrderMessage">The customer will be told the order was rejected and the food goes back on sale.</string>
+    <string name="msgReminderSent">Pickup reminder sent</string>
+    <string name="msgOrderChangedReload">This order was already updated. The list has been refreshed.</string>
 </resources>
