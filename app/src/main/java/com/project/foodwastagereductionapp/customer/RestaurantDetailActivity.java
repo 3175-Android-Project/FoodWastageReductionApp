@@ -27,6 +27,7 @@ public class RestaurantDetailActivity extends AppCompatActivity {
     public static final String EXTRA_RESTAURANT_ID = "restaurant_id";
     private long restaurantId;
     private Button btnViewCart;
+    private FoodItemAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +57,7 @@ public class RestaurantDetailActivity extends AppCompatActivity {
 
         // Food list
         RecyclerView recyclerFood = findViewById(R.id.recyclerFood);
-        FoodItemAdapter adapter = new FoodItemAdapter(restaurantId, this::addToCart);
+        adapter = new FoodItemAdapter(restaurantId, this::addToCart);
         recyclerFood.setAdapter(adapter);
 
         // View Cart button
@@ -72,13 +73,19 @@ public class RestaurantDetailActivity extends AppCompatActivity {
         if (btnViewCart != null) updateCartButton(); // cart may have changed on another screen
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (adapter != null) loadRestaurant(adapter); // stock may have changed (e.g. after an order)
+    }
+
     // Database work on a worker thread (AppDatabaseHelper rule), UI updates on the main thread
     private void loadRestaurant(FoodItemAdapter adapter) {
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         new Thread(() -> {
             Restaurant r = db.getRestaurant(restaurantId);
-            // Food comes from SampleData until the database has a food items table
-            List<FoodItem> food = SampleData.getFoodItems((int) restaurantId);
+            // Food the manager listed (food_items table)
+            List<FoodItem> food = db.getFoodForRestaurant(restaurantId);
             runOnUiThread(() -> {
                 if (r == null) {
                     finish();

@@ -258,6 +258,13 @@ public final class AppDatabaseHelper {
                 subtotal += line.getLineTotal();
             }
 
+            // Take the stock. If any item no longer has enough left, the whole order is rolled back.
+            for (OrderLine line : lines) {
+                if (database.foodItemDao().decreaseStock(restaurant.id, line.foodItemId, line.quantity) != 1) {
+                    throw new OutOfStockException(line.name);
+                }
+            }
+
             OrderEntity order = new OrderEntity();
             order.customerId = customerId;
             order.restaurantId = restaurant.id;
@@ -422,6 +429,43 @@ public final class AppDatabaseHelper {
         public DuplicateEmailException() {
             super("Email already registered");
         }
+    }
+
+    /** Thrown by placeOrder when an item sold out (or was switched off) before checkout finished. */
+    public static final class OutOfStockException extends IllegalStateException {
+        public final String foodName;
+
+        public OutOfStockException(String foodName) {
+            super("Not enough stock for " + foodName);
+            this.foodName = foodName;
+        }
+    }
+
+    // ---- Customer side: food items from the food_items table -----------------------------
+
+    /** Food a customer can see for this restaurant (switched on by the manager), incl. sold-out items. */
+    public List<FoodItem> getFoodForRestaurant(long restaurantId) {
+        List<FoodItem> food = new ArrayList<>();
+        for (FoodItemEntity e : database.foodItemDao().getAvailableForRestaurant(restaurantId)) {
+            food.add(toFoodItem(e));
+        }
+        return food;
+    }
+
+    /** One food item for the Food Detail screen, or null if it is gone or switched off. */
+    public FoodItem getFood(long restaurantId, long foodItemId) {
+        FoodItemEntity e = database.foodItemDao().getAvailableFoodItem(restaurantId, foodItemId);
+        return e == null ? null : toFoodItem(e);
+    }
+
+    private static FoodItem toFoodItem(FoodItemEntity e) {
+        return new FoodItem((int) e.id, e.name, e.originalPrice, e.discountedPrice,
+                e.quantityLeft, emptyToNull(e.availableUntil), 0, e.description,
+                emptyToNull(e.imageUri));
+    }
+
+    private static String emptyToNull(String value) {
+        return value == null || value.trim().isEmpty() ? null : value.trim();
     }
 
     // Generating food item object from FoodItemEntity

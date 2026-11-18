@@ -1,6 +1,7 @@
 package com.project.foodwastagereductionapp.customer;
 
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +16,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.auth.AuthTasks;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.FoodItem;
 
 public class FoodDetailActivity extends AppCompatActivity {
@@ -39,8 +42,7 @@ public class FoodDetailActivity extends AppCompatActivity {
         // Opened without a food item -> nothing to show
         restaurantId = getIntent().getLongExtra(EXTRA_RESTAURANT_ID, -1);
         int foodId = getIntent().getIntExtra(EXTRA_FOOD_ID, -1);
-        food = findFood(restaurantId, foodId);
-        if (food == null) {
+        if (restaurantId == -1 || foodId == -1) {
             finish();
             return;
         }
@@ -52,25 +54,35 @@ public class FoodDetailActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        bindFood();
-
-        // Add to cart
+        // Add to cart (enabled once the food has loaded)
         Button btnAddToCart = findViewById(R.id.btnAddToCart);
+        btnAddToCart.setEnabled(false);
         btnAddToCart.setOnClickListener(v -> addToCart());
+
+        loadFood(foodId);
     }
 
-    // Food comes from SampleData until the database has a food items table
-    private static FoodItem findFood(long restaurantId, int foodId) {
-        if (restaurantId == -1 || foodId == -1) return null;
-        for (FoodItem f : SampleData.getFoodItems((int) restaurantId)) {
-            if (f.id == foodId) return f;
-        }
-        return null;
+    // Food the manager listed (food_items table), read on the database worker thread
+    private void loadFood(int foodId) {
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        AuthTasks.run(this, null, () -> db.getFood(restaurantId, foodId), result -> {
+            if (result == null) { // removed or switched off by the restaurant
+                Toast.makeText(this, R.string.msgFoodNoLongerAvailable, Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+            food = result;
+            bindFood();
+        });
     }
 
     private void bindFood() {
         ImageView imgFood = findViewById(R.id.imgFood);
-        imgFood.setImageResource(food.imageRes != 0 ? food.imageRes : R.drawable.icon_food);
+        if (food.hasImageUri()) {
+            imgFood.setImageURI(Uri.parse(food.imageUri));
+        } else {
+            imgFood.setImageResource(food.imageRes != 0 ? food.imageRes : R.drawable.icon_food);
+        }
 
         TextView txtFoodName = findViewById(R.id.txtFoodName);
         txtFoodName.setText(food.name);
@@ -115,6 +127,7 @@ public class FoodDetailActivity extends AppCompatActivity {
     }
 
     private void addToCart() {
+        if (food == null) return; // still loading
         // Don't allow more than what's left
         if (CartManager.quantityOf(food.id) >= food.quantityLeft) {
             Toast.makeText(this, R.string.msgNoMoreStock, Toast.LENGTH_SHORT).show();

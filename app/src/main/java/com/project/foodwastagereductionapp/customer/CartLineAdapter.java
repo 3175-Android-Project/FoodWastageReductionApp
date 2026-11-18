@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,7 +49,11 @@ public class CartLineAdapter extends RecyclerView.Adapter<CartLineAdapter.CartLi
         CartManager.CartLine line = rows.get(position);
         FoodItem f = line.item;
 
-        h.imgFood.setImageResource(f.imageRes != 0 ? f.imageRes : R.drawable.icon_food);
+        if (f.hasImageUri()) {
+            h.imgFood.setImageURI(Uri.parse(f.imageUri));
+        } else {
+            h.imgFood.setImageResource(f.imageRes != 0 ? f.imageRes : R.drawable.icon_food);
+        }
         h.txtFoodName.setText(f.name);
         h.txtPrice.setText(PriceFormatter.format(f.price));
         h.txtQuantity.setText(String.valueOf(line.quantity));
