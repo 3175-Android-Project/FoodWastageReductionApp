@@ -249,6 +249,8 @@
     <string name="txtNotSet">Not set</string>
     <string name="btnAddOneToCart">Add 1 to cart</string>
     <string name="msgAddedToCart">Added to cart</string>
+    <string name="msgFoodNoLongerAvailable">This item is no longer available</string>
+    <string name="fmtSoldOutInCart">Sorry, %1$s sold out or has fewer left. Please update your cart.</string>
 
     <!-- Checkout -->
     <string name="titleCheckout">Checkout</string>

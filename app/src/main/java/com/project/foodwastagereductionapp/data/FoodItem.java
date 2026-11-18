@@ -9,9 +9,11 @@ public class FoodItem {
     public final String availableUntil;
     public final int imageRes;
     public final String description;
+    public final String imageUri; // photo the manager uploaded (may be null/empty)
 
     public FoodItem(int id, String name, double originalPrice, double price,
-                    int quantityLeft, String availableUntil, int imageRes, String description) {
+                    int quantityLeft, String availableUntil, int imageRes, String description,
+                    String imageUri) {
         this.id = id;
         this.name = name;
         this.originalPrice = originalPrice;
@@ -20,16 +22,27 @@ public class FoodItem {
         this.availableUntil = availableUntil;
         this.imageRes = imageRes;
         this.description = description;
+        this.imageUri = imageUri;
+    }
+
+    // Without a photo.
+    public FoodItem(int id, String name, double originalPrice, double price,
+                    int quantityLeft, String availableUntil, int imageRes, String description) {
+        this(id, name, originalPrice, price, quantityLeft, availableUntil, imageRes, description, null);
     }
 
     // Without a pickup time.
     public FoodItem(int id, String name, double originalPrice, double price,
                     int quantityLeft, int imageRes, String description) {
-        this(id, name, originalPrice, price, quantityLeft, null, imageRes, description);
+        this(id, name, originalPrice, price, quantityLeft, null, imageRes, description, null);
     }
 
     // Old constructor kept so existing code still compiles (no discount, quantity unknown).
     public FoodItem(int id, String name, double price, int imageRes, String description) {
-        this(id, name, price, price, 0, null, imageRes, description);
+        this(id, name, price, price, 0, null, imageRes, description, null);
+    }
+
+    public boolean hasImageUri() {
+        return imageUri != null && !imageUri.isEmpty();
     }
 }
