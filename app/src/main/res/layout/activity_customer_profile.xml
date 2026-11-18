@@ -88,7 +88,7 @@
                     tools:text="405 Main Street, Vancouver" />
             </LinearLayout>
 
-            <!-- Edit Profile + Logout (one card, like the wireframe) -->
+            <!-- Profile actions -->
             <LinearLayout
                 style="@style/Card.Default"
                 android:layout_width="match_parent"
@@ -123,6 +123,48 @@
                         android:layout_marginStart="@dimen/space_md"
                         android:layout_weight="1"
                         android:text="@string/txtEditProfile" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/icon_right"
+                        app:tint="@color/text_tertiary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/space_lg"
+                    android:layout_marginEnd="@dimen/space_lg"
+                    android:background="@color/background_secondary" />
+
+                <LinearLayout
+                    android:id="@+id/layoutChangePassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/space_lg">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/icon_lock"
+                        app:tint="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/txtChangePassword"
+                        style="@style/Text.HeadlineSm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_md"
+                        android:layout_weight="1"
+                        android:text="@string/btnChangePassword" />
 
                     <ImageView
                         android:layout_width="20dp"

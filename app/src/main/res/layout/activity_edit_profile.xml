@@ -38,8 +38,6 @@
             android:paddingTop="28dp"
             android:paddingBottom="@dimen/space_xxl">
 
-            <include layout="@layout/component_profile_photo" />
-
             <EditText
                 android:id="@+id/inputFullName"
                 style="@style/Input.Default"
@@ -87,15 +85,6 @@
                 android:layout_marginTop="@dimen/space_md"
                 android:hint="@string/hintPhone"
                 android:inputType="phone" />
-
-            <Button
-                android:id="@+id/btnChangePassword"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:layout_marginTop="@dimen/space_lg"
-                android:text="@string/btnChangePassword" />
 
             <Button
                 android:id="@+id/btnSaveChanges"
