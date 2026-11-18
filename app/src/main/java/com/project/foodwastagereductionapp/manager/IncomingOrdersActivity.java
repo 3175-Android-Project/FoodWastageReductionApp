@@ -25,6 +25,8 @@ import com.project.foodwastagereductionapp.ui.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.widget.Toast;
+import com.project.foodwastagereductionapp.ui.ConfirmationDialog;
 
 public class IncomingOrdersActivity extends BaseActivity {
 
@@ -58,7 +60,21 @@ public class IncomingOrdersActivity extends BaseActivity {
 
         RecyclerView rvOrders = findViewById(R.id.rvOrders);
         rvOrders.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new IncomingOrdersAdapter();
+        adapter = new IncomingOrdersAdapter(new IncomingOrdersAdapter.OnOrderAction() {
+            @Override
+            public void onChangeStatus(OrderEntity order, String newStatus) {
+                if (OrderStatus.REJECTED.equals(newStatus)) {
+                    confirmReject(order);
+                } else {
+                    changeStatus(order, newStatus);
+                }
+            }
+
+            @Override
+            public void onSendReminder(OrderEntity order) {
+                sendReminder(order);
+            }
+        });
         rvOrders.setAdapter(adapter);
 
         setupBottomNavigation();
@@ -117,14 +133,53 @@ public class IncomingOrdersActivity extends BaseActivity {
     private void filterOrders() {
         List<OrderEntity> filtered = new ArrayList<>();
         for (OrderEntity o : allOrders) {
-            if (currentStatus.equalsIgnoreCase(o.status)) {
+            // The Accepted tab also shows orders that are being prepared
+            boolean preparingInAccepted = OrderStatus.ACCEPTED.equals(currentStatus)
+                    && OrderStatus.PREPARING.equalsIgnoreCase(o.status);
+            if (currentStatus.equalsIgnoreCase(o.status) || preparingInAccepted) {
                 filtered.add(o);
             }
         }
         adapter.setRows(filtered);
         txtEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
     }
+    // ---- Order actions -----------------------------------------------------------------
 
+    private void confirmReject(OrderEntity order) {
+        ConfirmationDialog.show(this,
+                getString(R.string.dialogRejectOrderTitle),
+                getString(R.string.dialogRejectOrderMessage),
+                getString(R.string.btnRejectOrder),
+                getString(R.string.btnCancel),
+                () -> changeStatus(order, OrderStatus.REJECTED));
+    }
+
+    /** Saves the new status (the customer gets a notification) and reloads the list. */
+    private void changeStatus(OrderEntity order, String newStatus) {
+        long managerId = new SessionManager(this).getUserId();
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        AuthTasks.run(this, null,
+                () -> db.updateOrderStatusForRestaurant(managerId, order.id, newStatus),
+                changed -> {
+                    if (!changed) {
+                        // e.g. the customer cancelled it a moment ago
+                        Toast.makeText(this, R.string.msgOrderChangedReload, Toast.LENGTH_SHORT).show();
+                    }
+                    loadOrders();
+                });
+    }
+
+    private void sendReminder(OrderEntity order) {
+        long managerId = new SessionManager(this).getUserId();
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        AuthTasks.run(this, null,
+                () -> db.sendPickupReminder(managerId, order.id),
+                sent -> {
+                    Toast.makeText(this, sent ? R.string.msgReminderSent : R.string.msgOrderChangedReload,
+                            Toast.LENGTH_SHORT).show();
+                    if (!sent) loadOrders();
+                });
+    }
     private void setupBottomNavigation() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setItemActiveIndicatorEnabled(false);

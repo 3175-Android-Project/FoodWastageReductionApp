@@ -20,7 +20,8 @@ import com.project.foodwastagereductionapp.data.OrderStatus;
  */
 final class OrderStatusSimulator {
 
-    static final boolean ENABLED = true;
+    // Off: the restaurant manager now moves orders (Incoming orders screen)
+    static final boolean ENABLED = false;
 
     private static final String[] FLOW = {
             OrderStatus.ACCEPTED, OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.COMPLETED

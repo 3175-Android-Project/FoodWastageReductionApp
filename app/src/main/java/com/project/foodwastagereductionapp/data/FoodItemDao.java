@@ -46,4 +46,8 @@ public interface FoodItemDao {
             + "WHERE id = :foodItemId AND restaurantId = :restaurantId AND available = 1 "
             + "AND quantityLeft >= :quantity")
     int decreaseStock(long restaurantId, long foodItemId, int quantity);
+
+    /** Puts stock back (order rejected or cancelled). */
+    @Query("UPDATE food_items SET quantityLeft = quantityLeft + :quantity WHERE id = :foodItemId")
+    int increaseStock(long foodItemId, int quantity);
 }
