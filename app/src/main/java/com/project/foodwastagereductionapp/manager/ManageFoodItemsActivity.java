@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
-import com.project.foodwastagereductionapp.customer.CustomerOrderActivity;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.data.Restaurant;
@@ -40,19 +39,19 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
 
         // Bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
-        bottomNav.setSelectedItemId(R.id.nav_home);
+        bottomNav.setSelectedItemId(R.id.nav_items);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_home) {
+            if (id == R.id.nav_items) {
                 return true; // already here
-            } else if (id == R.id.nav_items) {
-                goTo(ManageFoodItemsActivity.class);
-                return true;
-            } else if (id == R.id.nav_orders) {
-                goTo(CustomerOrderActivity.class);
+            } else if (id == R.id.nav_home) {
+                goTo(ManagerDashboardActivity.class);
                 return true;
             } else if (id == R.id.nav_profile) {
                 goTo(ManagerProfileActivity.class);
+                return true;
+            } else if (id == R.id.nav_orders) {
+                goTo(OrderHistoryActivity.class);
                 return true;
             }
             return false;

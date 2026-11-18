@@ -44,6 +44,11 @@ public class ManagerDashboardActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 finish();
                 return true;
+            } else if (id == R.id.nav_orders) {
+                startActivity(new Intent(this, OrderHistoryActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
             } else if (id == R.id.nav_profile) {
                 openProfile();
                 return true;
