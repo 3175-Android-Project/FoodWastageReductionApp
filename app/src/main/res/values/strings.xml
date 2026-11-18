@@ -298,8 +298,7 @@
     <string name="btnChoosePhoto">Choose photo</string>
     <string name="btnRemovePhoto">Remove</string>
     <string name="msgPhotoUnavailable">Please choose a valid image smaller than 20 MB.</string>
-    <string name="btnChangePassword">Change password</string>
-    <string name="btnAccountSettings">Account settings</string>
+    <string name="btnChangePassword">Change Password</string>
     <string name="hintCurrentPassword">Current password</string>
     <string name="msgCurrentPasswordRequired">Enter your current password</string>
     <string name="msgPasswordChangeInstructions">Enter your current password and a new password with at least 6 characters. You will sign in again after saving.</string>

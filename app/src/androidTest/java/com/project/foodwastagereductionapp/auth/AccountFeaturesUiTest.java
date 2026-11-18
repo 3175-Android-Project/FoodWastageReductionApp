@@ -64,6 +64,8 @@ public class AccountFeaturesUiTest {
     private void tap(int id){visible(id);onView(withId(id)).perform(click());}
     private void capture(String name) {
         if (!"true".equals(InstrumentationRegistry.getArguments().getString("captureAccountScreens"))) return;
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        SystemClock.sleep(250);
         File directory=new File(context.getFilesDir(),"account-test-screens");directory.mkdirs();
         Bitmap image=InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
         try(OutputStream output=new FileOutputStream(new File(directory,name))) { image.compress(Bitmap.CompressFormat.PNG,100,output); }
@@ -120,9 +122,29 @@ public class AccountFeaturesUiTest {
         fill(R.id.editEmail,email);fill(R.id.editPassword,"Changed123");tap(R.id.btnLogin);await(CustomerHomeActivity.class,R.id.bottomNav);
         assertEquals(customer,session.getUserId());
     }
-    @Test public void managerCanOpenAccountSettingsWithoutChangingRestaurant() {
-        session.start(manager,false);ActivityScenario.launch(ManagerProfileActivity.class);await(ManagerProfileActivity.class,R.id.layoutEditProfile);SystemClock.sleep(450);
-        tap(R.id.btnAccountSettings);await(EditProfileActivity.class,R.id.btnSaveChanges);fill(R.id.inputFullName,"Manager Edited");tap(R.id.btnSaveChanges);awaitProfileValue(manager,"Manager Edited");
+    @Test public void managerProfileChangesPasswordWithoutChangingRestaurant() {
+        session.start(manager,false);
+        ActivityScenario<ManagerProfileActivity> scenario=ActivityScenario.launch(ManagerProfileActivity.class);
+        await(ManagerProfileActivity.class,R.id.layoutChangePassword);
+        onView(withText("Account settings")).check(androidx.test.espresso.assertion.ViewAssertions.doesNotExist());
+        scenario.onActivity(activity->{
+            android.view.ViewGroup card=(android.view.ViewGroup)activity.findViewById(R.id.layoutEditProfile).getParent();
+            int edit=card.indexOfChild(activity.findViewById(R.id.layoutEditProfile));
+            int change=card.indexOfChild(activity.findViewById(R.id.layoutChangePassword));
+            int logout=card.indexOfChild(activity.findViewById(R.id.layoutLogout));
+            assertTrue(edit<change && change<logout);
+        });
+        capture("manager-profile.png");
+        tap(R.id.layoutChangePassword);
+        await(ChangePasswordActivity.class,R.id.btnChangePassword);
+        fill(R.id.editCurrentPassword,"Original123");
+        fill(R.id.editNewPassword,"ManagerChanged123");
+        fill(R.id.editConfirmNewPassword,"ManagerChanged123");
+        tap(R.id.btnChangePassword);
+        await(LoginActivity.class,R.id.btnLogin);
+        assertEquals(-1,session.getUserId());
+        assertNull(db.authenticate(db.getUser(manager).email,"Original123"));
+        assertNotNull(db.authenticate(db.getUser(manager).email,"ManagerChanged123"));
         assertEquals("Account Kitchen",db.getRestaurantForManager(manager).name);
     }
     @Test public void missingEmailDoesNotAdvanceToCodeScreen() {
