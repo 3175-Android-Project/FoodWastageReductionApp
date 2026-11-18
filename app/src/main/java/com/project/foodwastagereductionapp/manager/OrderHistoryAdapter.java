@@ -14,8 +14,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.OrderEntity;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class OrderHistoryAdapter extends RecyclerView.Adapter<OrderHistoryAdapter.OrderViewHolder> {
 
@@ -23,9 +26,7 @@ public class OrderHistoryAdapter extends RecyclerView.Adapter<OrderHistoryAdapte
 
     public void setRows(List<OrderEntity> newRows) {
         rows.clear();
-
         rows.addAll(newRows);
-
         notifyDataSetChanged();
     }
 
@@ -33,30 +34,26 @@ public class OrderHistoryAdapter extends RecyclerView.Adapter<OrderHistoryAdapte
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
         return new OrderViewHolder(inflater.inflate(R.layout.item_order_history, parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         OrderEntity order = rows.get(position);
-
         Context context = holder.itemView.getContext();
 
-        holder.txtOrderNumber.setText("Order #" + order.orderNumber);
+        holder.txtOrderNumber.setText("Order #" + order.id);
 
-        holder.txtDateItems.setText(order.date + " • " + order.itemCount + " item(s)");
+        Date placed = new Date(order.placedAt);
+        String dateStr = new SimpleDateFormat("MMM d, yyyy", Locale.US).format(placed);
+        holder.txtDateItems.setText(dateStr + " • " + order.itemCount + " item(s)");
 
         holder.txtTotal.setText("$" + order.total);
-
         holder.txtStatus.setText(order.status);
 
-        if ("Picked up".equals(order.status) || "Delivered".equals(order.status)) {
-
+        if ("Picked up".equals(order.status) || "Delivered".equals(order.status) || "Completed".equals(order.status)) {
             holder.txtStatus.setTextColor(Color.parseColor("#4CAF50"));
-
         } else if ("Rejected".equals(order.status) || "Cancelled".equals(order.status)) {
-
             holder.txtStatus.setTextColor(Color.RED);
         }
 
@@ -81,11 +78,8 @@ public class OrderHistoryAdapter extends RecyclerView.Adapter<OrderHistoryAdapte
         OrderViewHolder(@NonNull View v) {
             super(v);
             txtOrderNumber = v.findViewById(R.id.txtOrderNumber);
-
             txtDateItems = v.findViewById(R.id.txtDateItems);
-
             txtTotal = v.findViewById(R.id.txtTotal);
-
             txtStatus = v.findViewById(R.id.txtStatus);
         }
     }

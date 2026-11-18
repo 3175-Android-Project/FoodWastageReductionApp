@@ -24,8 +24,9 @@ import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.Restaurant;
 import com.project.foodwastagereductionapp.data.User;
 import com.project.foodwastagereductionapp.manager.ManagerDashboardActivity;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
-public class RestaurantInformationActivity extends AppCompatActivity {
+public class RestaurantInformationActivity extends BaseActivity {
 
     public static final String EXTRA_EDIT_PROFILE =
             "editRestaurantProfile";

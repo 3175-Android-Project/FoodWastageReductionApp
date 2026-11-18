@@ -5,7 +5,6 @@ import com.project.foodwastagereductionapp.data.CartItem;
 import com.project.foodwastagereductionapp.data.Order;
 import com.project.foodwastagereductionapp.data.OrderStatus;
 import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
 
 
 import android.content.res.ColorStateList;
@@ -27,6 +26,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.project.foodwastagereductionapp.R;
+import com.project.foodwastagereductionapp.auth.AuthTasks;
+import com.project.foodwastagereductionapp.auth.SessionManager;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.OrderDetails;
+import com.project.foodwastagereductionapp.data.OrderLine;
 
 /**
  * Live status of an order that is still in progress:
@@ -36,9 +40,23 @@ import com.project.foodwastagereductionapp.R;
  */
 public class CustomerOrderStatusActivity extends AppCompatActivity {
 
-    public static final String EXTRA_ORDER_NUMBER = "orderNumber";
+    public static final String EXTRA_ORDER_ID = "orderId";
 
-    private OrderStore.PlacedOrder placed;
+    private long orderId;
+    private long customerId;
+    private AppDatabaseHelper db;
+    /** Latest data from Room; null until the first load finishes. */
+    private OrderDetails placed;
+    private boolean detailsBound;
+    private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+    // Re-reads the order every few seconds so the steps move while the screen is open
+    private final Runnable poll = new Runnable() {
+        @Override
+        public void run() {
+            load();
+            handler.postDelayed(this, OrderStatusSimulator.POLL_MS);
+        }
+    };
 
     private ImageView imgStatusIcon;
     private TextView txtStatusTitle, txtStatusDesc, txtOrderStatus, txtCancelNote;
@@ -46,19 +64,14 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
     private Button btnCancelOrder;
     private TextView[] stepCircles;
 
-    // Re-draws the screen when the restaurant updates the order while it is open
-    private final OrderStore.Listener orderListener = this::render;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        placed = OrderStore.find(getIntent().getStringExtra(EXTRA_ORDER_NUMBER));
-        if (placed == null) {
-            finish();
-            return;
-        }
+        orderId = getIntent().getLongExtra(EXTRA_ORDER_ID, -1);
+        customerId = new SessionManager(this).getUserId();
+        db = AppDatabaseHelper.getInstance(this);
 
         setContentView(R.layout.activity_customer_order_status);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -82,7 +95,6 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
         btnCancelOrder = findViewById(R.id.btnCancelOrder);
 
         buildSteps();
-        bindOrderDetails();
 
         btnCancelOrder.setOnClickListener(v -> confirmCancel());
     }
@@ -90,15 +102,13 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (placed == null) return;
-        OrderStore.addListener(orderListener);
-        render();
+        handler.post(poll);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        OrderStore.removeListener(orderListener);
+        handler.removeCallbacks(poll);
     }
 
     /** The four numbered steps (Pending, Accepted, Preparing, Ready). */
@@ -115,6 +125,25 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
         }
     }
 
+    /** Reads the order from Room (and moves the demo restaurant along), then draws it. */
+    private void load() {
+        AuthTasks.run(this, null, () -> {
+            OrderStatusSimulator.catchUp(db, customerId); // demo restaurant (see that class)
+            return db.getOrderDetails(customerId, orderId);
+        }, details -> {
+            if (details == null) {
+                finish();
+                return;
+            }
+            placed = details;
+            if (!detailsBound) {
+                bindOrderDetails();
+                detailsBound = true;
+            }
+            render();
+        });
+    }
+
     /** Parts of the screen that do not change with the status. */
     private void bindOrderDetails() {
         Order order = placed.order;
@@ -123,10 +152,10 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
                 .setText(getString(R.string.fmtOrderNumber, order.orderNumber));
 
         LinearLayout llItems = findViewById(R.id.llItems);
-        for (CartItem c : placed.items) {
+        for (OrderLine c : placed.lines) {
             TextView line = new TextView(this);
             line.setTextAppearance(R.style.Text_BodyMd);
-            line.setText(c.item.name + " x " + c.quantity);
+            line.setText(c.name + " x " + c.quantity);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             lp.topMargin = getResources().getDimensionPixelSize(R.dimen.space_xs);
@@ -244,14 +273,14 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
     }
 
     private void cancelOrder() {
-        // The restaurant may have accepted it while the dialog was open
-        if (!OrderStatus.canCancel(placed.order.status)) {
-            Toast.makeText(this, R.string.msgCannotCancel, Toast.LENGTH_SHORT).show();
-            render();
-            return;
-        }
-        // TODO: save to database later
-        OrderStore.updateStatus(placed.order.orderNumber, OrderStatus.CANCELLED); // re-draws via the listener
-        Toast.makeText(this, R.string.msgOrderCancelled, Toast.LENGTH_SHORT).show();
+        // The restaurant may have accepted it while the dialog was open: the database decides
+        AuthTasks.run(this, btnCancelOrder, () -> {
+            OrderStatusSimulator.catchUp(db, customerId);
+            return db.cancelOrder(customerId, orderId);
+        }, cancelled -> {
+            Toast.makeText(this, cancelled ? R.string.msgOrderCancelled : R.string.msgCannotCancel,
+                    Toast.LENGTH_SHORT).show();
+            load();
+        });
     }
 }

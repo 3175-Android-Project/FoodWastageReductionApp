@@ -5,7 +5,6 @@ import com.project.foodwastagereductionapp.data.CartItem;
 import com.project.foodwastagereductionapp.data.Order;
 import com.project.foodwastagereductionapp.data.OrderStatus;
 import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
 
 
 import android.content.Context;
@@ -68,7 +67,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         h.imgIcon.setBackgroundTintList(ContextCompat.getColorStateList(context,
                 negative ? R.color.background_warning : R.color.background_accent2));
 
-        h.itemView.setOnClickListener(v -> OrderNavigator.open(v.getContext(), n.orderNumber));
+        h.itemView.setOnClickListener(v -> OrderNavigator.open(v.getContext(), n.orderId, n.orderStatus));
     }
 
     @Override

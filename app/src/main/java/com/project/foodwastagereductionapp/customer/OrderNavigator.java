@@ -1,15 +1,9 @@
 package com.project.foodwastagereductionapp.customer;
 
-import com.project.foodwastagereductionapp.data.FoodItem;
-import com.project.foodwastagereductionapp.data.CartItem;
-import com.project.foodwastagereductionapp.data.Order;
-import com.project.foodwastagereductionapp.data.OrderStatus;
-import com.project.foodwastagereductionapp.data.AppNotification;
-import com.project.foodwastagereductionapp.data.CustomerProfile;
-
-
 import android.content.Context;
 import android.content.Intent;
+
+import com.project.foodwastagereductionapp.data.OrderStatus;
 
 /**
  * Customer Orders feature
@@ -21,15 +15,12 @@ final class OrderNavigator {
 
     private OrderNavigator() { }
 
-    static void open(Context context, String orderNumber) {
-        OrderStore.PlacedOrder placed = OrderStore.find(orderNumber);
-        if (placed == null) return;
-
-        Class<?> screen = OrderStatus.isActive(placed.order.status)
+    static void open(Context context, long orderId, String status) {
+        Class<?> screen = OrderStatus.isActive(status)
                 ? CustomerOrderStatusActivity.class
                 : CustomerOrderDetailActivity.class;
         Intent intent = new Intent(context, screen);
-        intent.putExtra(CustomerOrderStatusActivity.EXTRA_ORDER_NUMBER, orderNumber);
+        intent.putExtra(CustomerOrderStatusActivity.EXTRA_ORDER_ID, orderId);
         context.startActivity(intent);
     }
 }

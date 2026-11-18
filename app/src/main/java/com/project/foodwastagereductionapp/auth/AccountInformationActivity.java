@@ -17,8 +17,9 @@ import androidx.core.view.WindowInsetsCompat;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
-public class AccountInformationActivity extends AppCompatActivity {
+public class AccountInformationActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

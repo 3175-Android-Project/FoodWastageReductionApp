@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/screen_padding"
+    android:paddingEnd="@dimen/screen_padding"
+    android:paddingTop="16dp"
+    android:paddingBottom="32dp">
+
+    <!-- Location & Header Skeleton -->
+    <View
+        android:layout_width="100dp"
+        android:layout_height="14dp"
+        android:background="@drawable/bg_skeleton" />
+
+    <View
+        android:layout_width="220dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_skeleton" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_skeleton" />
+
+    <!-- Nearby Title -->
+    <View
+        android:layout_width="160dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/bg_skeleton" />
+
+    <!-- Nearby Horizontal Cards Skeleton -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <!-- Card 1 -->
+        <LinearLayout
+            style="@style/Card.Default"
+            android:layout_width="220dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:orientation="vertical">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="130dp"
+                android:background="@drawable/bg_skeleton" />
+            <View
+                android:layout_width="140dp"
+                android:layout_height="16dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_skeleton" />
+            <View
+                android:layout_width="100dp"
+                android:layout_height="14dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_skeleton" />
+        </LinearLayout>
+
+        <!-- Card 2 -->
+        <LinearLayout
+            style="@style/Card.Default"
+            android:layout_width="220dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="130dp"
+                android:background="@drawable/bg_skeleton" />
+            <View
+                android:layout_width="140dp"
+                android:layout_height="16dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_skeleton" />
+            <View
+                android:layout_width="100dp"
+                android:layout_height="14dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_skeleton" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Ending Soon Title -->
+    <View
+        android:layout_width="130dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/bg_skeleton" />
+
+    <!-- Ending Soon Card Skeleton -->
+    <LinearLayout
+        style="@style/Card.Default"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <View
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:background="@drawable/bg_skeleton" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <View
+                android:layout_width="150dp"
+                android:layout_height="16dp"
+                android:background="@drawable/bg_skeleton" />
+            <View
+                android:layout_width="180dp"
+                android:layout_height="14dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_skeleton" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
