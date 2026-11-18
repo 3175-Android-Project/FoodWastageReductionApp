@@ -48,6 +48,15 @@ public class CustomerHomeActivity extends AppCompatActivity {
         cachedHomeUser = null;
     }
 
+    private static final class HomeData {
+        final User user;
+        final List<RestaurantListing> restaurants;
+        HomeData(User user, List<RestaurantListing> restaurants) {
+            this.user = user;
+            this.restaurants = restaurants;
+        }
+    }
+
     // A food item plus the restaurant it belongs to (for the Ending soon list).
     private static final class EndingSoonItem {
         final Restaurant restaurant;
@@ -120,6 +129,10 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
     // Database work on a worker thread (AppDatabaseHelper rule), UI updates on the main thread
     private void loadHome() {
+        SessionManager session = new SessionManager(this);
+        SessionManager.Snapshot snapshot = session.snapshot();
+        long userId = snapshot.userId;
+        if (cachedHomeUser != null && cachedHomeUser.id != userId) invalidateCache();
         boolean isColdLoad = (cachedHomeRestaurants == null || cachedHomeUser == null);
         if (isColdLoad) {
             shimmerViewContainer.setVisibility(View.VISIBLE);
@@ -133,22 +146,30 @@ public class CustomerHomeActivity extends AppCompatActivity {
         }
 
         long startTime = System.currentTimeMillis();
-        long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
-        new Thread(() -> {
+        com.project.foodwastagereductionapp.auth.AuthTasks.run(this, null, () -> {
             User user = db.getUser(userId);
             List<RestaurantListing> all = db.searchRestaurants("");
+            return new HomeData(user, all);
+        }, result -> {
+            User user = result.user;
+            List<RestaurantListing> all = result.restaurants;
+            if (user == null || !user.emailVerified || !User.CUSTOMER.equals(user.role)) {
+                com.project.foodwastagereductionapp.auth.AuthNavigator.logout(this);
+                return;
+            }
             cachedHomeUser = user;
             cachedHomeRestaurants = all;
             long elapsed = System.currentTimeMillis() - startTime;
             long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (isFinishing() || isDestroyed() || !session.isCurrent(snapshot)) return;
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
                 scrollContent.setVisibility(View.VISIBLE);
                 bindHome(user, all);
             }, delay);
-        }).start();
+        });
     }
 
     private void bindHome(User user, List<RestaurantListing> all) {

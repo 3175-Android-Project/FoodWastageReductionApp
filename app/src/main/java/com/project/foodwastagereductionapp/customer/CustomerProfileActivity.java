@@ -100,6 +100,8 @@ public class CustomerProfileActivity extends AppCompatActivity {
                 AuthNavigator.logout(this);
                 return;
             }
+            com.project.foodwastagereductionapp.profile.ProfilePhotoStore.show(
+                    findViewById(R.id.imgAvatar), user.profilePhotoUri);
             txtCustomerName.setText(user.fullName);
             txtEmail.setText(user.email);
             if (user.hasAddress()) {

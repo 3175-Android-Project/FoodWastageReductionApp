@@ -26,6 +26,9 @@ final class UserEntity {
     @ColumnInfo(name = "email_verified")
     boolean emailVerified;
 
+    @ColumnInfo(name = "profile_photo_uri")
+    String profilePhotoUri;
+
     // Added in database
     @ColumnInfo(name = "address")
     String address;

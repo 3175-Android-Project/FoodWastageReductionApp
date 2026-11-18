@@ -47,7 +47,7 @@ public class AuthFlowTest {
     @Before public void setUp() {
         verificationTestCode = InstrumentationRegistry.getArguments().getString("verificationTestCode");
         assumeTrue("Use a test email server and supply verificationTestCode for a configured build",
-                !BuildConfig.EMAIL_VERIFICATION_URL.isEmpty() && verificationTestCode != null);
+                BuildConfig.EMAIL_VERIFICATION_URL.startsWith("http://10.0.2.2:") && verificationTestCode != null);
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         db = AppDatabaseHelper.getInstance(context);
         email = "sqlite-test-" + UUID.randomUUID() + "@example.com";
@@ -79,7 +79,7 @@ public class AuthFlowTest {
         onView(withId(R.id.editPassword)).perform(replaceText("wrong"), closeSoftKeyboard());
         onView(withId(R.id.btnLogin)).perform(click());
         await(LoginActivity.class, R.id.btnLogin);
-        onView(withId(R.id.editPassword)).check(matches(hasErrorText(context.getString(R.string.msgInvalidCredentials))));
+        onView(withId(R.id.editPassword)).check(matches(hasErrorText(context.getString(R.string.msgIncorrectPassword))));
         login();
         await(CustomerHomeActivity.class, R.id.bottomNav);
         onView(withId(R.id.nav_profile)).perform(click());
@@ -87,7 +87,8 @@ public class AuthFlowTest {
         onView(withId(R.id.txtCustomerName)).check(matches(withText("Daeun Test")));
         onView(withId(R.id.txtEmail)).check(matches(withText(email)));
         onView(withId(R.id.txtAddress)).check(matches(withSubstring("Vancouver")));
-        onView(withId(R.id.layoutLogout)).perform(click());
+        onView(withId(R.id.layoutLogout)).perform(scrollTo(), click());
+        onView(withId(R.id.dialogPositive)).perform(click());
         await(LoginActivity.class, R.id.btnLogin);
         assertEquals(-1, new SessionManager(context).getUserId());
         login();
@@ -128,7 +129,7 @@ public class AuthFlowTest {
         await(ManagerProfileActivity.class, R.id.layoutEditProfile);
         awaitRestaurantName("Renamed Kitchen");
         assertEquals(restaurantId, db.getRestaurantForManager(manager.id).id);
-        onView(withId(R.id.btnBack)).perform(click());
+        onView(withId(R.id.nav_home)).perform(click());
         await(ManagerDashboardActivity.class, R.id.bottomNav);
         onView(withId(R.id.nav_profile)).perform(click());
         await(ManagerProfileActivity.class, R.id.layoutEditProfile);
@@ -136,7 +137,8 @@ public class AuthFlowTest {
         await(ManagerDashboardActivity.class, R.id.bottomNav);
         onView(withId(R.id.cardRestaurantProfile)).perform(scrollTo(), click());
         await(ManagerProfileActivity.class, R.id.layoutEditProfile);
-        onView(withId(R.id.layoutLogout)).perform(click());
+        onView(withId(R.id.layoutLogout)).perform(scrollTo(), click());
+        onView(withId(R.id.dialogPositive)).perform(click());
         await(LoginActivity.class, R.id.btnLogin);
         login();
         await(ManagerDashboardActivity.class, R.id.bottomNav);
@@ -204,6 +206,7 @@ public class AuthFlowTest {
         onView(withId(R.id.btnContinue)).perform(click());
         await(AccountInformationActivity.class, R.id.btnCreateAccount);
         fill(R.id.editFullName, "Daeun Test");
+        fill(R.id.editAddress, "405 Main Street");
         fill(R.id.editCity, "Vancouver");
         fill(R.id.editProvince, "BC");
         fill(R.id.editPostalCode, "V6B 1A1");

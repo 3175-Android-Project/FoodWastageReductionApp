@@ -39,7 +39,7 @@ public class AppDatabaseHelperTest {
     }
     private Restaurant restaurant(long manager, String name) {
         return new Restaurant(0, manager, name, "Burnaby", "BC", "V5A 1S6",
-                "6045551234", "Korean", "Fresh surplus food");
+                "6045551234", "Korean", "Fresh surplus food", "");
     }
     @Test public void customerPersistsAfterDatabaseReopenAndAuthenticates() {
         long id = user("  Customer@Example.com  ", User.CUSTOMER);

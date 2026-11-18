@@ -116,6 +116,14 @@
                     android:layout_marginEnd="@dimen/space_lg"
                     android:background="@color/background_secondary" />
 
+                <Button
+                    android:id="@+id/btnAccountSettings"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="64dp"
+                    android:text="@string/btnAccountSettings" />
+
                 <LinearLayout
                     android:id="@+id/layoutLogout"
                     android:layout_width="match_parent"

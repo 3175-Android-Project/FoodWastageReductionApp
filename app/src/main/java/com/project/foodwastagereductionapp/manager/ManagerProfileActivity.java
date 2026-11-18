@@ -51,6 +51,8 @@ public class ManagerProfileActivity extends AppCompatActivity {
             intent.putExtra(RestaurantInformationActivity.EXTRA_EDIT_PROFILE, true);
             startActivity(intent);
         });
+        findViewById(R.id.btnAccountSettings).setOnClickListener(v -> startActivity(new Intent(
+                this, com.project.foodwastagereductionapp.customer.EditProfileActivity.class)));
         findViewById(R.id.layoutLogout).setOnClickListener(
                 view -> ConfirmationDialog.showLogout(this, () -> AuthNavigator.logout(this)));
 
@@ -80,7 +82,10 @@ public class ManagerProfileActivity extends AppCompatActivity {
 
     @Override protected void onResume() {
         super.onResume();
-        Restaurant cached = ManagerDashboardActivity.getCachedRestaurant();
+        SessionManager session = new SessionManager(this);
+        SessionManager.Snapshot snapshot = session.snapshot();
+        long userId = snapshot.userId;
+        Restaurant cached = ManagerDashboardActivity.getCachedRestaurant(userId);
         boolean isColdLoad = (cached == null);
         View editProfile = findViewById(R.id.layoutEditProfile);
 
@@ -98,7 +103,6 @@ public class ManagerProfileActivity extends AppCompatActivity {
         }
 
         long startTime = System.currentTimeMillis();
-        long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
             User user = db.getUser(userId);
@@ -112,6 +116,7 @@ public class ManagerProfileActivity extends AppCompatActivity {
             long elapsed = System.currentTimeMillis() - startTime;
             long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (isFinishing() || isDestroyed() || !session.isCurrent(snapshot)) return;
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
                 scrollContent.setVisibility(View.VISIBLE);
