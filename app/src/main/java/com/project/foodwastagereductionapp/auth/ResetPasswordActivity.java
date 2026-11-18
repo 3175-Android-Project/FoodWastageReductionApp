@@ -4,221 +4,60 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
-import com.project.foodwastagereductionapp.data.PasswordHasher;
+import com.project.foodwastagereductionapp.ui.BaseActivity;
 
-public class ResetPasswordActivity extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+public class ResetPasswordActivity extends BaseActivity {
+    public static final String EXTRA_RESET_TOKEN = "resetToken";
+    @Override protected void onCreate(Bundle state) {
+        super.onCreate(state);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_reset_password);
-
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main),
-                (v, insets) -> {
-
-                    Insets systemBars =
-                            insets.getInsets(
-                                    WindowInsetsCompat.Type.systemBars()
-                            );
-
-                    v.setPadding(
-                            systemBars.left,
-                            systemBars.top,
-                            systemBars.right,
-                            systemBars.bottom
-                    );
-
-                    return insets;
-                }
-        );
-
-
-        // Get email from ResetLinkSentActivity
-        String email =
-                getIntent().getStringExtra("email");
-
-
-        if (email == null || email.isEmpty()) {
-
-            Toast.makeText(
-                    this,
-                    "Unable to reset password.",
-                    Toast.LENGTH_LONG
-            ).show();
-
-            finish();
-
-            return;
-        }
-
-
-        // Header
-        TextView txtHeaderTitle =
-                findViewById(R.id.txtHeaderTitle);
-
-        txtHeaderTitle.setText(R.string.app_name);
-
-
-        ImageView btnBack =
-                findViewById(R.id.btnBack);
-
-        btnBack.setOnClickListener(v -> finish());
-
-
-        // Input fields
-        EditText editNewPassword =
-                findViewById(R.id.editNewPassword);
-
-        EditText editConfirmNewPassword =
-                findViewById(R.id.editConfirmNewPassword);
-
-
-        // Reset button
-        Button btnResetPassword =
-                findViewById(R.id.btnResetPassword);
-
-
-        btnResetPassword.setOnClickListener(v -> {
-
-            String newPassword =
-                    editNewPassword
-                            .getText()
-                            .toString()
-                            .trim();
-
-            String confirmPassword =
-                    editConfirmNewPassword
-                            .getText()
-                            .toString()
-                            .trim();
-
-
-            // Empty validation
-            if (newPassword.isEmpty()
-                    || confirmPassword.isEmpty()) {
-
-                Toast.makeText(
-                        ResetPasswordActivity.this,
-                        "Please enter both password fields",
-                        Toast.LENGTH_SHORT
-                ).show();
-
-                return;
-            }
-
-
-            // Minimum password length
-            if (newPassword.length() < 6) {
-
-                editNewPassword.setError(
-                        "Use at least 6 characters"
-                );
-
-                editNewPassword.requestFocus();
-
-                return;
-            }
-
-
-            // Password match validation
-            if (!newPassword.equals(confirmPassword)) {
-
-                Toast.makeText(
-                        ResetPasswordActivity.this,
-                        "Passwords do not match",
-                        Toast.LENGTH_SHORT
-                ).show();
-
-                return;
-            }
-
-
-            btnResetPassword.setEnabled(false);
-
-
-            AppDatabaseHelper db =
-                    AppDatabaseHelper.getInstance(
-                            ResetPasswordActivity.this
-                    );
-
-
-            AuthTasks.run(
-                    ResetPasswordActivity.this,
-                    null,
-
-                    // Background thread
-                    () -> {
-
-                        String passwordHash =
-                                PasswordHasher.hash(
-                                        newPassword
-                                );
-
-
-                        return db.updatePasswordByEmail(
-                                email,
-                                passwordHash
-                        );
-                    },
-
-                    // Success
-                    updated -> {
-
-                        btnResetPassword.setEnabled(true);
-
-
-                        if (!updated) {
-
-                            Toast.makeText(
-                                    ResetPasswordActivity.this,
-                                    "Account not found.",
-                                    Toast.LENGTH_LONG
-                            ).show();
-
-                            return;
-                        }
-
-
-                        Intent intent =
-                                new Intent(
-                                        ResetPasswordActivity.this,
-                                        PasswordResetCompleteActivity.class
-                                );
-
-
-                        startActivity(intent);
-
-                        finish();
-                    },
-
-                    // Error
-                    error -> {
-
-                        btnResetPassword.setEnabled(true);
-
-
-                        Toast.makeText(
-                                ResetPasswordActivity.this,
-                                "Unable to reset password. Please try again.",
-                                Toast.LENGTH_LONG
-                        ).show();
-                    }
-            );
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(bars.left, bars.top, bars.right,
+                    Math.max(bars.bottom, insets.getInsets(WindowInsetsCompat.Type.ime()).bottom));
+            return insets;
         });
+        ((TextView) findViewById(R.id.txtHeaderTitle)).setText(R.string.app_name);
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        String email = AppDatabaseHelper.normalizeEmail(getIntent().getStringExtra("email"));
+        String token = getIntent().getStringExtra(EXTRA_RESET_TOKEN);
+        EditText password = findViewById(R.id.editNewPassword);
+        EditText confirmation = findViewById(R.id.editConfirmNewPassword);
+        Button save = findViewById(R.id.btnResetPassword);
+        save.setEnabled(false);
+        AuthTasks.run(this, null, () -> AppDatabaseHelper.getInstance(this)
+                .isPasswordResetGrantValid(email, token), valid -> {
+            if (!valid) { authorizationExpired(); return; }
+            save.setEnabled(true);
+        });
+        save.setOnClickListener(v -> {
+            String value = password.getText().toString();
+            if (value.length() < 6) { password.setError(getString(R.string.msgPasswordTooShort)); return; }
+            if (!value.equals(confirmation.getText().toString())) {
+                confirmation.setError(getString(R.string.msgPasswordsDoNotMatch)); return;
+            }
+            AuthTasks.run(this, save, () -> AppDatabaseHelper.getInstance(this)
+                    .resetPassword(email, token, value), updated -> {
+                if (!updated) { authorizationExpired(); return; }
+                new SessionManager(this).clear();
+                Intent login = new Intent(this, LoginActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivities(new Intent[]{login, new Intent(this, PasswordResetCompleteActivity.class)});
+                finish();
+            });
+        });
+    }
+    private void authorizationExpired() {
+        Toast.makeText(this, R.string.msgResetAuthorizationExpired, Toast.LENGTH_LONG).show();
+        finish();
     }
 }

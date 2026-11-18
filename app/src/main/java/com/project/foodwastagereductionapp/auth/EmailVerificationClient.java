@@ -1,6 +1,7 @@
 package com.project.foodwastagereductionapp.auth;
 
 import android.os.SystemClock;
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,7 +24,7 @@ final class EmailVerificationClient {
     }
 
     Challenge requestCode(String email) throws IOException, JSONException {
-        JSONObject response = post("/v1/email/request", new JSONObject().put("email", email), true);
+        JSONObject response = post("/v1/email/request", new JSONObject().put("email", AppDatabaseHelper.normalizeEmail(email)), true);
         String id = response.getString("challengeId");
         if (!id.matches("[A-Za-z0-9_-]{32}")) throw new IOException("Invalid challenge response");
         int expiresIn = Math.max(1, Math.min(response.getInt("expiresIn"), 300));
@@ -31,10 +32,11 @@ final class EmailVerificationClient {
     }
 
     void verifyCode(String email, String challengeId, String code) throws IOException, JSONException {
+        email = AppDatabaseHelper.normalizeEmail(email);
         JSONObject request = new JSONObject().put("email", email)
                 .put("challengeId", challengeId).put("code", code);
         JSONObject response = post("/v1/email/verify", request, false);
-        if (!Boolean.TRUE.equals(response.opt("verified")) || !email.equals(response.optString("email"))) {
+        if (!Boolean.TRUE.equals(response.opt("verified")) || !email.equals(AppDatabaseHelper.normalizeEmail(response.optString("email")))) {
             throw new IOException("Unexpected verification response");
         }
     }

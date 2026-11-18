@@ -42,6 +42,12 @@ public final class AppDatabaseHelper {
     /** Hash is generated before entering this method; plaintext passwords are never stored. */
     public long createUser(String email, String passwordHash, String role, String fullName,
                            String city, String province, String postalCode) {
+        return createUser(email, passwordHash, role, fullName, city, province, postalCode, "", "");
+    }
+
+    public long createUser(String email, String passwordHash, String role, String fullName,
+                           String city, String province, String postalCode, String address,
+                           String photoUri) {
         if (!validEmail(email) || passwordHash == null || !passwordHash.startsWith("pbkdf2_sha1$")
                 || !(User.CUSTOMER.equals(role) || User.MANAGER.equals(role))) {
             throw new IllegalArgumentException("Invalid signup details");
@@ -54,6 +60,8 @@ public final class AppDatabaseHelper {
         user.city = required(city);
         user.province = required(province);
         user.postalCode = required(postalCode);
+        user.address = address == null ? "" : address.trim();
+        user.profilePhotoUri = photoUri == null ? "" : photoUri;
         long id = database.userDao().insert(user);
         if (id == -1) throw new DuplicateEmailException();
         return id;
@@ -125,12 +133,70 @@ public final class AppDatabaseHelper {
         return new Restaurant(e.id, e.managerId, e.name, e.city, e.province,
                 e.postalCode, e.phone, e.cuisineType, e.description, e.imageUri);
     }
-    public boolean updatePasswordByEmail(String email, String newPasswordHash) {
-        if (!validEmail(email) || newPasswordHash == null
-                || !newPasswordHash.startsWith("pbkdf2_sha1$")) {
-            throw new IllegalArgumentException("Invalid password reset details");
+    /** Called only after the email service has verified a reset code for this account. */
+    public String issuePasswordResetGrant(
+            com.project.foodwastagereductionapp.auth.PasswordResetVerification.VerifiedEmail proof) {
+        if (proof == null) throw new IllegalArgumentException("Email verification is required");
+        String email = proof.getEmail();
+        String token = ResetTokens.create();
+        long now = System.currentTimeMillis();
+        database.runInTransaction(() -> {
+            UserEntity user = database.userDao().findByEmail(normalizeEmail(email));
+            if (user == null) throw new IllegalArgumentException("Account not found");
+            PasswordResetGrantDao grants = database.passwordResetGrantDao();
+            grants.deleteExpired(now);
+            grants.deleteForUser(user.id);
+            PasswordResetGrantEntity grant = new PasswordResetGrantEntity();
+            grant.tokenHash = ResetTokens.hash(token);
+            grant.userId = user.id;
+            grant.issuedAt = now;
+            grant.expiresAt = now + 5 * 60 * 1000L;
+            grants.insert(grant);
+        });
+        return token;
+    }
+
+    public boolean isPasswordResetGrantValid(String email, String token) {
+        String hash = ResetTokens.hash(token);
+        UserEntity user = database.userDao().findByEmail(normalizeEmail(email));
+        return hash != null && user != null && database.passwordResetGrantDao()
+                .findValid(hash, user.id, System.currentTimeMillis()) != null;
+    }
+
+    /** Password update and token consumption either both commit or both roll back. */
+    public boolean resetPassword(String email, String token, String newPassword) {
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("Use at least 6 characters");
         }
-        return database.userDao().updatePassword(normalizeEmail(email), newPasswordHash) == 1;
+        String hash = ResetTokens.hash(token);
+        if (hash == null) return false;
+        String passwordHash = PasswordHasher.hash(newPassword);
+        final boolean[] updated = {false};
+        database.runInTransaction(() -> {
+            UserEntity user = database.userDao().findByEmail(normalizeEmail(email));
+            if (user == null || database.passwordResetGrantDao()
+                    .findValid(hash, user.id, System.currentTimeMillis()) == null) return;
+            updated[0] = database.userDao().updatePassword(user.id, passwordHash) == 1;
+            if (updated[0]) database.passwordResetGrantDao().deleteForUser(user.id);
+        });
+        return updated[0];
+    }
+
+    /** Changing a signed-in user's password also requires their current password. */
+    public boolean changePassword(long userId, String currentPassword, String newPassword) {
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("Use at least 6 characters");
+        }
+        String hash = PasswordHasher.hash(newPassword);
+        final boolean[] updated = {false};
+        database.runInTransaction(() -> {
+            UserEntity user = database.userDao().findById(userId);
+            if (user == null || !user.emailVerified
+                    || !PasswordHasher.verify(currentPassword, user.passwordHash)) return;
+            updated[0] = database.userDao().updatePassword(userId, hash) == 1;
+            if (updated[0]) database.passwordResetGrantDao().deleteForUser(userId);
+        });
+        return updated[0];
     }
 
     public void deleteUser(long userId) {
@@ -326,15 +392,24 @@ public final class AppDatabaseHelper {
         if (user == null) return null;
         return new User(user.id, user.email, user.role, user.fullName, user.city,
                 user.province, user.postalCode, user.emailVerified,
-                user.address, user.phone);
+                user.address, user.phone, user.profilePhotoUri);
     }
 
     // Edit Profile: name, city, province and postal code are required; address and phone are optional.
     public User updateProfile(long userId, String fullName, String address, String city,
                               String province, String postalCode, String phone) {
+        User current = getUser(userId);
+        if (current == null) throw new IllegalArgumentException("Account no longer exists");
+        return updateProfile(userId, fullName, address, city, province, postalCode, phone,
+                current.profilePhotoUri);
+    }
+
+    public User updateProfile(long userId, String fullName, String address, String city,
+                              String province, String postalCode, String phone, String photoUri) {
         int updated = database.userDao().updateProfile(userId, required(fullName),
                 address == null ? "" : address.trim(), required(city), required(province),
-                required(postalCode), phone == null ? "" : phone.trim());
+                required(postalCode), phone == null ? "" : phone.trim(),
+                photoUri == null ? "" : photoUri);
         if (updated != 1) throw new IllegalArgumentException("Account no longer exists");
         return getUser(userId);
     }

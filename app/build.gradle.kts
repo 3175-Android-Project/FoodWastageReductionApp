@@ -46,6 +46,9 @@ android {
 
     buildTypes {
         debug {
+            if (providers.gradleProperty("grabbitAccountTestBuild").orNull == "true") {
+                applicationIdSuffix = ".accounttest"
+            }
             buildConfigField("String", "EMAIL_VERIFICATION_URL", "\"$verificationUrl\"")
         }
         release {
@@ -67,6 +70,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.room.runtime)
     implementation(libs.shimmer)
+    implementation(libs.exifinterface)
     annotationProcessor(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)

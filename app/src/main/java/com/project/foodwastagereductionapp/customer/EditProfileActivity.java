@@ -20,12 +20,14 @@ import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.ui.BaseActivity;
 
-/** Edits the logged-in customer's account (saved in the database). */
+/** Edits the signed-in user's account (saved in the database). */
 public class EditProfileActivity extends BaseActivity {
 
     private EditText inputFullName, etAddress, etCity, etProvince, etPostalCode, etPhone;
     private Button btnSaveChanges;
     private long userId;
+    private boolean restoringForm;
+    private com.project.foodwastagereductionapp.profile.ProfilePhotoPicker photoPicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,11 @@ public class EditProfileActivity extends BaseActivity {
         etPhone = findViewById(R.id.etPhone);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
 
+        photoPicker = new com.project.foodwastagereductionapp.profile.ProfilePhotoPicker(this, savedInstanceState);
+        btnSaveChanges.setEnabled(false);
+        findViewById(R.id.btnChangePassword).setOnClickListener(v -> startActivity(
+                new android.content.Intent(this, com.project.foodwastagereductionapp.auth.ChangePasswordActivity.class)));
+        restoringForm = savedInstanceState != null;
         userId = new SessionManager(this).getUserId();
         loadProfile();
 
@@ -64,20 +71,26 @@ public class EditProfileActivity extends BaseActivity {
     /** Fills the form with the logged-in account (same pattern as CustomerProfileActivity). */
     private void loadProfile() {
         AuthTasks.run(this, null, () -> AppDatabaseHelper.getInstance(this).getUser(userId), user -> {
-            if (user == null) {
+            if (user == null || !user.emailVerified) {
                 AuthNavigator.logout(this);
                 return;
             }
-            inputFullName.setText(user.fullName);
-            etAddress.setText(emptyIfNull(user.address));
-            etCity.setText(user.city);
-            etProvince.setText(user.province);
-            etPostalCode.setText(user.postalCode);
-            etPhone.setText(emptyIfNull(user.phone));
+            if (!restoringForm) {
+                inputFullName.setText(user.fullName);
+                etAddress.setText(emptyIfNull(user.address));
+                etCity.setText(user.city);
+                etProvince.setText(user.province);
+                etPostalCode.setText(user.postalCode);
+                etPhone.setText(emptyIfNull(user.phone));
+            }
+            photoPicker.setInitial(user.profilePhotoUri);
+            btnSaveChanges.setEnabled(true);
         });
     }
 
     private void saveProfile() {
+        if (photoPicker.isBusy()) return;
+        String photoUri = photoPicker.getPhotoUri();
         String fullName = textOf(inputFullName);
         String address = textOf(etAddress);
         String city = textOf(etCity);
@@ -90,6 +103,7 @@ public class EditProfileActivity extends BaseActivity {
             inputFullName.setError(getString(R.string.msgFullNameRequired));
             return;
         }
+        if (address.isEmpty()) { etAddress.setError(getString(R.string.msgAddressRequired)); return; }
         if (city.isEmpty() || province.isEmpty() || postalCode.isEmpty()) {
             Toast.makeText(this, R.string.msgCompleteAllFields, Toast.LENGTH_SHORT).show();
             return;
@@ -97,11 +111,17 @@ public class EditProfileActivity extends BaseActivity {
 
         AuthTasks.run(this, btnSaveChanges,
                 () -> AppDatabaseHelper.getInstance(this).updateProfile(
-                        userId, fullName, address, city, province, postalCode, phone),
+                        userId, fullName, address, city, province, postalCode, phone, photoUri),
                 user -> {
+                    SessionManager.invalidateCaches();
                     Toast.makeText(this, R.string.msgProfileSaved, Toast.LENGTH_SHORT).show();
                     finish(); // back to Profile, which reloads in onResume()
                 });
+    }
+
+    @Override protected void onSaveInstanceState(Bundle state) {
+        if (photoPicker != null) photoPicker.saveState(state);
+        super.onSaveInstanceState(state);
     }
 
     private static String emptyIfNull(String value) {

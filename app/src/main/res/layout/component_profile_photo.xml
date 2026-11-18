@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:gravity="center_horizontal" android:orientation="vertical"
+    android:paddingTop="16dp" android:paddingBottom="8dp">
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imgProfilePhoto" android:layout_width="88dp" android:layout_height="88dp"
+        android:background="@drawable/bg_status_badge" android:contentDescription="@string/txtProfilePhoto"
+        android:src="@drawable/icon_user" app:shapeAppearanceOverlay="@style/ShapeAppearance.Rounded12" />
+    <TextView style="@style/Text.BodyXs" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_marginTop="8dp"
+        android:text="@string/txtProfilePhoto" />
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:gravity="center" android:orientation="horizontal">
+        <Button android:id="@+id/btnChoosePhoto" style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:minHeight="48dp" android:text="@string/btnChoosePhoto" />
+        <Button android:id="@+id/btnRemovePhoto" style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:minHeight="48dp" android:text="@string/btnRemovePhoto" />
+    </LinearLayout>
+</LinearLayout>

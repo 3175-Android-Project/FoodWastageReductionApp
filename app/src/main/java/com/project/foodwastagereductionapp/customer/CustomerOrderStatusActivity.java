@@ -214,7 +214,7 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
         showIcon(icon, R.color.background_accent1, R.color.background_accent2);
         txtStatusTitle.setText(title);
         if (OrderStatus.READY.equals(status)) {
-            txtStatusDesc.setText(getString(desc, placed.order.orderNumber));
+            txtStatusDesc.setText(getString(R.string.msgStatusReady, placed.order.orderNumber));
         } else {
             txtStatusDesc.setText(desc);
         }

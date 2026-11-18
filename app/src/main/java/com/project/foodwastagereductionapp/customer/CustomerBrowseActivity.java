@@ -32,6 +32,8 @@ public class CustomerBrowseActivity extends BaseActivity {
     private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
     private RecyclerView recyclerRestaurants;
     private static List<RestaurantListing> cachedRestaurants = null;
+    private long searchRequest;
+    public static void invalidateCache() { cachedRestaurants = null; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +102,10 @@ public class CustomerBrowseActivity extends BaseActivity {
     }
 
     private void loadRestaurants(String query) {
+        long request = ++searchRequest;
+        com.project.foodwastagereductionapp.auth.SessionManager session =
+                new com.project.foodwastagereductionapp.auth.SessionManager(this);
+        com.project.foodwastagereductionapp.auth.SessionManager.Snapshot snapshot = session.snapshot();
         boolean isColdLoad = (query.isEmpty() && cachedRestaurants == null);
         if (!query.isEmpty() || cachedRestaurants == null) {
             shimmerViewContainer.setVisibility(View.VISIBLE);
@@ -116,21 +122,23 @@ public class CustomerBrowseActivity extends BaseActivity {
 
         long startTime = System.currentTimeMillis();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
-        new Thread(() -> {
-            List<RestaurantListing> results = db.searchRestaurants(query);
+        com.project.foodwastagereductionapp.auth.AuthTasks.run(this, null,
+                () -> db.searchRestaurants(query), results -> {
+            if (request != searchRequest) return;
             if (query.isEmpty()) {
                 cachedRestaurants = results;
             }
             long elapsed = System.currentTimeMillis() - startTime;
             long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (isFinishing() || isDestroyed() || request != searchRequest || !session.isCurrent(snapshot)) return;
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
                 recyclerRestaurants.setVisibility(View.VISIBLE);
                 adapter.setRows(results);
                 txtEmpty.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
             }, delay);
-        }).start();
+        });
     }
 
     private void goTo(Class<?> screen) {
