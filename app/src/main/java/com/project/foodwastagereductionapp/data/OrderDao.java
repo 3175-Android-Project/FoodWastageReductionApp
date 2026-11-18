@@ -3,19 +3,26 @@ package com.project.foodwastagereductionapp.data;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import java.util.List;
 
 @Dao
-interface OrderDao {
+public interface OrderDao {
     @Insert
     long insert(OrderEntity order);
+
+    @Update
+    void update(OrderEntity order);
 
     @Insert
     void insertItems(List<OrderItemEntity> items);
 
     @Query("SELECT * FROM orders WHERE customer_id = :customerId ORDER BY placed_at DESC, id DESC")
     List<OrderEntity> findByCustomer(long customerId);
+
+    @Query("SELECT * FROM orders WHERE restaurant_id = :restaurantId ORDER BY placed_at DESC, id DESC")
+    List<OrderEntity> findByRestaurant(long restaurantId);
 
     /** Only returns the order if it belongs to this customer. */
     @Query("SELECT * FROM orders WHERE id = :orderId AND customer_id = :customerId LIMIT 1")
@@ -30,4 +37,18 @@ interface OrderDao {
     /** Changes the status only if it still is {@code expectedStatus}; returns rows changed (0 or 1). */
     @Query("UPDATE orders SET status = :newStatus WHERE id = :orderId AND status = :expectedStatus")
     int updateStatus(long orderId, String newStatus, String expectedStatus);
+
+    @Query("SELECT * FROM orders " +
+            "WHERE restaurant_id = :restaurantId " +
+            "AND (" +
+            "status = 'Completed' OR " +
+            "status = 'Picked up' OR " +
+            "status = 'Delivered' OR " +
+            "status = 'Rejected' OR " +
+            "status = 'Cancelled')"
+    )
+    List<OrderEntity> getOrderHistory(long restaurantId);
+
+    @Query("SELECT * FROM orders " + "WHERE id = :orderId")
+    OrderEntity getOrder(long orderId);
 }

@@ -311,6 +311,21 @@
 
     </androidx.core.widget.NestedScrollView>
 
+    <!-- Shimmer Skeleton Loading State -->
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerViewContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/navDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:shimmer_duration="1000">
+
+        <include layout="@layout/layout_skeleton_manager_home" />
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
     <View
         android:id="@+id/navDivider"
         android:layout_width="0dp"

@@ -12,7 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 @Database(
         entities = {UserEntity.class, RestaurantEntity.class, OrderEntity.class,
                 OrderItemEntity.class, NotificationEntity.class, FoodItemEntity.class},
-        version = 4,
+        version = 5,
         exportSchema = false
 )
 abstract class AppDatabase extends RoomDatabase {
@@ -73,6 +73,14 @@ abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    /** Version 5: managers can see order history */
+    static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            // Already handled or future fields if needed
+        }
+    };
+
     private static volatile AppDatabase instance;
 
     static AppDatabase getInstance(Context context, String databaseName) {
@@ -90,7 +98,7 @@ abstract class AppDatabase extends RoomDatabase {
                                         AppDatabase.class,
                                         databaseName
                                 )
-                                .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                                 .fallbackToDestructiveMigration()
                                 .build();
                         result.getOpenHelper().getWritableDatabase();
@@ -101,6 +109,7 @@ abstract class AppDatabase extends RoomDatabase {
                                         AppDatabase.class,
                                         databaseName
                                 )
+                                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                                 .fallbackToDestructiveMigration()
                                 .build();
                     }

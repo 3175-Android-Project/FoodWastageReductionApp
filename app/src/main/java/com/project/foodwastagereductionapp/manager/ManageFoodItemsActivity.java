@@ -16,15 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
-import com.project.foodwastagereductionapp.customer.FoodItemAdapter;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
-import android.widget.TextView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.data.Restaurant;
 
 public class ManageFoodItemsActivity extends AppCompatActivity {
     private RecyclerView recyclerFoods;
     private FoodAdapter adapter;
+    private TextView txtEmpty;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,21 +38,21 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.txtHeaderTitle)).setText(R.string.managerFoodItemsActivity);
         findViewById(R.id.btnBack).setVisibility(View.GONE);
 
+        // Bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
-        bottomNav.setItemActiveIndicatorEnabled(false);
         bottomNav.setSelectedItemId(R.id.nav_items);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_items) return true;
-            if (id == R.id.nav_home) {
-                startActivity(new Intent(this, ManagerDashboardActivity.class));
-                overridePendingTransition(0, 0);
-                finish();
+            if (id == R.id.nav_items) {
+                return true; // already here
+            } else if (id == R.id.nav_home) {
+                goTo(ManagerDashboardActivity.class);
                 return true;
             } else if (id == R.id.nav_profile) {
-                startActivity(new Intent(this, ManagerProfileActivity.class));
-                overridePendingTransition(0, 0);
-                finish();
+                goTo(ManagerProfileActivity.class);
+                return true;
+            } else if (id == R.id.nav_orders) {
+                goTo(IncomingOrdersActivity.class);
                 return true;
             }
             return false;
@@ -64,13 +63,8 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
         adapter = new FoodAdapter(
                 //Delete
                 food -> {
-
-                    AuthTasks.run(
-                            this,
-                            null,
-                            () -> {
-                                AppDatabaseHelper db =
-                                        AppDatabaseHelper.getInstance(this);
+                    AuthTasks.run(this, null, () -> {
+                                AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
                                 db.deleteFoodItem(food.id);
                                 return true;
                             },
@@ -81,7 +75,6 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
                 },
                 //Avaiablility
                 (food, available) -> {
-
                     AuthTasks.run(this, null, () -> {
                                 AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
                                 food.available = available;
@@ -89,12 +82,12 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
                                 return true;
                             },
                             result -> {
-
                             }
                     );
                 }
         );
         recyclerFoods.setAdapter(adapter);
+        txtEmpty = findViewById(R.id.txtEmpty);
 
         long managerId = new SessionManager(this).getUserId();
         AuthTasks.run(
@@ -107,6 +100,17 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
                 },
                 list -> {
                     adapter.setRows(list);
+                    txtEmpty.setVisibility(list == null || list.isEmpty() ? View.VISIBLE : View.GONE);
                 });
+
+        findViewById(R.id.btnAddFood).setOnClickListener(v -> {
+                    startActivity(new Intent(ManageFoodItemsActivity.this, AddFoodItemActivity.class));
+                });
+    }
+
+    private void goTo(Class<?> screen) {
+        startActivity(new Intent(this, screen));
+        overridePendingTransition(0, 0);
+        finish();
     }
 }

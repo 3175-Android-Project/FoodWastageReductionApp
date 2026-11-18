@@ -20,29 +20,29 @@ import androidx.room.PrimaryKey;
         },
         indices = {@Index("customer_id"), @Index("restaurant_id")}
 )
-final class OrderEntity {
+public class OrderEntity {
     @PrimaryKey(autoGenerate = true)
-    long id;
+    public long id;
     @ColumnInfo(name = "customer_id")
-    long customerId;
+    public long customerId;
     @ColumnInfo(name = "restaurant_id")
-    Long restaurantId;
+    public Long restaurantId;
     @ColumnInfo(name = "restaurant_name")
-    String restaurantName;
+    public String restaurantName;
     @ColumnInfo(name = "restaurant_address")
-    String restaurantAddress;
+    public String restaurantAddress;
     @ColumnInfo(name = "restaurant_image_uri")
-    String restaurantImageUri;
+    public String restaurantImageUri;
     @ColumnInfo(name = "placed_at")
-    long placedAt;
+    public long placedAt;
     @ColumnInfo(name = "item_count")
-    int itemCount;
-    double total;
-    String status;
+    public int itemCount;
+    public double total;
+    public String status;
     @ColumnInfo(name = "pickup_time")
-    String pickupTime;
+    public String pickupTime;
     @ColumnInfo(name = "is_delivery")
-    boolean isDelivery;
+    public boolean isDelivery;
     @ColumnInfo(name = "delivery_address")
-    String deliveryAddress;
+    public String deliveryAddress;
 }

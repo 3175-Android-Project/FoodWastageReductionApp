@@ -230,6 +230,19 @@ public final class AppDatabaseHelper {
         return result;
     }
 
+    /** All of this restaurant's orders, newest first. */
+    public List<Order> getOrdersForRestaurant(long restaurantId) {
+        List<Order> result = new ArrayList<>();
+        for (OrderEntity e : database.orderDao().findByRestaurant(restaurantId)) {
+            result.add(toOrder(e));
+        }
+        return result;
+    }
+
+    public List<OrderEntity> getOrderEntitiesForRestaurant(long restaurantId) {
+        return database.orderDao().findByRestaurant(restaurantId);
+    }
+
     /** Null if the order does not exist or belongs to someone else. */
     public OrderDetails getOrderDetails(long customerId, long orderId) {
         OrderEntity e = database.orderDao().findForCustomer(customerId, orderId);
@@ -382,5 +395,19 @@ public final class AppDatabaseHelper {
     //Updating foodItems
     public void updateFoodItem(FoodItemEntity item){
         database.foodItemDao().update(item);
+    }
+
+    //Using order entity
+    public long createOrder(OrderEntity order){
+        return database.orderDao().insert(order);
+    }
+    public List<OrderEntity> getOrderHistory(long restaurantId){
+        return database.orderDao().getOrderHistory(restaurantId);
+    }
+    public OrderEntity getOrder(long orderId){
+        return database.orderDao().getOrder(orderId);
+    }
+    public void updateOrder(OrderEntity order){
+        database.orderDao().update(order);
     }
 }
