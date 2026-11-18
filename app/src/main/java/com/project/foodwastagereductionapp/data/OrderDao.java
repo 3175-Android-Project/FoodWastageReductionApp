@@ -21,6 +21,9 @@ public interface OrderDao {
     @Query("SELECT * FROM orders WHERE customer_id = :customerId ORDER BY placed_at DESC, id DESC")
     List<OrderEntity> findByCustomer(long customerId);
 
+    @Query("SELECT * FROM orders WHERE restaurant_id = :restaurantId ORDER BY placed_at DESC, id DESC")
+    List<OrderEntity> findByRestaurant(long restaurantId);
+
     /** Only returns the order if it belongs to this customer. */
     @Query("SELECT * FROM orders WHERE id = :orderId AND customer_id = :customerId LIMIT 1")
     OrderEntity findForCustomer(long customerId, long orderId);

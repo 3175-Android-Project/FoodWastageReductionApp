@@ -290,4 +290,8 @@
     <string name="txtFoodItemsTitle">Food Items</string>
     <string name="txtProfiletitle">Profile</string>
     <string name="txtAddFoodCaption">Create a new food item for customers</string>
+    <string name="titleIncomingOrders">Incoming orders</string>
+    <string name="tabPending">Pending</string>
+    <string name="tabAccepted">Accepted</string>
+    <string name="tabReady">Ready</string>
 </resources>

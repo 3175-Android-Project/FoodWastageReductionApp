@@ -23,6 +23,7 @@ import com.project.foodwastagereductionapp.data.Restaurant;
 public class ManageFoodItemsActivity extends AppCompatActivity {
     private RecyclerView recyclerFoods;
     private FoodAdapter adapter;
+    private TextView txtEmpty;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +52,7 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
                 goTo(ManagerProfileActivity.class);
                 return true;
             } else if (id == R.id.nav_orders) {
-                goTo(OrderHistoryActivity.class);
+                goTo(IncomingOrdersActivity.class);
                 return true;
             }
             return false;
@@ -86,6 +87,7 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
                 }
         );
         recyclerFoods.setAdapter(adapter);
+        txtEmpty = findViewById(R.id.txtEmpty);
 
         long managerId = new SessionManager(this).getUserId();
         AuthTasks.run(
@@ -98,6 +100,7 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
                 },
                 list -> {
                     adapter.setRows(list);
+                    txtEmpty.setVisibility(list == null || list.isEmpty() ? View.VISIBLE : View.GONE);
                 });
 
         findViewById(R.id.btnAddFood).setOnClickListener(v -> {

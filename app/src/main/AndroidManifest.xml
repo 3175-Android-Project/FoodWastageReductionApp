@@ -128,6 +128,10 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".manager.IncomingOrdersActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".manager.OrderHistoryDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

@@ -2,6 +2,7 @@ package com.project.foodwastagereductionapp.manager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -15,13 +16,23 @@ import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthNavigator;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
-import com.project.foodwastagereductionapp.customer.CustomerBrowseActivity;
-import com.project.foodwastagereductionapp.customer.CustomerOrderActivity;
-import com.project.foodwastagereductionapp.customer.CustomerProfileActivity;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.Restaurant;
 import com.project.foodwastagereductionapp.data.User;
 
 public class ManagerDashboardActivity extends AppCompatActivity {
+
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
+    private View scrollContent;
+    private static Restaurant cachedManagerRestaurant = null;
+
+    public static void invalidateCache() {
+        cachedManagerRestaurant = null;
+    }
+
+    public static Restaurant getCachedRestaurant() {
+        return cachedManagerRestaurant;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +44,13 @@ public class ManagerDashboardActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
+        scrollContent = findViewById(R.id.scrollContent);
+
         findViewById(R.id.cardRestaurantProfile).setOnClickListener(v -> openProfile());
         BottomNavigationView nav = findViewById(R.id.bottomNav);
+        nav.setItemActiveIndicatorEnabled(false);
         nav.setSelectedItemId(R.id.nav_home);
         nav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -45,7 +61,7 @@ public class ManagerDashboardActivity extends AppCompatActivity {
                 finish();
                 return true;
             } else if (id == R.id.nav_orders) {
-                startActivity(new Intent(this, OrderHistoryActivity.class));
+                startActivity(new Intent(this, IncomingOrdersActivity.class));
                 overridePendingTransition(0, 0);
                 finish();
                 return true;
@@ -60,13 +76,31 @@ public class ManagerDashboardActivity extends AppCompatActivity {
             startActivity(new Intent(this, ManageFoodItemsActivity.class));
         });
 
+        findViewById(R.id.cardActiveOrders).setOnClickListener(v -> {
+            startActivity(new Intent(this, IncomingOrdersActivity.class));
+        });
+
         findViewById(R.id.cardOrderHistory).setOnClickListener(v -> {
             startActivity(new Intent(this, OrderHistoryActivity.class));
-                });
+        });
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onResume() {
         super.onResume();
+        boolean isColdLoad = (cachedManagerRestaurant == null);
+        if (isColdLoad) {
+            shimmerViewContainer.setVisibility(View.VISIBLE);
+            shimmerViewContainer.startShimmer();
+            scrollContent.setVisibility(View.GONE);
+        } else {
+            shimmerViewContainer.stopShimmer();
+            shimmerViewContainer.setVisibility(View.GONE);
+            scrollContent.setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.txtRestaurantName)).setText(cachedManagerRestaurant.name);
+        }
+
+        long startTime = System.currentTimeMillis();
         long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
@@ -78,38 +112,20 @@ public class ManagerDashboardActivity extends AppCompatActivity {
                 AuthNavigator.logout(this);
                 return;
             }
-            ((TextView) findViewById(R.id.txtRestaurantName)).setText(restaurant.name);
-        });
-
-        // Bottom navigation
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
-        bottomNav.setSelectedItemId(R.id.nav_home);
-        bottomNav.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.nav_home) {
-                return true; // already here
-            } else if (id == R.id.nav_items) {
-                goTo(ManageFoodItemsActivity.class);
-                return true;
-            } else if (id == R.id.nav_orders) {
-                goTo(OrderHistoryActivity.class);
-                return true;
-            } else if (id == R.id.nav_profile) {
-                goTo(ManagerProfileActivity.class);
-                return true;
-            }
-            return false;
+            cachedManagerRestaurant = restaurant;
+            long elapsed = System.currentTimeMillis() - startTime;
+            long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                shimmerViewContainer.stopShimmer();
+                shimmerViewContainer.setVisibility(View.GONE);
+                scrollContent.setVisibility(View.VISIBLE);
+                ((TextView) findViewById(R.id.txtRestaurantName)).setText(restaurant.name);
+            }, delay);
         });
     }
 
     private void openProfile() {
         startActivity(new Intent(this, ManagerProfileActivity.class));
-        overridePendingTransition(0, 0);
-        finish();
-    }
-
-    private void goTo(Class<?> screen) {
-        startActivity(new Intent(this, screen));
         overridePendingTransition(0, 0);
         finish();
     }
