@@ -74,10 +74,14 @@
 
                 <!-- Pending -->
                 <LinearLayout
+                    android:id="@+id/cardPending"
                     style="@style/Card.Default"
                     android:layout_width="0dp"
                     android:layout_height="110dp"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -105,10 +109,14 @@
 
                 <!-- Accepted -->
                 <LinearLayout
+                    android:id="@+id/cardAccepted"
                     style="@style/Card.Default"
                     android:layout_width="0dp"
                     android:layout_height="110dp"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -136,10 +144,14 @@
 
                 <!-- Ready -->
                 <LinearLayout
+                    android:id="@+id/cardReady"
                     style="@style/Card.Default"
                     android:layout_width="0dp"
                     android:layout_height="110dp"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
                     android:gravity="center"
                     android:orientation="vertical">
 

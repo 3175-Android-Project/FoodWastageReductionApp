@@ -228,6 +228,7 @@ public class AddFoodItemActivity extends BaseActivity {
                 },
                 result -> {
                     if (Boolean.TRUE.equals(result)) {
+                        ManageFoodItemsActivity.invalidateCache();
                         finish();
                     }
                 }
