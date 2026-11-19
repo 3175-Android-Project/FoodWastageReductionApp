@@ -84,18 +84,28 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switchAvailable"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:thumb="@drawable/bg_switch_thumb"
-                android:track="@drawable/bg_switch_track"
-                tools:ignore="UseSwitchCompatOrMaterialXml" />
+            <FrameLayout
+                android:id="@+id/switchContainer"
+                android:layout_width="44dp"
+                android:layout_height="24dp"
+                android:background="@drawable/bg_switch_track_off"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="2dp">
+
+                <View
+                    android:id="@+id/switchThumb"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical|start"
+                    android:background="@drawable/bg_switch_thumb" />
+
+            </FrameLayout>
 
             <ImageView
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:layout_marginStart="2dp"
+                android:layout_marginStart="4dp"
                 android:importantForAccessibility="no"
                 android:src="@drawable/icon_right"
                 app:tint="@color/text_tertiary" />
