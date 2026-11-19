@@ -12,6 +12,9 @@ import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.PasswordHasher;
 import com.project.foodwastagereductionapp.data.Restaurant;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.data.FoodItemEntity;
+import com.project.foodwastagereductionapp.data.OrderLine;
+import com.project.foodwastagereductionapp.data.OrderStatus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -146,5 +149,96 @@ public class AppDatabaseHelperTest {
         db.saveRestaurant(restaurant(second, "Second"));
         assertEquals("First", db.getRestaurantForManager(first).name);
         assertEquals("Second", db.getRestaurantForManager(second).name);
+    }
+
+    @Test public void managerFoodLifecycleAndStockAvailability() {
+        long manager = user("manager@example.com", User.MANAGER);
+        db.confirmEmailLocally(manager);
+        db.saveRestaurant(restaurant(manager, "Test Kitchen"));
+        long restaurantId = db.getRestaurantForManager(manager).id;
+
+        long foodId = db.createFoodItem(
+                restaurantId, "Soup", "Fresh soup", "Soup",
+                10.0, 6.0, 3, "8:00 PM", true, "");
+
+        FoodItemEntity food = db.getFoodItem(foodId);
+        assertEquals(3, food.quantityLeft);
+        assertTrue(food.available);
+
+        food.quantityLeft = 5;
+        food.name = "Lunch Soup";
+        db.updateFoodItem(food);
+        assertEquals("Lunch Soup", db.getFoodItem(foodId).name);
+        assertEquals(5, db.getFoodItem(foodId).quantityLeft);
+
+        db.deleteFoodItem(foodId);
+        assertNull(db.getFoodItem(foodId));
+    }
+
+    @Test public void checkoutReservesStockAndCancellationRestoresIt() {
+        long customer = user("customer@example.com", User.CUSTOMER);
+        long manager = user("manager@example.com", User.MANAGER);
+        db.confirmEmailLocally(customer);
+        db.confirmEmailLocally(manager);
+        db.saveRestaurant(restaurant(manager, "Test Kitchen"));
+        long restaurantId = db.getRestaurantForManager(manager).id;
+        long foodId = db.createFoodItem(
+                restaurantId, "Sandwich", "Surplus sandwich", "Lunch",
+                8.0, 5.0, 2, "7:00 PM", true, "");
+
+        long orderId = db.placeOrder(
+                customer, restaurantId,
+                java.util.Collections.singletonList(new OrderLine((int) foodId, "Sandwich", 5.0, 1)),
+                "7:00 PM", false, null);
+
+        assertEquals(1, db.getFoodItem(foodId).quantityLeft);
+        assertTrue(db.cancelOrder(customer, orderId));
+        assertEquals(2, db.getFoodItem(foodId).quantityLeft);
+        assertFalse(db.cancelOrder(customer, orderId));
+    }
+
+    @Test public void rejectedOrderRestoresStockAndNotifiesCustomer() {
+        long customer = user("customer@example.com", User.CUSTOMER);
+        long manager = user("manager@example.com", User.MANAGER);
+        db.confirmEmailLocally(customer);
+        db.confirmEmailLocally(manager);
+        db.saveRestaurant(restaurant(manager, "Test Kitchen"));
+        long restaurantId = db.getRestaurantForManager(manager).id;
+        long foodId = db.createFoodItem(
+                restaurantId, "Pasta", "Surplus pasta", "Dinner",
+                12.0, 7.0, 2, "8:00 PM", true, "");
+        long orderId = db.placeOrder(
+                customer, restaurantId,
+                java.util.Collections.singletonList(new OrderLine((int) foodId, "Pasta", 7.0, 1)),
+                "8:00 PM", false, null);
+
+        assertTrue(db.updateOrderStatusForRestaurant(
+                manager, orderId, OrderStatus.REJECTED));
+        assertEquals(2, db.getFoodItem(foodId).quantityLeft);
+        assertEquals(OrderStatus.REJECTED, db.getOrders(customer).get(0).status);
+        assertEquals(1, db.getNotifications(customer).size());
+    }
+
+    @Test public void managerCannotChangeAnotherRestaurantsOrder() {
+        long customer = user("customer@example.com", User.CUSTOMER);
+        long firstManager = user("first@example.com", User.MANAGER);
+        long secondManager = user("second@example.com", User.MANAGER);
+        db.confirmEmailLocally(customer);
+        db.confirmEmailLocally(firstManager);
+        db.confirmEmailLocally(secondManager);
+        db.saveRestaurant(restaurant(firstManager, "First Kitchen"));
+        db.saveRestaurant(restaurant(secondManager, "Second Kitchen"));
+        long restaurantId = db.getRestaurantForManager(firstManager).id;
+        long foodId = db.createFoodItem(
+                restaurantId, "Rice", "Surplus rice", "Dinner",
+                10.0, 4.0, 2, "8:00 PM", true, "");
+        long orderId = db.placeOrder(
+                customer, restaurantId,
+                java.util.Collections.singletonList(new OrderLine((int) foodId, "Rice", 4.0, 1)),
+                "8:00 PM", false, null);
+
+        assertFalse(db.updateOrderStatusForRestaurant(
+                secondManager, orderId, OrderStatus.ACCEPTED));
+        assertEquals(OrderStatus.PENDING, db.getOrders(customer).get(0).status);
     }
 }

@@ -92,6 +92,6 @@ Initial runs may require downloading additional Android test and lint tools, so 
 
 Email verification uses the configured verification service. Existing order/food data remains outside the Room schema and uses its existing demo stores.
 
-The Room database currently uses destructive fallback for databases created by the previous `SQLiteOpenHelper` implementation or for missing migrations. Future Room version bumps should use explicit `Migration` objects to preserve user data.
+The Room database uses explicit version migrations. Database upgrades from versions 1 through 6 preserve existing accounts, restaurants, orders, food items and notifications; missing or unknown migrations are not silently destructive. Future Room version bumps should add a new named `Migration` object and a regression test.
 
 Room references: [Room persistence library](https://developer.android.com/training/data-storage/room), [Room migrations](https://developer.android.com/training/data-storage/room/migrating-db-versions).

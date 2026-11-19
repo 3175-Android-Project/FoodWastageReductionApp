@@ -253,9 +253,9 @@ The proposal requirements are not all complete yet. The following items remain:
 
 ### Data and security
 
-- [ ] Replace destructive Room fallback migration behavior with explicit version migrations that preserve existing data.
-- [ ] Add backup policy and data-extraction rules that exclude sensitive account information.
-- [ ] Expand automated coverage for food management, cart, checkout, cancellation and manager order workflows.
+- [x] Replace destructive Room fallback migration behavior with explicit version migrations that preserve existing data.
+- [x] Add backup policy and data-extraction rules that exclude sensitive account information.
+- [x] Expand automated coverage for food management, cart, checkout, cancellation and manager order workflows.
 
 ---
 
