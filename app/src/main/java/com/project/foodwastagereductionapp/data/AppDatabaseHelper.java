@@ -464,37 +464,6 @@ public final class AppDatabaseHelper {
         return result;
     }
 
-    public List<AppNotification> getManagerNotifications(long managerId) {
-        List<AppNotification> result = new ArrayList<>();
-        RestaurantEntity restaurant = database.restaurantDao().findByManagerId(managerId);
-        if (restaurant == null) return result;
-        for (OrderEntity e : database.orderDao().findByRestaurant(restaurant.id)) {
-            String status = e.status == null ? "" : e.status;
-            if (OrderStatus.PENDING.equals(status)) {
-                result.add(new AppNotification(
-                        e.id,
-                        "New order received",
-                        restaurant.name,
-                        e.id,
-                        e.pickupTime,
-                        e.placedAt,
-                        e.status
-                ));
-            } else if (OrderStatus.CANCELLED.equals(status)) {
-                result.add(new AppNotification(
-                        e.id,
-                        "Order cancelled",
-                        restaurant.name,
-                        e.id,
-                        e.pickupTime,
-                        e.placedAt,
-                        e.status
-                ));
-            }
-        }
-        return result;
-    }
-
     private static Order toOrder(OrderEntity e) {
         Date placed = new Date(e.placedAt);
         return new Order(e.id, e.restaurantName,

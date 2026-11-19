@@ -55,8 +55,6 @@
                 android:layout_marginTop="@dimen/space_xs"
                 android:text="@string/accountInformationDesc" />
 
-            <include layout="@layout/component_profile_photo" />
-
             <EditText
                 android:id="@+id/editFullName"
                 style="@style/Input.Default"
