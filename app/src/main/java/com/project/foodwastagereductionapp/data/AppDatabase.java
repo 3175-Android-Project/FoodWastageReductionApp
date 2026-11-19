@@ -23,6 +23,14 @@ abstract class AppDatabase extends RoomDatabase {
     abstract FoodItemDao foodItemDao();
     abstract PasswordResetGrantDao passwordResetGrantDao();
 
+    /** Version 2: account and restaurant tables remain unchanged. */
+    static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            // The database layout was unchanged between versions 1 and 2.
+        }
+    };
+
     /** Version 3: users get address + phone (Edit Profile). Keeps all existing accounts and restaurants. */
     static final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
@@ -108,7 +116,8 @@ abstract class AppDatabase extends RoomDatabase {
                     if (result != null) result.close();
                     result = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, databaseName)
-                            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3,
+                                    MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                             .build();
                     result.getOpenHelper().getWritableDatabase();
                     instance = result;
