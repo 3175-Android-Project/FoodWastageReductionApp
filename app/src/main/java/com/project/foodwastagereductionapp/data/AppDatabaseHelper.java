@@ -410,4 +410,27 @@ public final class AppDatabaseHelper {
     public void updateOrder(OrderEntity order){
         database.orderDao().update(order);
     }
+
+    public OrderDetails getOrderDetailsForManager(long restaurantId, long orderId) {
+
+        OrderEntity e = database.orderDao().findForRestaurant(restaurantId, orderId);
+
+        if (e == null) {
+            return null;
+        }
+
+        List<OrderLine> lines = new ArrayList<>();
+
+        for (OrderItemEntity i : database.orderDao().itemsFor(orderId)) {
+
+            lines.add(new OrderLine(i.foodItemId, i.name, i.unitPrice, i.quantity));
+        }
+
+        User customer = getUser(e.customerId);
+
+        return new OrderDetails(toOrder(e), lines, e.pickupTime, e.restaurantAddress, e.isDelivery, e.deliveryAddress,
+                customer == null ? "" : customer.fullName,
+                customer == null ? "" : customer.email,
+                customer == null || customer.phone == null ? "" : customer.phone);
+    }
 }

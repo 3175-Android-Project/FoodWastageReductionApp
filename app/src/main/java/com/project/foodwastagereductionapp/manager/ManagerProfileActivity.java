@@ -51,8 +51,7 @@ public class ManagerProfileActivity extends AppCompatActivity {
             intent.putExtra(RestaurantInformationActivity.EXTRA_EDIT_PROFILE, true);
             startActivity(intent);
         });
-        findViewById(R.id.layoutLogout).setOnClickListener(
-                view -> ConfirmationDialog.showLogout(this, () -> AuthNavigator.logout(this)));
+        findViewById(R.id.layoutLogout).setOnClickListener(view -> ConfirmationDialog.showLogout(this, () -> AuthNavigator.logout(this)));
 
         BottomNavigationView nav = findViewById(R.id.bottomNav);
         nav.setItemActiveIndicatorEnabled(false);

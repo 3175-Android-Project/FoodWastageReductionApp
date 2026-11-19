@@ -51,4 +51,7 @@ public interface OrderDao {
 
     @Query("SELECT * FROM orders " + "WHERE id = :orderId")
     OrderEntity getOrder(long orderId);
+
+    @Query("SELECT * FROM orders " + "WHERE id = :orderId " + "AND restaurant_id = :restaurantId " + "LIMIT 1")
+    OrderEntity findForRestaurant(long restaurantId, long orderId);
 }
