@@ -13,17 +13,19 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.data.Restaurant;
+import com.project.foodwastagereductionapp.ui.ConfirmationDialog;
 
 public class ManageFoodItemsActivity extends AppCompatActivity {
     private RecyclerView recyclerFoods;
     private FoodAdapter adapter;
     private TextView txtEmpty;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,34 +63,54 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
         recyclerFoods = findViewById(R.id.recyclerFoods);
         recyclerFoods.setLayoutManager(new LinearLayoutManager(this));
         adapter = new FoodAdapter(
-                //Delete
+                // Item Click (Edit)
                 food -> {
-                    AuthTasks.run(this, null, () -> {
-                                AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
-                                db.deleteFoodItem(food.id);
-                                return true;
-                            },
-                            result -> {
-                                recreate();
+                    Intent intent = new Intent(this, AddFoodItemActivity.class);
+                    intent.putExtra("foodId", food.id);
+                    startActivity(intent);
+                },
+                // Delete with Confirmation Dialog
+                food -> {
+                    ConfirmationDialog.show(
+                            this,
+                            "Delete food item?",
+                            "Are you sure you want to delete this item?",
+                            "Delete",
+                            "Cancel",
+                            () -> {
+                                AuthTasks.run(this, null, () -> {
+                                    AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+                                    db.deleteFoodItem(food.id);
+                                    return true;
+                                }, result -> loadFoodItems());
                             }
                     );
                 },
-                //Avaiablility
+                // Availability change
                 (food, available) -> {
                     AuthTasks.run(this, null, () -> {
-                                AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
-                                food.available = available;
-                                db.updateFoodItem(food);
-                                return true;
-                            },
-                            result -> {
-                            }
-                    );
+                        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+                        food.available = available;
+                        db.updateFoodItem(food);
+                        return true;
+                    }, result -> {});
                 }
         );
         recyclerFoods.setAdapter(adapter);
         txtEmpty = findViewById(R.id.txtEmpty);
 
+        findViewById(R.id.btnAddFood).setOnClickListener(v -> {
+            startActivity(new Intent(ManageFoodItemsActivity.this, AddFoodItemActivity.class));
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadFoodItems();
+    }
+
+    private void loadFoodItems() {
         long managerId = new SessionManager(this).getUserId();
         AuthTasks.run(
                 this,
@@ -96,15 +118,12 @@ public class ManageFoodItemsActivity extends AppCompatActivity {
                 () -> {
                     AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
                     Restaurant restaurant = db.getRestaurantForManager(managerId);
+                    if (restaurant == null) return new java.util.ArrayList<com.project.foodwastagereductionapp.data.FoodItemEntity>();
                     return db.getFoodItemsForRestaurant(restaurant.id);
                 },
                 list -> {
                     adapter.setRows(list);
                     txtEmpty.setVisibility(list == null || list.isEmpty() ? View.VISIBLE : View.GONE);
-                });
-
-        findViewById(R.id.btnAddFood).setOnClickListener(v -> {
-                    startActivity(new Intent(ManageFoodItemsActivity.this, AddFoodItemActivity.class));
                 });
     }
 

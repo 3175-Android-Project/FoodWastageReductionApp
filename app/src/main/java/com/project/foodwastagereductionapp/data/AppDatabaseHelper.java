@@ -550,6 +550,10 @@ public final class AppDatabaseHelper {
         return database.foodItemDao().getRestaurantFoodItems(restaurantId);
     }
 
+    public FoodItemEntity getFoodItem(long foodItemId) {
+        return database.foodItemDao().getFoodItem(foodItemId);
+    }
+
     //Deleting food items
     public void deleteFoodItem(long foodItemId){
         FoodItemEntity item = database.foodItemDao().getFoodItem(foodItemId);
