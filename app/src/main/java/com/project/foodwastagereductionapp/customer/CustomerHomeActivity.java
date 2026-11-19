@@ -19,6 +19,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.AppNotification;
 import com.project.foodwastagereductionapp.data.FoodItem;
 import com.project.foodwastagereductionapp.data.Restaurant;
 import com.project.foodwastagereductionapp.data.RestaurantListing;
@@ -135,6 +136,26 @@ public class CustomerHomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadHome(); // refresh (e.g. after editing the profile city)
+        checkUnreadNotifications();
+    }
+
+    private void checkUnreadNotifications() {
+        long userId = new SessionManager(this).getUserId();
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        com.project.foodwastagereductionapp.auth.AuthTasks.run(this, null, () -> {
+            List<AppNotification> notifs = db.getNotifications(userId);
+            if (notifs == null || notifs.isEmpty()) return false;
+            long lastSeen = getSharedPreferences("grabbit_notifications_prefs", MODE_PRIVATE)
+                    .getLong("last_seen_notif_" + userId, 0);
+            for (AppNotification n : notifs) {
+                if (n.timeMillis > lastSeen) return true;
+            }
+            return false;
+        }, hasUnread -> {
+            if (hasUnread != null) {
+                findViewById(R.id.notificationBadge).setVisibility(hasUnread ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
     // Database work on a worker thread (AppDatabaseHelper rule), UI updates on the main thread

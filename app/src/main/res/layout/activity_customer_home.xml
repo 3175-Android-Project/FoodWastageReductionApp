@@ -70,14 +70,30 @@
                     android:layout_weight="1"
                     android:text="@string/titleSearchFood" />
 
-                <ImageView
-                    android:id="@+id/btnNotification"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:padding="10dp"
-                    android:src="@drawable/icon_bell"
-                    app:tint="@color/text_primary"
-                    android:contentDescription="@string/contentDescNotifications" />
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/btnNotification"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:padding="10dp"
+                        android:src="@drawable/icon_bell"
+                        app:tint="@color/text_primary"
+                        android:contentDescription="@string/contentDescNotifications" />
+
+                    <View
+                        android:id="@+id/notificationBadge"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginEnd="12dp"
+                        android:background="@drawable/bg_red_badge"
+                        android:visibility="gone" />
+
+                </FrameLayout>
 
             </LinearLayout>
 

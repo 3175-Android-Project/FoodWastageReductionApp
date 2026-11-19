@@ -431,6 +431,37 @@ public final class AppDatabaseHelper {
         return result;
     }
 
+    public List<AppNotification> getManagerNotifications(long managerId) {
+        List<AppNotification> result = new ArrayList<>();
+        RestaurantEntity restaurant = database.restaurantDao().findByManagerId(managerId);
+        if (restaurant == null) return result;
+        for (OrderEntity e : database.orderDao().findByRestaurant(restaurant.id)) {
+            String status = e.status == null ? "" : e.status;
+            if (OrderStatus.PENDING.equals(status)) {
+                result.add(new AppNotification(
+                        e.id,
+                        "New order received",
+                        restaurant.name,
+                        e.id,
+                        e.pickupTime,
+                        e.placedAt,
+                        e.status
+                ));
+            } else if (OrderStatus.CANCELLED.equals(status)) {
+                result.add(new AppNotification(
+                        e.id,
+                        "Order cancelled",
+                        restaurant.name,
+                        e.id,
+                        e.pickupTime,
+                        e.placedAt,
+                        e.status
+                ));
+            }
+        }
+        return result;
+    }
+
     private static Order toOrder(OrderEntity e) {
         Date placed = new Date(e.placedAt);
         return new Order(e.id, e.restaurantName,
@@ -550,6 +581,10 @@ public final class AppDatabaseHelper {
         return database.foodItemDao().getRestaurantFoodItems(restaurantId);
     }
 
+    public FoodItemEntity getFoodItem(long foodItemId) {
+        return database.foodItemDao().getFoodItem(foodItemId);
+    }
+
     //Deleting food items
     public void deleteFoodItem(long foodItemId){
         FoodItemEntity item = database.foodItemDao().getFoodItem(foodItemId);
@@ -576,5 +611,28 @@ public final class AppDatabaseHelper {
     }
     public void updateOrder(OrderEntity order){
         database.orderDao().update(order);
+    }
+
+    public OrderDetails getOrderDetailsForManager(long restaurantId, long orderId) {
+
+        OrderEntity e = database.orderDao().findForRestaurant(restaurantId, orderId);
+
+        if (e == null) {
+            return null;
+        }
+
+        List<OrderLine> lines = new ArrayList<>();
+
+        for (OrderItemEntity i : database.orderDao().itemsFor(orderId)) {
+
+            lines.add(new OrderLine(i.foodItemId, i.name, i.unitPrice, i.quantity));
+        }
+
+        User customer = getUser(e.customerId);
+
+        return new OrderDetails(toOrder(e), lines, e.pickupTime, e.restaurantAddress, e.isDelivery, e.deliveryAddress,
+                customer == null ? "" : customer.fullName,
+                customer == null ? "" : customer.email,
+                customer == null || customer.phone == null ? "" : customer.phone);
     }
 }

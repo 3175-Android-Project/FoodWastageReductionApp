@@ -1,52 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Card.Default"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:layout_marginBottom="12dp">
+    android:layout_marginBottom="12dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="16dp">
 
-    <TextView
-        android:id="@+id/txtFoodName"
-        android:layout_width="wrap_content"
+    <!-- Food Image Thumbnail -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imgFood"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_image_upload"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop"
+        android:src="@drawable/icon_food"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Rounded12"
+        app:tint="@color/text_tertiary" />
+
+    <!-- Food Info -->
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:layout_marginStart="16dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/txtFoodPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/txtFoodName"
+            style="@style/Text.HeadlineSm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Salmon Sushi Box" />
 
-    <TextView
-        android:id="@+id/txtQuantity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/txtFoodPrice"
+            style="@style/Text.BodySm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            tools:text="$8.50 · 5 left" />
 
-    <Switch
-        android:id="@+id/switchAvailable"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Available"/>
+        <TextView
+            android:id="@+id/txtStatus"
+            style="@style/Text.BodyXs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="@font/pretendard_bold"
+            tools:text="Available" />
 
+    </LinearLayout>
+
+    <!-- Actions (Delete & Switch + Chevron) -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginStart="8dp"
+        android:gravity="end"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnEdit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Edit"/>
-
-        <Button
+        <ImageView
             android:id="@+id/btnDelete"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:src="@drawable/icon_trash"
+            app:tint="@color/text_warning"
+            android:contentDescription="Delete food item" />
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete"/>
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/switchContainer"
+                android:layout_width="44dp"
+                android:layout_height="24dp"
+                android:background="@drawable/bg_switch_track_off"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="2dp">
+
+                <View
+                    android:id="@+id/switchThumb"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical|start"
+                    android:background="@drawable/bg_switch_thumb" />
+
+            </FrameLayout>
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginStart="4dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/icon_right"
+                app:tint="@color/text_tertiary" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
