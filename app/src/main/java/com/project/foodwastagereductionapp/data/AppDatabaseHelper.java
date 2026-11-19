@@ -42,6 +42,12 @@ public final class AppDatabaseHelper {
     /** Hash is generated before entering this method; plaintext passwords are never stored. */
     public long createUser(String email, String passwordHash, String role, String fullName,
                            String city, String province, String postalCode) {
+        return createUser(email, passwordHash, role, fullName, city, province, postalCode, "", "");
+    }
+
+    public long createUser(String email, String passwordHash, String role, String fullName,
+                           String city, String province, String postalCode, String address,
+                           String photoUri) {
         if (!validEmail(email) || passwordHash == null || !passwordHash.startsWith("pbkdf2_sha1$")
                 || !(User.CUSTOMER.equals(role) || User.MANAGER.equals(role))) {
             throw new IllegalArgumentException("Invalid signup details");
@@ -54,6 +60,8 @@ public final class AppDatabaseHelper {
         user.city = required(city);
         user.province = required(province);
         user.postalCode = required(postalCode);
+        user.address = address == null ? "" : address.trim();
+        user.profilePhotoUri = photoUri == null ? "" : photoUri;
         long id = database.userDao().insert(user);
         if (id == -1) throw new DuplicateEmailException();
         return id;
@@ -125,12 +133,70 @@ public final class AppDatabaseHelper {
         return new Restaurant(e.id, e.managerId, e.name, e.city, e.province,
                 e.postalCode, e.phone, e.cuisineType, e.description, e.imageUri);
     }
-    public boolean updatePasswordByEmail(String email, String newPasswordHash) {
-        if (!validEmail(email) || newPasswordHash == null
-                || !newPasswordHash.startsWith("pbkdf2_sha1$")) {
-            throw new IllegalArgumentException("Invalid password reset details");
+    /** Called only after the email service has verified a reset code for this account. */
+    public String issuePasswordResetGrant(
+            com.project.foodwastagereductionapp.auth.PasswordResetVerification.VerifiedEmail proof) {
+        if (proof == null) throw new IllegalArgumentException("Email verification is required");
+        String email = proof.getEmail();
+        String token = ResetTokens.create();
+        long now = System.currentTimeMillis();
+        database.runInTransaction(() -> {
+            UserEntity user = database.userDao().findByEmail(normalizeEmail(email));
+            if (user == null) throw new IllegalArgumentException("Account not found");
+            PasswordResetGrantDao grants = database.passwordResetGrantDao();
+            grants.deleteExpired(now);
+            grants.deleteForUser(user.id);
+            PasswordResetGrantEntity grant = new PasswordResetGrantEntity();
+            grant.tokenHash = ResetTokens.hash(token);
+            grant.userId = user.id;
+            grant.issuedAt = now;
+            grant.expiresAt = now + 5 * 60 * 1000L;
+            grants.insert(grant);
+        });
+        return token;
+    }
+
+    public boolean isPasswordResetGrantValid(String email, String token) {
+        String hash = ResetTokens.hash(token);
+        UserEntity user = database.userDao().findByEmail(normalizeEmail(email));
+        return hash != null && user != null && database.passwordResetGrantDao()
+                .findValid(hash, user.id, System.currentTimeMillis()) != null;
+    }
+
+    /** Password update and token consumption either both commit or both roll back. */
+    public boolean resetPassword(String email, String token, String newPassword) {
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("Use at least 6 characters");
         }
-        return database.userDao().updatePassword(normalizeEmail(email), newPasswordHash) == 1;
+        String hash = ResetTokens.hash(token);
+        if (hash == null) return false;
+        String passwordHash = PasswordHasher.hash(newPassword);
+        final boolean[] updated = {false};
+        database.runInTransaction(() -> {
+            UserEntity user = database.userDao().findByEmail(normalizeEmail(email));
+            if (user == null || database.passwordResetGrantDao()
+                    .findValid(hash, user.id, System.currentTimeMillis()) == null) return;
+            updated[0] = database.userDao().updatePassword(user.id, passwordHash) == 1;
+            if (updated[0]) database.passwordResetGrantDao().deleteForUser(user.id);
+        });
+        return updated[0];
+    }
+
+    /** Changing a signed-in user's password also requires their current password. */
+    public boolean changePassword(long userId, String currentPassword, String newPassword) {
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("Use at least 6 characters");
+        }
+        String hash = PasswordHasher.hash(newPassword);
+        final boolean[] updated = {false};
+        database.runInTransaction(() -> {
+            UserEntity user = database.userDao().findById(userId);
+            if (user == null || !user.emailVerified
+                    || !PasswordHasher.verify(currentPassword, user.passwordHash)) return;
+            updated[0] = database.userDao().updatePassword(userId, hash) == 1;
+            if (updated[0]) database.passwordResetGrantDao().deleteForUser(userId);
+        });
+        return updated[0];
     }
 
     public void deleteUser(long userId) {
@@ -190,6 +256,13 @@ public final class AppDatabaseHelper {
                 if (line.quantity < 1) throw new IllegalArgumentException("Invalid quantity");
                 itemCount += line.quantity;
                 subtotal += line.getLineTotal();
+            }
+
+            // Take the stock. If any item no longer has enough left, the whole order is rolled back.
+            for (OrderLine line : lines) {
+                if (database.foodItemDao().decreaseStock(restaurant.id, line.foodItemId, line.quantity) != 1) {
+                    throw new OutOfStockException(line.name);
+                }
             }
 
             OrderEntity order = new OrderEntity();
@@ -267,6 +340,7 @@ public final class AppDatabaseHelper {
             if (e == null || !OrderStatus.canCancel(e.status)) return;
             cancelled[0] = database.orderDao()
                     .updateStatus(orderId, OrderStatus.CANCELLED, e.status) == 1;
+            if (cancelled[0]) restoreStock(orderId); // the food is available again
         });
         return cancelled[0];
     }
@@ -287,6 +361,7 @@ public final class AppDatabaseHelper {
             OrderEntity e = database.orderDao().findById(orderId);
             if (e == null || !OrderStatus.canMoveTo(e.status, newStatus)) return;
             if (database.orderDao().updateStatus(orderId, newStatus, e.status) != 1) return;
+            if (OrderStatus.REJECTED.equals(newStatus)) restoreStock(orderId); // food available again
             if (OrderStatus.shouldNotify(newStatus)) {
                 NotificationEntity n = new NotificationEntity();
                 n.customerId = e.customerId;
@@ -298,6 +373,52 @@ public final class AppDatabaseHelper {
             changed[0] = true;
         });
         return changed[0];
+    }
+    // ---- Restaurant (manager) side: process incoming orders --------------------------------
+
+    /**
+     * Manager moves one of their own restaurant's orders to the next status
+     * (Accept, Reject, Start preparing, Mark ready, Picked up / Delivered = Completed).
+     * Orders of other restaurants and moves that skip steps are ignored.
+     *
+     * @return true if the status changed
+     */
+    public boolean updateOrderStatusForRestaurant(long managerId, long orderId, String newStatus) {
+        if (!isOrderOfManager(managerId, orderId)) return false;
+        return updateOrderStatus(orderId, newStatus);
+    }
+
+    /**
+     * Manager reminds the customer to collect a Ready order: adds a "Your order is ready"
+     * notification to the customer's bell.
+     *
+     * @return true if the reminder was added
+     */
+    public boolean sendPickupReminder(long managerId, long orderId) {
+        if (!isOrderOfManager(managerId, orderId)) return false;
+        OrderEntity e = database.orderDao().findById(orderId);
+        if (e == null || !OrderStatus.READY.equals(e.status)) return false;
+        NotificationEntity n = new NotificationEntity();
+        n.customerId = e.customerId;
+        n.orderId = orderId;
+        n.status = OrderStatus.READY;
+        n.createdAt = System.currentTimeMillis();
+        database.notificationDao().insert(n);
+        return true;
+    }
+
+    private boolean isOrderOfManager(long managerId, long orderId) {
+        RestaurantEntity restaurant = database.restaurantDao().findByManagerId(managerId);
+        OrderEntity e = database.orderDao().findById(orderId);
+        return restaurant != null && e != null && e.restaurantId != null
+                && e.restaurantId == restaurant.id;
+    }
+
+    /** Gives the order's food back to the restaurant's stock (rejected / cancelled orders). */
+    private void restoreStock(long orderId) {
+        for (OrderItemEntity item : database.orderDao().itemsFor(orderId)) {
+            database.foodItemDao().increaseStock(item.foodItemId, item.quantity);
+        }
     }
 
     /** Order-status updates and pickup reminders, newest first. */
@@ -326,15 +447,24 @@ public final class AppDatabaseHelper {
         if (user == null) return null;
         return new User(user.id, user.email, user.role, user.fullName, user.city,
                 user.province, user.postalCode, user.emailVerified,
-                user.address, user.phone);
+                user.address, user.phone, user.profilePhotoUri);
     }
 
     // Edit Profile: name, city, province and postal code are required; address and phone are optional.
     public User updateProfile(long userId, String fullName, String address, String city,
                               String province, String postalCode, String phone) {
+        User current = getUser(userId);
+        if (current == null) throw new IllegalArgumentException("Account no longer exists");
+        return updateProfile(userId, fullName, address, city, province, postalCode, phone,
+                current.profilePhotoUri);
+    }
+
+    public User updateProfile(long userId, String fullName, String address, String city,
+                              String province, String postalCode, String phone, String photoUri) {
         int updated = database.userDao().updateProfile(userId, required(fullName),
                 address == null ? "" : address.trim(), required(city), required(province),
-                required(postalCode), phone == null ? "" : phone.trim());
+                required(postalCode), phone == null ? "" : phone.trim(),
+                photoUri == null ? "" : photoUri);
         if (updated != 1) throw new IllegalArgumentException("Account no longer exists");
         return getUser(userId);
     }
@@ -347,6 +477,43 @@ public final class AppDatabaseHelper {
         public DuplicateEmailException() {
             super("Email already registered");
         }
+    }
+
+    /** Thrown by placeOrder when an item sold out (or was switched off) before checkout finished. */
+    public static final class OutOfStockException extends IllegalStateException {
+        public final String foodName;
+
+        public OutOfStockException(String foodName) {
+            super("Not enough stock for " + foodName);
+            this.foodName = foodName;
+        }
+    }
+
+    // ---- Customer side: food items from the food_items table -----------------------------
+
+    /** Food a customer can see for this restaurant (switched on by the manager), incl. sold-out items. */
+    public List<FoodItem> getFoodForRestaurant(long restaurantId) {
+        List<FoodItem> food = new ArrayList<>();
+        for (FoodItemEntity e : database.foodItemDao().getAvailableForRestaurant(restaurantId)) {
+            food.add(toFoodItem(e));
+        }
+        return food;
+    }
+
+    /** One food item for the Food Detail screen, or null if it is gone or switched off. */
+    public FoodItem getFood(long restaurantId, long foodItemId) {
+        FoodItemEntity e = database.foodItemDao().getAvailableFoodItem(restaurantId, foodItemId);
+        return e == null ? null : toFoodItem(e);
+    }
+
+    private static FoodItem toFoodItem(FoodItemEntity e) {
+        return new FoodItem((int) e.id, e.name, e.originalPrice, e.discountedPrice,
+                e.quantityLeft, emptyToNull(e.availableUntil), 0, e.description,
+                emptyToNull(e.imageUri));
+    }
+
+    private static String emptyToNull(String value) {
+        return value == null || value.trim().isEmpty() ? null : value.trim();
     }
 
     // Generating food item object from FoodItemEntity

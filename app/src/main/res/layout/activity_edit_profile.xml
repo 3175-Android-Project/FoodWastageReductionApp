@@ -50,7 +50,7 @@
                 style="@style/Input.Default"
                 android:layout_width="match_parent"
                 android:layout_marginTop="@dimen/space_md"
-                android:hint="@string/hintAddress"
+                android:hint="@string/hintStreetAddressRequired"
                 android:inputType="textPostalAddress|textCapWords" />
 
             <EditText

@@ -117,6 +117,53 @@
                     android:background="@color/background_secondary" />
 
                 <LinearLayout
+                    android:id="@+id/layoutChangePassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="64dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/space_xl"
+                    android:paddingEnd="@dimen/space_lg"
+                    android:paddingTop="@dimen/space_lg"
+                    android:paddingBottom="@dimen/space_lg">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/icon_lock"
+                        app:tint="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/txtChangePassword"
+                        style="@style/Text.BodyMd"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_md"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/pretendard_semibold"
+                        android:text="@string/btnChangePassword" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/icon_right"
+                        app:tint="@color/text_secondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/space_lg"
+                    android:layout_marginEnd="@dimen/space_lg"
+                    android:background="@color/background_secondary" />
+
+                <LinearLayout
                     android:id="@+id/layoutLogout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

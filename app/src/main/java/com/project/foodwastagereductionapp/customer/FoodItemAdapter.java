@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,7 +55,11 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
         FoodItem f = rows.get(position);
         Context context = h.itemView.getContext();
 
-        h.imgFood.setImageResource(f.imageRes != 0 ? f.imageRes : R.drawable.icon_food);
+        if (f.hasImageUri()) {
+            h.imgFood.setImageURI(Uri.parse(f.imageUri));
+        } else {
+            h.imgFood.setImageResource(f.imageRes != 0 ? f.imageRes : R.drawable.icon_food);
+        }
         h.txtFoodName.setText(f.name);
 
         // Discounted price (black)

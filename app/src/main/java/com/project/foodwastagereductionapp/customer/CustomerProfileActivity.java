@@ -23,6 +23,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.MainActivity;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthNavigator;
+import com.project.foodwastagereductionapp.auth.ChangePasswordActivity;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
@@ -57,6 +58,11 @@ public class CustomerProfileActivity extends AppCompatActivity {
         LinearLayout layoutEditProfile = findViewById(R.id.layoutEditProfile);
         layoutEditProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, EditProfileActivity.class)));
+
+        LinearLayout layoutChangePassword = findViewById(R.id.layoutChangePassword);
+        layoutChangePassword.setEnabled(false);
+        layoutChangePassword.setOnClickListener(v ->
+                startActivity(new Intent(this, ChangePasswordActivity.class)));
 
         // Logout row → confirm, then back to the landing screen
         LinearLayout layoutLogout = findViewById(R.id.layoutLogout);
@@ -94,12 +100,17 @@ public class CustomerProfileActivity extends AppCompatActivity {
     }
 
     private void showProfile() {
+        View changePassword = findViewById(R.id.layoutChangePassword);
+        changePassword.setEnabled(false);
         long userId = new SessionManager(this).getUserId();
         AuthTasks.run(this, null, () -> AppDatabaseHelper.getInstance(this).getUser(userId), user -> {
             if (user == null || !user.emailVerified || !User.CUSTOMER.equals(user.role)) {
                 AuthNavigator.logout(this);
                 return;
             }
+            changePassword.setEnabled(true);
+            com.project.foodwastagereductionapp.profile.ProfilePhotoStore.show(
+                    findViewById(R.id.imgAvatar), user.profilePhotoUri);
             txtCustomerName.setText(user.fullName);
             txtEmail.setText(user.email);
             if (user.hasAddress()) {

@@ -30,8 +30,9 @@ public class ManagerDashboardActivity extends AppCompatActivity {
         cachedManagerRestaurant = null;
     }
 
-    public static Restaurant getCachedRestaurant() {
-        return cachedManagerRestaurant;
+    public static Restaurant getCachedRestaurant(long managerId) {
+        return cachedManagerRestaurant != null && cachedManagerRestaurant.managerId == managerId
+                ? cachedManagerRestaurant : null;
     }
 
     @Override
@@ -88,7 +89,11 @@ public class ManagerDashboardActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        boolean isColdLoad = (cachedManagerRestaurant == null);
+        SessionManager session = new SessionManager(this);
+        SessionManager.Snapshot snapshot = session.snapshot();
+        long userId = snapshot.userId;
+        Restaurant cached = getCachedRestaurant(userId);
+        boolean isColdLoad = cached == null;
         if (isColdLoad) {
             shimmerViewContainer.setVisibility(View.VISIBLE);
             shimmerViewContainer.startShimmer();
@@ -97,11 +102,10 @@ public class ManagerDashboardActivity extends AppCompatActivity {
             shimmerViewContainer.stopShimmer();
             shimmerViewContainer.setVisibility(View.GONE);
             scrollContent.setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.txtRestaurantName)).setText(cachedManagerRestaurant.name);
+            ((TextView) findViewById(R.id.txtRestaurantName)).setText(cached.name);
         }
 
         long startTime = System.currentTimeMillis();
-        long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
             User user = db.getUser(userId);
@@ -116,6 +120,7 @@ public class ManagerDashboardActivity extends AppCompatActivity {
             long elapsed = System.currentTimeMillis() - startTime;
             long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (isFinishing() || isDestroyed() || !session.isCurrent(snapshot)) return;
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
                 scrollContent.setVisibility(View.VISIBLE);

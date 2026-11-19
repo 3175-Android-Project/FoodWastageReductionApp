@@ -55,6 +55,8 @@
                 android:layout_marginTop="@dimen/space_xs"
                 android:text="@string/accountInformationDesc" />
 
+            <include layout="@layout/component_profile_photo" />
+
             <EditText
                 android:id="@+id/editFullName"
                 style="@style/Input.Default"
@@ -62,6 +64,14 @@
                 android:layout_marginTop="@dimen/space_xl"
                 android:hint="@string/hintFullName"
                 android:inputType="textPersonName" />
+
+            <EditText
+                android:id="@+id/editAddress"
+                style="@style/Input.Default"
+                android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/space_md"
+                android:hint="@string/hintStreetAddressRequired"
+                android:inputType="textPostalAddress|textCapWords" />
 
             <EditText
                 android:id="@+id/editCity"

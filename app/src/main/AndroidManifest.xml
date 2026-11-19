@@ -23,6 +23,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".auth.ChangePasswordActivity"
+            android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".auth.LoginActivity"
             android:exported="false"

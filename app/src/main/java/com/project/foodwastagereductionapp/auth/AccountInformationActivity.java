@@ -20,6 +20,7 @@ import com.project.foodwastagereductionapp.data.User;
 import com.project.foodwastagereductionapp.ui.BaseActivity;
 
 public class AccountInformationActivity extends BaseActivity {
+    private com.project.foodwastagereductionapp.profile.ProfilePhotoPicker photoPicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +70,9 @@ public class AccountInformationActivity extends BaseActivity {
 
         btnBack.setOnClickListener(v -> finish());
 
+        photoPicker = new com.project.foodwastagereductionapp.profile.ProfilePhotoPicker(this, savedInstanceState);
+        EditText editAddress = findViewById(R.id.editAddress);
+
         // Inputs
         EditText editFullName =
                 findViewById(R.id.editFullName);
@@ -87,6 +91,10 @@ public class AccountInformationActivity extends BaseActivity {
 
         btnCreateAccount.setOnClickListener(v -> {
 
+            if (photoPicker.isBusy()) return;
+            String address = editAddress.getText().toString().trim();
+            if (address.isEmpty()) { editAddress.setError(getString(R.string.msgAddressRequired)); return; }
+            String photoUri = photoPicker.getPhotoUri();
             String fullName =
                     editFullName.getText().toString().trim();
 
@@ -116,8 +124,12 @@ public class AccountInformationActivity extends BaseActivity {
             AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
             AuthTasks.run(this, btnCreateAccount,
                     () -> db.createUser(email, passwordHash, selectedRole, fullName,
-                            city, province, postalCode),
+                            city, province, postalCode, address, photoUri),
                     userId -> AuthNavigator.open(this, EmailVerificationActivity.class, userId));
         });
+    }
+    @Override protected void onSaveInstanceState(Bundle state) {
+        if (photoPicker != null) photoPicker.saveState(state);
+        super.onSaveInstanceState(state);
     }
 }

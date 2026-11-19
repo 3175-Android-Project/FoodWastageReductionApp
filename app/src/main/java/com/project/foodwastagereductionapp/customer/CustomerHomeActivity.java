@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CustomerHomeActivity extends AppCompatActivity {
 
@@ -43,10 +45,27 @@ public class CustomerHomeActivity extends AppCompatActivity {
     private static List<RestaurantListing> cachedHomeRestaurants = null;
     private static User cachedHomeUser = null;
 
+    private static Map<Long, List<FoodItem>> cachedHomeFood = null;
+
     public static void invalidateCache() {
         cachedHomeRestaurants = null;
         cachedHomeUser = null;
+        cachedHomeFood = null;
     }
+
+    private static final class HomeData {
+        final User user;
+        final List<RestaurantListing> restaurants;
+        final Map<Long, List<FoodItem>> foodByRestaurant; // restaurant id -> its food (food_items)
+        HomeData(User user, List<RestaurantListing> restaurants, Map<Long, List<FoodItem>> foodByRestaurant) {
+            this.user = user;
+            this.restaurants = restaurants;
+            this.foodByRestaurant = foodByRestaurant;
+        }
+    }
+
+    // Food loaded with the restaurants on the worker thread (see loadHome)
+    private Map<Long, List<FoodItem>> foodByRestaurant = new HashMap<>();
 
     // A food item plus the restaurant it belongs to (for the Ending soon list).
     private static final class EndingSoonItem {
@@ -120,7 +139,11 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
     // Database work on a worker thread (AppDatabaseHelper rule), UI updates on the main thread
     private void loadHome() {
-        boolean isColdLoad = (cachedHomeRestaurants == null || cachedHomeUser == null);
+        SessionManager session = new SessionManager(this);
+        SessionManager.Snapshot snapshot = session.snapshot();
+        long userId = snapshot.userId;
+        if (cachedHomeUser != null && cachedHomeUser.id != userId) invalidateCache();
+        boolean isColdLoad = (cachedHomeRestaurants == null || cachedHomeUser == null || cachedHomeFood == null);
         if (isColdLoad) {
             shimmerViewContainer.setVisibility(View.VISIBLE);
             shimmerViewContainer.startShimmer();
@@ -129,26 +152,41 @@ public class CustomerHomeActivity extends AppCompatActivity {
             shimmerViewContainer.stopShimmer();
             shimmerViewContainer.setVisibility(View.GONE);
             scrollContent.setVisibility(View.VISIBLE);
+            foodByRestaurant = cachedHomeFood;
             bindHome(cachedHomeUser, cachedHomeRestaurants);
         }
 
         long startTime = System.currentTimeMillis();
-        long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
-        new Thread(() -> {
+        com.project.foodwastagereductionapp.auth.AuthTasks.run(this, null, () -> {
             User user = db.getUser(userId);
             List<RestaurantListing> all = db.searchRestaurants("");
+            Map<Long, List<FoodItem>> food = new HashMap<>();
+            for (RestaurantListing l : all) {
+                food.put(l.restaurant.id, db.getFoodForRestaurant(l.restaurant.id));
+            }
+            return new HomeData(user, all, food);
+        }, result -> {
+            User user = result.user;
+            List<RestaurantListing> all = result.restaurants;
+            if (user == null || !user.emailVerified || !User.CUSTOMER.equals(user.role)) {
+                com.project.foodwastagereductionapp.auth.AuthNavigator.logout(this);
+                return;
+            }
             cachedHomeUser = user;
             cachedHomeRestaurants = all;
+            cachedHomeFood = result.foodByRestaurant;
             long elapsed = System.currentTimeMillis() - startTime;
             long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (isFinishing() || isDestroyed() || !session.isCurrent(snapshot)) return;
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
                 scrollContent.setVisibility(View.VISIBLE);
+                foodByRestaurant = result.foodByRestaurant;
                 bindHome(user, all);
             }, delay);
-        }).start();
+        });
     }
 
     private void bindHome(User user, List<RestaurantListing> all) {
@@ -186,12 +224,12 @@ public class CustomerHomeActivity extends AppCompatActivity {
             ((TextView) card.findViewById(R.id.txtRestaurantAddress))
                     .setText(getString(R.string.fmtCityProvince, r.city, r.province));
 
-            // Lowest discounted price and total items left (food from SampleData for now)
+            // Lowest discounted price and total items left (food_items table)
             TextView txtPrice = card.findViewById(R.id.txtPrice);
             TextView txtItemsLeft = card.findViewById(R.id.txtItemsLeft);
             double lowest = -1;
             int totalLeft = 0;
-            for (FoodItem f : SampleData.getFoodItems((int) r.id)) {
+            for (FoodItem f : foodFor(r.id)) {
                 if (f.quantityLeft <= 0) continue;
                 totalLeft += f.quantityLeft;
                 if (lowest < 0 || f.price < lowest) lowest = f.price;
@@ -215,7 +253,7 @@ public class CustomerHomeActivity extends AppCompatActivity {
         SimpleDateFormat format = new SimpleDateFormat("h:mm a", Locale.ENGLISH);
         List<EndingSoonItem> items = new ArrayList<>();
         for (Restaurant r : restaurants) {
-            for (FoodItem f : SampleData.getFoodItems((int) r.id)) {
+            for (FoodItem f : foodFor(r.id)) {
                 if (f.quantityLeft <= 0 || f.availableUntil == null) continue;
                 try {
                     items.add(new EndingSoonItem(r, f, format.parse(f.availableUntil)));
@@ -237,7 +275,11 @@ public class CustomerHomeActivity extends AppCompatActivity {
             View card = inflater.inflate(R.layout.item_home_ending_soon, llEndingSoon, false);
 
             ImageView imgFood = card.findViewById(R.id.imgFood);
-            if (e.food.imageRes != 0) imgFood.setImageResource(e.food.imageRes);
+            if (e.food.hasImageUri()) {
+                setImage(imgFood, e.food.imageUri);
+            } else if (e.food.imageRes != 0) {
+                imgFood.setImageResource(e.food.imageRes);
+            }
             ((TextView) card.findViewById(R.id.txtFoodName)).setText(e.food.name);
             ((TextView) card.findViewById(R.id.txtRestaurantInfo))
                     .setText(getString(R.string.fmtRestaurantCity, e.restaurant.name, e.restaurant.city));
@@ -247,6 +289,12 @@ public class CustomerHomeActivity extends AppCompatActivity {
             card.setOnClickListener(v -> openFood(e.restaurant.id, e.food.id));
             llEndingSoon.addView(card);
         }
+    }
+
+    // Food for one restaurant, loaded in loadHome() (empty list if none)
+    private List<FoodItem> foodFor(long restaurantId) {
+        List<FoodItem> food = foodByRestaurant.get(restaurantId);
+        return food != null ? food : new ArrayList<>();
     }
 
     private void setImage(ImageView view, String uri) {

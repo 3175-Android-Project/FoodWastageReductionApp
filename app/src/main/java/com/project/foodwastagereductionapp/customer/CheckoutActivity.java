@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -178,6 +179,15 @@ public class CheckoutActivity extends BaseActivity {
                 return;
             }
             openStatus(orderId);
+        }, error -> {
+            // An item sold out (or was switched off) while it was in the cart: nothing was saved
+            if (error instanceof AppDatabaseHelper.OutOfStockException) {
+                String name = ((AppDatabaseHelper.OutOfStockException) error).foodName;
+                Toast.makeText(this, getString(R.string.fmtSoldOutInCart, name), Toast.LENGTH_LONG).show();
+            } else {
+                Log.e("GrabbitDatabase", "Placing the order failed", error);
+                Toast.makeText(this, R.string.msgDatabaseError, Toast.LENGTH_LONG).show();
+            }
         });
     }
 

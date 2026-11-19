@@ -11,8 +11,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(
         entities = {UserEntity.class, RestaurantEntity.class, OrderEntity.class,
-                OrderItemEntity.class, NotificationEntity.class, FoodItemEntity.class},
-        version = 5,
+                OrderItemEntity.class, NotificationEntity.class, FoodItemEntity.class, PasswordResetGrantEntity.class},
+        version = 6,
         exportSchema = false
 )
 abstract class AppDatabase extends RoomDatabase {
@@ -21,6 +21,7 @@ abstract class AppDatabase extends RoomDatabase {
     abstract OrderDao orderDao();
     abstract NotificationDao notificationDao();
     abstract FoodItemDao foodItemDao();
+    abstract PasswordResetGrantDao passwordResetGrantDao();
 
     /** Version 3: users get address + phone (Edit Profile). Keeps all existing accounts and restaurants. */
     static final Migration MIGRATION_2_3 = new Migration(2, 3) {
@@ -81,6 +82,19 @@ abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    /** Version 6 preserves existing accounts and orders while adding profile photos/reset grants. */
+    static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE users ADD COLUMN profile_photo_uri TEXT");
+            db.execSQL("CREATE TABLE IF NOT EXISTS password_reset_grants (token_hash TEXT NOT NULL, "
+                    + "user_id INTEGER NOT NULL, issued_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, "
+                    + "PRIMARY KEY(token_hash), FOREIGN KEY(user_id) REFERENCES users(id) "
+                    + "ON UPDATE NO ACTION ON DELETE CASCADE)");
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_password_reset_grants_user_id "
+                    + "ON password_reset_grants(user_id)");
+        }
+    };
+
     private static volatile AppDatabase instance;
 
     static AppDatabase getInstance(Context context, String databaseName) {
@@ -92,27 +106,11 @@ abstract class AppDatabase extends RoomDatabase {
                 if (result == null || !result.isOpen()
                         || !databaseName.equals(result.getOpenHelper().getDatabaseName())) {
                     if (result != null) result.close();
-                    try {
-                        result = Room.databaseBuilder(
-                                        context.getApplicationContext(),
-                                        AppDatabase.class,
-                                        databaseName
-                                )
-                                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
-                                .fallbackToDestructiveMigration()
-                                .build();
-                        result.getOpenHelper().getWritableDatabase();
-                    } catch (Exception e) {
-                        context.deleteDatabase(databaseName);
-                        result = Room.databaseBuilder(
-                                        context.getApplicationContext(),
-                                        AppDatabase.class,
-                                        databaseName
-                                )
-                                .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
-                                .fallbackToDestructiveMigration()
-                                .build();
-                    }
+                    result = Room.databaseBuilder(context.getApplicationContext(),
+                                    AppDatabase.class, databaseName)
+                            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                            .build();
+                    result.getOpenHelper().getWritableDatabase();
                     instance = result;
                 }
             }

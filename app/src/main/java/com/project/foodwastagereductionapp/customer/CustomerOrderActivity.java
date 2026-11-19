@@ -33,6 +33,8 @@ public class CustomerOrderActivity extends AppCompatActivity {
     private com.facebook.shimmer.ShimmerFrameLayout shimmerViewContainer;
     private RecyclerView rvOrders;
     private static List<Order> cachedOrders = null;
+    private static long cachedCustomerId = -1;
+    public static void invalidateCache() { cachedOrders = null; cachedCustomerId = -1; }
     private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
     // Re-reads the orders every few seconds so status changes show up while the screen is open
     private final Runnable poll = new Runnable() {
@@ -64,7 +66,7 @@ public class CustomerOrderActivity extends AppCompatActivity {
         txtEmpty = findViewById(R.id.txtEmpty);
         shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
 
-        if (cachedOrders != null) {
+        if (cachedOrders != null && cachedCustomerId == new SessionManager(this).getUserId()) {
             shimmerViewContainer.stopShimmer();
             shimmerViewContainer.setVisibility(View.GONE);
             rvOrders.setVisibility(View.VISIBLE);
@@ -104,17 +106,21 @@ public class CustomerOrderActivity extends AppCompatActivity {
     /** Splits the orders into "Current orders" and "Past orders" sections. */
     private void refreshOrders() {
         long startTime = System.currentTimeMillis();
-        boolean isColdLoad = (cachedOrders == null);
-        long customerId = new SessionManager(this).getUserId();
+        SessionManager session = new SessionManager(this);
+        SessionManager.Snapshot snapshot = session.snapshot();
+        long customerId = snapshot.userId;
+        boolean isColdLoad = cachedOrders == null || cachedCustomerId != customerId;
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
             OrderStatusSimulator.catchUp(db, customerId); // demo restaurant (see that class)
             return db.getOrders(customerId);
         }, orders -> {
             cachedOrders = orders;
+            cachedCustomerId = customerId;
             long elapsed = System.currentTimeMillis() - startTime;
             long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (isFinishing() || isDestroyed() || !session.isCurrent(snapshot)) return;
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
                 rvOrders.setVisibility(View.VISIBLE);

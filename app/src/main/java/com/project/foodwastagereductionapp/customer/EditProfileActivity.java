@@ -20,12 +20,13 @@ import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.ui.BaseActivity;
 
-/** Edits the logged-in customer's account (saved in the database). */
+/** Edits the signed-in user's account (saved in the database). */
 public class EditProfileActivity extends BaseActivity {
 
     private EditText inputFullName, etAddress, etCity, etProvince, etPostalCode, etPhone;
     private Button btnSaveChanges;
     private long userId;
+    private boolean restoringForm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +55,8 @@ public class EditProfileActivity extends BaseActivity {
         etPhone = findViewById(R.id.etPhone);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
 
+        btnSaveChanges.setEnabled(false);
+        restoringForm = savedInstanceState != null;
         userId = new SessionManager(this).getUserId();
         loadProfile();
 
@@ -64,16 +67,19 @@ public class EditProfileActivity extends BaseActivity {
     /** Fills the form with the logged-in account (same pattern as CustomerProfileActivity). */
     private void loadProfile() {
         AuthTasks.run(this, null, () -> AppDatabaseHelper.getInstance(this).getUser(userId), user -> {
-            if (user == null) {
+            if (user == null || !user.emailVerified) {
                 AuthNavigator.logout(this);
                 return;
             }
-            inputFullName.setText(user.fullName);
-            etAddress.setText(emptyIfNull(user.address));
-            etCity.setText(user.city);
-            etProvince.setText(user.province);
-            etPostalCode.setText(user.postalCode);
-            etPhone.setText(emptyIfNull(user.phone));
+            if (!restoringForm) {
+                inputFullName.setText(user.fullName);
+                etAddress.setText(emptyIfNull(user.address));
+                etCity.setText(user.city);
+                etProvince.setText(user.province);
+                etPostalCode.setText(user.postalCode);
+                etPhone.setText(emptyIfNull(user.phone));
+            }
+            btnSaveChanges.setEnabled(true);
         });
     }
 
@@ -90,6 +96,7 @@ public class EditProfileActivity extends BaseActivity {
             inputFullName.setError(getString(R.string.msgFullNameRequired));
             return;
         }
+        if (address.isEmpty()) { etAddress.setError(getString(R.string.msgAddressRequired)); return; }
         if (city.isEmpty() || province.isEmpty() || postalCode.isEmpty()) {
             Toast.makeText(this, R.string.msgCompleteAllFields, Toast.LENGTH_SHORT).show();
             return;
@@ -99,6 +106,7 @@ public class EditProfileActivity extends BaseActivity {
                 () -> AppDatabaseHelper.getInstance(this).updateProfile(
                         userId, fullName, address, city, province, postalCode, phone),
                 user -> {
+                    SessionManager.invalidateCaches();
                     Toast.makeText(this, R.string.msgProfileSaved, Toast.LENGTH_SHORT).show();
                     finish(); // back to Profile, which reloads in onResume()
                 });

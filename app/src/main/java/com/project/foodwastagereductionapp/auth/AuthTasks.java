@@ -27,23 +27,26 @@ public final class AuthTasks {
         });
     }
 
-    static <T> void run(Activity activity, View button, Callable<T> work, Consumer<T> done,
+    public static <T> void run(Activity activity, View button, Callable<T> work, Consumer<T> done,
                         Consumer<Exception> failed) {
         if (button != null) {
             if (!button.isEnabled()) return;
             button.setEnabled(false);
         }
+        SessionManager session = new SessionManager(activity);
+        SessionManager.Snapshot snapshot = session.snapshot();
         WORKER.execute(() -> {
+            if (!session.isCurrent(snapshot)) return;
             try {
                 T result = work.call();
                 MAIN.post(() -> {
-                    if (activity.isFinishing() || activity.isDestroyed()) return;
+                    if (activity.isFinishing() || activity.isDestroyed() || !session.isCurrent(snapshot)) return;
                     if (button != null) button.setEnabled(true);
                     done.accept(result);
                 });
             } catch (Exception error) {
                 MAIN.post(() -> {
-                    if (activity.isFinishing() || activity.isDestroyed()) return;
+                    if (activity.isFinishing() || activity.isDestroyed() || !session.isCurrent(snapshot)) return;
                     if (button != null) button.setEnabled(true);
                     failed.accept(error);
                 });

@@ -18,6 +18,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthNavigator;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
+import com.project.foodwastagereductionapp.auth.ChangePasswordActivity;
 import com.project.foodwastagereductionapp.auth.RestaurantInformationActivity;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
@@ -51,7 +52,11 @@ public class ManagerProfileActivity extends AppCompatActivity {
             intent.putExtra(RestaurantInformationActivity.EXTRA_EDIT_PROFILE, true);
             startActivity(intent);
         });
-        findViewById(R.id.layoutLogout).setOnClickListener(view -> ConfirmationDialog.showLogout(this, () -> AuthNavigator.logout(this)));
+        findViewById(R.id.layoutChangePassword).setEnabled(false);
+        findViewById(R.id.layoutChangePassword).setOnClickListener(v -> startActivity(new Intent(
+                this, ChangePasswordActivity.class)));
+        findViewById(R.id.layoutLogout).setOnClickListener(
+                view -> ConfirmationDialog.showLogout(this, () -> AuthNavigator.logout(this)));
 
         BottomNavigationView nav = findViewById(R.id.bottomNav);
         nav.setItemActiveIndicatorEnabled(false);
@@ -79,25 +84,30 @@ public class ManagerProfileActivity extends AppCompatActivity {
 
     @Override protected void onResume() {
         super.onResume();
-        Restaurant cached = ManagerDashboardActivity.getCachedRestaurant();
+        SessionManager session = new SessionManager(this);
+        SessionManager.Snapshot snapshot = session.snapshot();
+        long userId = snapshot.userId;
+        Restaurant cached = ManagerDashboardActivity.getCachedRestaurant(userId);
         boolean isColdLoad = (cached == null);
         View editProfile = findViewById(R.id.layoutEditProfile);
+        View changePassword = findViewById(R.id.layoutChangePassword);
 
         if (isColdLoad) {
             shimmerViewContainer.setVisibility(View.VISIBLE);
             shimmerViewContainer.startShimmer();
             scrollContent.setVisibility(View.GONE);
             editProfile.setEnabled(false);
+            changePassword.setEnabled(false);
         } else {
             shimmerViewContainer.stopShimmer();
             shimmerViewContainer.setVisibility(View.GONE);
             scrollContent.setVisibility(View.VISIBLE);
             bindProfile(cached);
             editProfile.setEnabled(true);
+            changePassword.setEnabled(true);
         }
 
         long startTime = System.currentTimeMillis();
-        long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
             User user = db.getUser(userId);
@@ -111,11 +121,13 @@ public class ManagerProfileActivity extends AppCompatActivity {
             long elapsed = System.currentTimeMillis() - startTime;
             long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (isFinishing() || isDestroyed() || !session.isCurrent(snapshot)) return;
                 shimmerViewContainer.stopShimmer();
                 shimmerViewContainer.setVisibility(View.GONE);
                 scrollContent.setVisibility(View.VISIBLE);
                 bindProfile(restaurant);
                 editProfile.setEnabled(true);
+                changePassword.setEnabled(true);
             }, delay);
         });
     }
