@@ -17,12 +17,13 @@ Grabbit helps restaurants sell surplus food at a discount instead of discarding 
 5. [Restaurant Manager Features](#restaurant-manager-features)
 6. [Password Reset](#password-reset)
 7. [Implementation Status](#implementation-status)
-8. [Known TODOs](#known-todos)
-9. [Project Structure](#project-structure)
-10. [Development Setup](#development-setup)
-11. [Database Integration](#database-integration)
-12. [Design and Navigation](#design-and-navigation)
-13. [Testing](#testing)
+8. [Proposal Requirement Coverage](#proposal-requirement-coverage)
+9. [Known TODOs](#known-todos)
+10. [Project Structure](#project-structure)
+11. [Development Setup](#development-setup)
+12. [Database Integration](#database-integration)
+13. [Design and Navigation](#design-and-navigation)
+14. [Testing](#testing)
 
 ---
 
@@ -74,8 +75,7 @@ The welcome flow provides **Login** and **Register**.
 - Passwords are stored using a salted PBKDF2-HMAC-SHA1 hash.
 - Email verification confirms the account before normal app access.
 - Manager registration continues to restaurant information setup.
-
-The optional profile-photo data model and profile-photo UI components exist, but profile photos are not currently collected during account creation.
+- A profile photo is optional in the project proposal. The app currently provides profile-photo data/UI support, but photo selection is not required for registration.
 
 ### Login and profile management
 
@@ -160,67 +160,96 @@ The reset grant is short-lived and stored as a hash. Invalid, expired or already
 
 The following features are currently implemented:
 
-- Customer and restaurant-manager roles
-- Login, registration and role-based navigation
-- Email verification
-- Password hashing and signed-in password changes
-- Password reset codes and reset grants
-- Customer and manager profile editing
-- Restaurant information management
-- Restaurant search
-- Restaurant and surplus-food listings
-- Cart, pickup/delivery checkout and stock reservation
-- Order placement, cancellation and status history
-- Manager accept/reject and status updates
-- In-app notifications and pickup reminders
-- Local Room database persistence
-- Light/dark theme resources, edge-to-edge layout and shimmer loading states
+- Customer and restaurant-manager roles.
+- Welcome, login and registration flows with role-based navigation.
+- Name, email, password and address collection; email uniqueness and verification.
+- Password hashing, signed-in password changes and logout.
+- Password reset codes and short-lived reset grants.
+- Customer and manager profile editing.
+- Restaurant information setup and manager restaurant profile management.
+- Restaurant search by name, city, province or cuisine type.
+- Surplus-food listings with food details and photos.
+- Add, edit, remove, view and mark availability of manager food items.
+- Cart with quantity changes, subtotal, tax and total.
+- Pickup/delivery checkout and stock reservation.
+- Order placement, cancellation and order-status history.
+- Pending, accepted, preparing, ready, completed, rejected and cancelled statuses.
+- Manager acceptance/rejection, status updates and reminders.
+- In-app customer notifications.
+- Local Room database persistence on the Android device.
+- Light/dark theme resources, edge-to-edge layout and shimmer loading states.
+
+Password recovery and password verification are additional features included in the project. The email service is described in [email_server/README.md](email_server/README.md).
+
+---
+
+## Proposal Requirement Coverage
+
+This section maps the supplied course proposal to the current implementation.
+
+### Implemented proposal features
+
+- Both required roles can register, log in and manage their account or restaurant profile.
+- The welcome screen provides Login and Register.
+- Manager food management supports adding, editing, deleting and viewing items.
+- Customers can search restaurants, open restaurant listings and view discounted food details.
+- Customers can select multiple items, choose pickup or delivery, place an order and view the total.
+- Customers can cancel pending orders and view current and previous orders.
+- Orders contain restaurant, customer, food-line, quantity, price, date, fulfillment method, status and total information.
+- Managers can view orders, accept/reject them and update fulfillment statuses.
+- Ready-order reminders are available as in-app notifications.
+- The app uses Room with a SQLite database, as permitted by the course project.
+
+### Proposal features still needing work
+
+- Restaurant search uses text matching rather than geolocation or a defined nearby-distance search.
+- Customer food-item search/filter controls for name, category and price are incomplete.
+- Manager food-item search/filter controls for name, category and date are incomplete.
+- Manager order-history filtering is not yet separated as a dedicated control.
+- Food validation is incomplete:
+  - Discounted price must be lower than original price.
+  - Original price must be greater than zero.
+  - Quantity must be at least 1.
+  - Available date and time should replace the time-only field and reject past values.
+- A user-selected pickup/delivery time is not yet distinct from the item's available-until time.
+- Delivery address editing or confirmation during checkout should be completed.
+- Real external pickup/delivery hand-off confirmation is not implemented.
+
+### Optional items
+
+- A profile photo is optional according to the proposal and is not a TODO requirement.
+- Password recovery is a listed bonus/additional feature and is implemented locally with email verification infrastructure.
 
 ---
 
 ## Known TODOs
 
-The proposal requirements are not all complete yet. The following items remain to be implemented:
+The proposal requirements are not all complete yet. The following items remain:
 
 ### Food validation and management
 
-- [ ] Require a discounted price to be lower than the original price before saving or editing an item.
-- [ ] Require the original price to be greater than zero.
-- [ ] Require quantity to be at least `1`.
-- [ ] Replace the manager-only **available-until time** field with a complete available date and time.
-- [ ] Validate that available date/time are not in the past.
-- [ ] Prevent a manager from adding a quantity of `0` or making a zero-stock item available.
+- [ ] Require the discounted price to be lower than the original price when adding or editing an item.
+- [ ] Require the original price and quantity to be greater than zero.
+- [ ] Replace the manager-only available-until time with a complete available date and time.
+- [ ] Reject available date/time values that are in the past.
+- [ ] Prevent a zero-stock item from being made available.
 
 ### Customer search and filtering
 
-- [ ] Add food-item search and filters for name, category and price.
-- [ ] Add dedicated category and price controls to restaurant and browse screens.
+- [ ] Add dedicated food-item search and category/price filters.
 - [ ] Add geolocation or an explicit nearby-distance search instead of text matching only.
 - [ ] Combine customer city/location defaults with restaurant search and home recommendations.
 
 ### Manager search and filtering
 
 - [ ] Add search and filters for manager food items by name, category and date.
-- [ ] Add a dedicated order-history filter beyond the existing order list.
+- [ ] Add dedicated filters to the manager order-history screen.
 
 ### Delivery and pickup
 
 - [ ] Present a user-selected pickup/delivery time instead of deriving it only from the cart's available-until time.
 - [ ] Support editing or confirming the delivery address during checkout.
-- [ ] Add real pickup/delivery hand-off confirmation for external delivery workflows.
-
-### Profiles
-
-- [ ] Enable profile-photo selection in account registration.
-- [ ] Enable profile-photo selection and removal in customer and manager profile editing.
-- [ ] Make profile-photo permissions and storage behavior consistent across registration and editing.
-
-### Notifications and backend
-
-- [ ] Replace the demo order-status simulator with server-driven, real-time status updates.
-- [ ] Add remote/push reminders rather than only in-app notification records.
-- [ ] Validate password-reset delivery through a production email service and keep reset codes in secure server-side storage.
-- [ ] Add live cross-device synchronization and authentication; current persistence is local to the installed app.
+- [ ] Add real external pickup/delivery hand-off confirmation.
 
 ### Data and security
 
