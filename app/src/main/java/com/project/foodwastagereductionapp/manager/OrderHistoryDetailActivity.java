@@ -38,7 +38,7 @@ public class OrderHistoryDetailActivity extends AppCompatActivity {
             return insets;
         });
 
-        TextView txtHistoryHeaderTitle = findViewById(R.id.txtHistoryHeaderTitle);
+
         long orderId = getIntent().getLongExtra("orderId", -1);
         long managerId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
@@ -61,7 +61,6 @@ public class OrderHistoryDetailActivity extends AppCompatActivity {
                 }
         );
 
-        txtHistoryHeaderTitle.setText("Order #" + orderId);
     }
 
     private void bind(OrderDetails details) {
