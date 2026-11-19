@@ -204,7 +204,9 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
                 title = R.string.titleStatusPreparing; desc = R.string.msgStatusPreparing; break;
             case OrderStatus.READY:
                 icon = R.drawable.icon_check;
-                title = R.string.titleStatusReady;     desc = R.string.msgStatusReady;     break;
+                title = placed.isDelivery ? R.string.titleStatusReadyDelivery : R.string.titleStatusReady;
+                desc = R.string.msgStatusReady;
+                break;
             case OrderStatus.COMPLETED:
                 icon = R.drawable.icon_check;
                 title = R.string.titleStatusCompleted; desc = R.string.msgStatusCompleted; break;
@@ -214,7 +216,11 @@ public class CustomerOrderStatusActivity extends AppCompatActivity {
         showIcon(icon, R.color.background_accent1, R.color.background_accent2);
         txtStatusTitle.setText(title);
         if (OrderStatus.READY.equals(status)) {
-            txtStatusDesc.setText(getString(R.string.msgStatusReady, placed.order.orderNumber));
+            if (placed.isDelivery) {
+                txtStatusDesc.setText(R.string.msgStatusReadyDelivery);
+            } else {
+                txtStatusDesc.setText(getString(R.string.msgStatusReady, placed.order.orderNumber));
+            }
         } else {
             txtStatusDesc.setText(desc);
         }

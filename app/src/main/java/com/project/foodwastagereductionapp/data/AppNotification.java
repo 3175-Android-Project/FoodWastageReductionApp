@@ -11,9 +11,10 @@ public final class AppNotification {
     public final long timeMillis;
     /** The order's current status (decides which screen a tap opens). */
     public final String orderStatus;
+    public final boolean isDelivery;
 
     public AppNotification(long id, String status, String restaurantName, long orderId,
-                           String pickupTime, long timeMillis, String orderStatus) {
+                           String pickupTime, long timeMillis, String orderStatus, boolean isDelivery) {
         this.id = id;
         this.status = status;
         this.restaurantName = restaurantName;
@@ -21,5 +22,11 @@ public final class AppNotification {
         this.pickupTime = pickupTime;
         this.timeMillis = timeMillis;
         this.orderStatus = orderStatus;
+        this.isDelivery = isDelivery;
+    }
+
+    public AppNotification(long id, String status, String restaurantName, long orderId,
+                           String pickupTime, long timeMillis, String orderStatus) {
+        this(id, status, restaurantName, orderId, pickupTime, timeMillis, orderStatus, false);
     }
 }

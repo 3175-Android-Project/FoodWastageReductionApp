@@ -48,12 +48,16 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         AppNotification n = notifications.get(position);
         Context context = h.itemView.getContext();
 
-        h.txtTitle.setText(titleFor(n.status));
+        h.txtTitle.setText(titleFor(n.status, n.isDelivery));
 
-        // "Your order is ready!" doubles as the pickup reminder, so it also says when to collect
+        // "Your order is ready!" / "Your order is ready for delivery!"
         if (OrderStatus.READY.equals(n.status)) {
-            h.txtMessage.setText(context.getString(R.string.fmtNotificationReady,
-                    n.restaurantName, n.pickupTime));
+            if (n.isDelivery) {
+                h.txtMessage.setText(context.getString(R.string.fmtNotificationReadyDelivery, n.restaurantName));
+            } else {
+                h.txtMessage.setText(context.getString(R.string.fmtNotificationReady,
+                        n.restaurantName, n.pickupTime));
+            }
         } else {
             h.txtMessage.setText(n.restaurantName);
         }
@@ -75,11 +79,11 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         return notifications.size();
     }
 
-    private static int titleFor(String status) {
+    private static int titleFor(String status, boolean isDelivery) {
         switch (status) {
             case OrderStatus.ACCEPTED:  return R.string.notifOrderAccepted;
             case OrderStatus.PREPARING: return R.string.notifOrderPreparing;
-            case OrderStatus.READY:     return R.string.notifOrderReady;
+            case OrderStatus.READY:     return isDelivery ? R.string.notifOrderReadyDelivery : R.string.notifOrderReady;
             case OrderStatus.REJECTED:  return R.string.notifOrderRejected;
             default:                    return R.string.notifOrderCompleted;
         }

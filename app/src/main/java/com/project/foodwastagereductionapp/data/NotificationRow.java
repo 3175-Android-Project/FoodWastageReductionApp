@@ -9,4 +9,5 @@ final class NotificationRow {
     String pickupTime;
     long timeMillis;
     String orderStatus;
+    boolean isDelivery;
 }

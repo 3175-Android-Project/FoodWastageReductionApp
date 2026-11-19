@@ -426,7 +426,40 @@ public final class AppDatabaseHelper {
         List<AppNotification> result = new ArrayList<>();
         for (NotificationRow r : database.notificationDao().findByCustomer(customerId)) {
             result.add(new AppNotification(r.id, r.status, r.restaurantName, r.orderId,
-                    r.pickupTime, r.timeMillis, r.orderStatus));
+                    r.pickupTime, r.timeMillis, r.orderStatus, r.isDelivery));
+        }
+        return result;
+    }
+
+    public List<AppNotification> getManagerNotifications(long managerId) {
+        List<AppNotification> result = new ArrayList<>();
+        RestaurantEntity restaurant = database.restaurantDao().findByManagerId(managerId);
+        if (restaurant == null) return result;
+        for (OrderEntity e : database.orderDao().findByRestaurant(restaurant.id)) {
+            String status = e.status == null ? "" : e.status;
+            if (OrderStatus.PENDING.equals(status)) {
+                result.add(new AppNotification(
+                        e.id,
+                        "New order received",
+                        restaurant.name,
+                        e.id,
+                        e.pickupTime,
+                        e.placedAt,
+                        e.status,
+                        e.isDelivery
+                ));
+            } else if (OrderStatus.CANCELLED.equals(status)) {
+                result.add(new AppNotification(
+                        e.id,
+                        "Order cancelled",
+                        restaurant.name,
+                        e.id,
+                        e.pickupTime,
+                        e.placedAt,
+                        e.status,
+                        e.isDelivery
+                ));
+            }
         }
         return result;
     }

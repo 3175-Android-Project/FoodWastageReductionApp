@@ -201,6 +201,8 @@
     <string name="msgStatusPreparing">The restaurant is getting your food ready.</string>
     <string name="titleStatusReady">Ready for pickup!</string>
     <string name="msgStatusReady">Show order #%1$s at the restaurant\nto collect your food.</string>
+    <string name="titleStatusReadyDelivery">Ready for delivery!</string>
+    <string name="msgStatusReadyDelivery">Your order is on the way for delivery.</string>
     <string name="titleStatusCompleted">Order picked up</string>
     <string name="msgStatusCompleted">Thanks for helping reduce food waste!</string>
     <string name="titleStatusCancelled">Order cancelled</string>
@@ -224,9 +226,11 @@
     <string name="notifOrderAccepted">Order accepted</string>
     <string name="notifOrderPreparing">Your order is being prepared</string>
     <string name="notifOrderReady">Your order is ready!</string>
+    <string name="notifOrderReadyDelivery">Your order is ready for delivery!</string>
     <string name="notifOrderRejected">Order rejected</string>
     <string name="notifOrderCompleted">Order picked up</string>
     <string name="fmtNotificationReady">%1$s · Pickup %2$s</string>
+    <string name="fmtNotificationReadyDelivery">%1$s · Delivery</string>
 
 
     <!-- Restaurant Detail -->
