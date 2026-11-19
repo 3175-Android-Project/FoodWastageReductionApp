@@ -245,6 +245,70 @@
 
             </LinearLayout>
 
+            <!-- Pending Actions (Side by Side) -->
+            <LinearLayout
+                android:id="@+id/layoutPendingActions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btnReject"
+                    style="@style/Button.Primary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_button_warning"
+                    android:textColor="@color/text_warning"
+                    android:text="@string/btnRejectOrder"
+                    app:backgroundTint="@null" />
+
+                <Button
+                    android:id="@+id/btnAccept"
+                    style="@style/Button.Primary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/btnAcceptOrder"
+                    app:backgroundTint="@null" />
+
+            </LinearLayout>
+
+            <!-- Manager Actions -->
+            <LinearLayout
+                android:id="@+id/layoutManagerActions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btnPrimaryAction"
+                    style="@style/Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    app:backgroundTint="@null" />
+
+                <Button
+                    android:id="@+id/btnSecondaryAction"
+                    style="@style/Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_card"
+                    android:textColor="@color/text_primary"
+                    android:text=""
+                    app:backgroundTint="@null"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
