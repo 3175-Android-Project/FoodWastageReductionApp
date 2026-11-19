@@ -437,23 +437,27 @@ public final class AppDatabaseHelper {
         if (restaurant == null) return result;
         for (OrderEntity e : database.orderDao().findByRestaurant(restaurant.id)) {
             String status = e.status == null ? "" : e.status;
-            if (OrderStatus.COMPLETED.equals(status) || OrderStatus.REJECTED.equals(status) || OrderStatus.CANCELLED.equals(status)) {
-                continue;
+            if (OrderStatus.PENDING.equals(status)) {
+                result.add(new AppNotification(
+                        e.id,
+                        "New order received",
+                        restaurant.name,
+                        e.id,
+                        e.pickupTime,
+                        e.placedAt,
+                        e.status
+                ));
+            } else if (OrderStatus.CANCELLED.equals(status)) {
+                result.add(new AppNotification(
+                        e.id,
+                        "Order cancelled",
+                        restaurant.name,
+                        e.id,
+                        e.pickupTime,
+                        e.placedAt,
+                        e.status
+                ));
             }
-            String notifStatus = "New order received";
-            if (OrderStatus.ACCEPTED.equals(status)) notifStatus = "Order accepted";
-            else if (OrderStatus.PREPARING.equals(status)) notifStatus = "Order preparing";
-            else if (OrderStatus.READY.equals(status)) notifStatus = "Order ready";
-
-            result.add(new AppNotification(
-                    e.id,
-                    notifStatus,
-                    restaurant.name,
-                    e.id,
-                    e.pickupTime,
-                    e.placedAt,
-                    e.status
-            ));
         }
         return result;
     }

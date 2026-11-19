@@ -35,13 +35,11 @@ public class ManagerDashboardActivity extends AppCompatActivity {
         final int pending;
         final int accepted;
         final int ready;
-        final boolean hasNotifications;
-        DashboardData(Restaurant restaurant, int pending, int accepted, int ready, boolean hasNotifications) {
+        DashboardData(Restaurant restaurant, int pending, int accepted, int ready) {
             this.restaurant = restaurant;
             this.pending = pending;
             this.accepted = accepted;
             this.ready = ready;
-            this.hasNotifications = hasNotifications;
         }
     }
 
@@ -152,6 +150,8 @@ public class ManagerDashboardActivity extends AppCompatActivity {
             bindDashboard(cached);
         }
 
+        checkUnreadNotifications();
+
         long startTime = System.currentTimeMillis();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
@@ -174,8 +174,7 @@ public class ManagerDashboardActivity extends AppCompatActivity {
                     ready++;
                 }
             }
-            List<AppNotification> notifs = db.getManagerNotifications(userId);
-            return new DashboardData(restaurant, pending, accepted, ready, !notifs.isEmpty());
+            return new DashboardData(restaurant, pending, accepted, ready);
         }, data -> {
             if (data == null) {
                 AuthNavigator.logout(this);
@@ -195,12 +194,30 @@ public class ManagerDashboardActivity extends AppCompatActivity {
         });
     }
 
+    private void checkUnreadNotifications() {
+        long userId = new SessionManager(this).getUserId();
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        AuthTasks.run(this, null, () -> {
+            List<AppNotification> notifs = db.getManagerNotifications(userId);
+            if (notifs.isEmpty()) return false;
+            long lastSeen = getSharedPreferences("grabbit_notifications_prefs", MODE_PRIVATE)
+                    .getLong("last_seen_notif_" + userId, 0);
+            for (AppNotification n : notifs) {
+                if (n.timeMillis > lastSeen) return true;
+            }
+            return false;
+        }, hasUnread -> {
+            if (hasUnread != null) {
+                findViewById(R.id.notificationBadge).setVisibility(hasUnread ? View.VISIBLE : View.GONE);
+            }
+        });
+    }
+
     private void bindDashboard(DashboardData data) {
         ((TextView) findViewById(R.id.txtRestaurantName)).setText(data.restaurant.name);
         ((TextView) findViewById(R.id.txtPendingCount)).setText(String.valueOf(data.pending));
         ((TextView) findViewById(R.id.txtAcceptedCount)).setText(String.valueOf(data.accepted));
         ((TextView) findViewById(R.id.txtReadyCount)).setText(String.valueOf(data.ready));
-        findViewById(R.id.notificationBadge).setVisibility(data.hasNotifications ? View.VISIBLE : View.GONE);
     }
 
     private void openProfile() {
