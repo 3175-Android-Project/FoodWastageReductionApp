@@ -45,10 +45,14 @@ public interface OrderDao {
             "status = 'Picked up' OR " +
             "status = 'Delivered' OR " +
             "status = 'Rejected' OR " +
-            "status = 'Cancelled')"
+            "status = 'Cancelled')" +
+            " ORDER BY placed_at DESC, id DESC"
     )
     List<OrderEntity> getOrderHistory(long restaurantId);
 
     @Query("SELECT * FROM orders " + "WHERE id = :orderId")
     OrderEntity getOrder(long orderId);
+
+    @Query("SELECT * FROM orders " + "WHERE id = :orderId " + "AND restaurant_id = :restaurantId " + "LIMIT 1")
+    OrderEntity findForRestaurant(long restaurantId, long orderId);
 }

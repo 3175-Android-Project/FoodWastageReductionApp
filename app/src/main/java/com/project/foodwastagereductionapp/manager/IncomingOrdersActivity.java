@@ -46,6 +46,13 @@ public class IncomingOrdersActivity extends BaseActivity {
             return insets;
         });
 
+        String requestedStatus = getIntent().getStringExtra("status");
+        if (requestedStatus != null && !requestedStatus.isEmpty()) {
+            currentStatus = requestedStatus;
+        } else {
+            currentStatus = OrderStatus.PENDING;
+        }
+
         ((TextView) findViewById(R.id.txtHeaderTitle)).setText(R.string.titleIncomingOrders);
         findViewById(R.id.btnBack).setVisibility(View.GONE);
 

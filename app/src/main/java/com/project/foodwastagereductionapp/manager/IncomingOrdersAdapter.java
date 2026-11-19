@@ -1,6 +1,7 @@
 package com.project.foodwastagereductionapp.manager;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,6 +71,12 @@ public class IncomingOrdersAdapter extends RecyclerView.Adapter<IncomingOrdersAd
         Date placed = new Date(o.placedAt);
         String timeStr = new SimpleDateFormat("MMM d, h:mm a", Locale.US).format(placed);
         holder.txtTime.setText(timeStr);
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, OrderHistoryDetailActivity.class);
+            intent.putExtra("orderId", o.id);
+            context.startActivity(intent);
+        });
 
         bindActions(holder, o, context);
     }

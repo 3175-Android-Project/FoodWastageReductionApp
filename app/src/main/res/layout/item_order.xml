@@ -59,6 +59,7 @@
             android:layout_marginTop="2dp"
             android:textColor="@color/text_tertiary"
             android:textSize="12sp"
+            tools:ignore="TextContrastCheck"
             tools:text="Order #1024" />
 
         <TextView
@@ -67,6 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="@color/text_tertiary"
+            tools:ignore="TextContrastCheck"
             tools:text="Oct 1, 2026 · 1 item" />
 
         <TextView

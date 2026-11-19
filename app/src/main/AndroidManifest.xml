@@ -102,6 +102,10 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".manager.ManagerNotificationsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".customer.CustomerBrowseActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

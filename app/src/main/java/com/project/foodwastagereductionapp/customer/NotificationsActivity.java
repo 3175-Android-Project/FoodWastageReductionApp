@@ -58,6 +58,10 @@ public class NotificationsActivity extends AppCompatActivity {
         super.onStart();
         // Reload every time so updates that arrived while away (e.g. on the status screen) show up
         long customerId = new SessionManager(this).getUserId();
+        getSharedPreferences("grabbit_notifications_prefs", MODE_PRIVATE)
+                .edit()
+                .putLong("last_seen_notif_" + customerId, System.currentTimeMillis())
+                .apply();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
         AuthTasks.run(this, null, () -> {
             OrderStatusSimulator.catchUp(db, customerId); // demo restaurant (see that class)

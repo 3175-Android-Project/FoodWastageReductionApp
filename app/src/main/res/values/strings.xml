@@ -283,8 +283,8 @@
     <string name="fmtItemsLeft">%1$d left · until %2$s</string>
 
     <string name="dialogClose">Close dialog</string>
-    <string name="managerFoodItemsActivity">Food Items</string>
-    <string name="btnAddFoodItem">+ Add Food Item</string>
+    <string name="managerFoodItemsActivity">Food items</string>
+    <string name="btnAddFoodItem">+ Add food item</string>
     <string name="hintFoodName">Name</string>
     <string name="hintFoodDescription">Description</string>
     <string name="hintFoodCategory">Category</string>
