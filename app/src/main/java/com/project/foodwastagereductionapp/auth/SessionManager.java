@@ -6,6 +6,7 @@ import com.project.foodwastagereductionapp.customer.CartManager;
 import com.project.foodwastagereductionapp.customer.CustomerBrowseActivity;
 import com.project.foodwastagereductionapp.customer.CustomerHomeActivity;
 import com.project.foodwastagereductionapp.customer.CustomerOrderActivity;
+import com.project.foodwastagereductionapp.customer.CustomerProfileActivity;
 import com.project.foodwastagereductionapp.manager.ManagerDashboardActivity;
 
 /** Identity stays in preferences; private cached data belongs to one session generation. */
@@ -46,6 +47,7 @@ public final class SessionManager {
         CustomerHomeActivity.invalidateCache();
         CustomerOrderActivity.invalidateCache();
         CustomerBrowseActivity.invalidateCache();
+        CustomerProfileActivity.invalidateCache();
         ManagerDashboardActivity.invalidateCache();
     }
     public static final class Snapshot {

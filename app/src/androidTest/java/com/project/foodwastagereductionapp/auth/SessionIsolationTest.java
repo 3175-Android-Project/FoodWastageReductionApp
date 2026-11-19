@@ -34,6 +34,7 @@ public class SessionIsolationTest {
         put(CustomerOrderActivity.class,"cachedOrders",new ArrayList<Order>());
         put(CustomerOrderActivity.class,"cachedCustomerId",101L);
         put(CustomerHomeActivity.class,"cachedHomeUser",new User(101,"first@example.com",User.CUSTOMER,"First","City","BC","V6B1A1",true));
+        put(CustomerProfileActivity.class,"cachedUser",new User(101,"first@example.com",User.CUSTOMER,"First","City","BC","V6B1A1",true));
         put(CustomerHomeActivity.class,"cachedHomeRestaurants",new ArrayList<RestaurantListing>());
         put(CustomerBrowseActivity.class,"cachedRestaurants",new ArrayList<RestaurantListing>());
         put(ManagerDashboardActivity.class,"cachedManagerRestaurant",new Restaurant(1,101,"First","City","BC","V6B1A1","6045550100","Food","",""));
@@ -43,6 +44,7 @@ public class SessionIsolationTest {
         assertFalse(session.isCurrent(first));
         assertNull(get(CustomerOrderActivity.class,"cachedOrders"));
         assertNull(get(CustomerHomeActivity.class,"cachedHomeUser"));
+        assertNull(get(CustomerProfileActivity.class,"cachedUser"));
         assertNull(get(CustomerBrowseActivity.class,"cachedRestaurants"));
         assertNull(ManagerDashboardActivity.getCachedRestaurant(101));
         assertEquals(0,CartManager.count());

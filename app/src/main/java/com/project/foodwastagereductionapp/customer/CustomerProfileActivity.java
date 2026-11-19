@@ -1,12 +1,5 @@
 package com.project.foodwastagereductionapp.customer;
 
-import com.project.foodwastagereductionapp.data.FoodItem;
-import com.project.foodwastagereductionapp.data.CartItem;
-import com.project.foodwastagereductionapp.data.Order;
-import com.project.foodwastagereductionapp.data.OrderStatus;
-import com.project.foodwastagereductionapp.data.AppNotification;
-
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -19,12 +12,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.project.foodwastagereductionapp.MainActivity;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthNavigator;
-import com.project.foodwastagereductionapp.auth.ChangePasswordActivity;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
+import com.project.foodwastagereductionapp.auth.ChangePasswordActivity;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.User;
@@ -32,6 +25,14 @@ import com.project.foodwastagereductionapp.ui.ConfirmationDialog;
 
 public class CustomerProfileActivity extends AppCompatActivity {
 
+    private static User cachedUser = null;
+
+    public static void invalidateCache() {
+        cachedUser = null;
+    }
+
+    private ShimmerFrameLayout shimmerViewContainer;
+    private View scrollContent;
     private TextView txtCustomerName, txtEmail, txtAddress;
 
     @Override
@@ -44,6 +45,10 @@ public class CustomerProfileActivity extends AppCompatActivity {
             v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
             return insets;
         });
+
+        shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
+        scrollContent = findViewById(R.id.scrollContent);
+
         // Header title
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
         txtHeaderTitle.setText(R.string.txtProfile);
@@ -100,27 +105,68 @@ public class CustomerProfileActivity extends AppCompatActivity {
     }
 
     private void showProfile() {
+        SessionManager session = new SessionManager(this);
+        SessionManager.Snapshot snapshot = session.snapshot();
+        long userId = snapshot.userId;
+
+        View editProfile = findViewById(R.id.layoutEditProfile);
         View changePassword = findViewById(R.id.layoutChangePassword);
-        changePassword.setEnabled(false);
-        long userId = new SessionManager(this).getUserId();
-        AuthTasks.run(this, null, () -> AppDatabaseHelper.getInstance(this).getUser(userId), user -> {
-            if (user == null || !user.emailVerified || !User.CUSTOMER.equals(user.role)) {
+
+        boolean isColdLoad = (cachedUser == null || cachedUser.id != userId);
+
+        if (isColdLoad) {
+            shimmerViewContainer.setVisibility(View.VISIBLE);
+            shimmerViewContainer.startShimmer();
+            scrollContent.setVisibility(View.GONE);
+            editProfile.setEnabled(false);
+            changePassword.setEnabled(false);
+        } else {
+            shimmerViewContainer.stopShimmer();
+            shimmerViewContainer.setVisibility(View.GONE);
+            scrollContent.setVisibility(View.VISIBLE);
+            bindProfile(cachedUser);
+            editProfile.setEnabled(true);
+            changePassword.setEnabled(true);
+        }
+
+        long startTime = System.currentTimeMillis();
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        AuthTasks.run(this, null, () -> {
+            User user = db.getUser(userId);
+            if (user == null || !user.emailVerified || !User.CUSTOMER.equals(user.role)) return null;
+            return user;
+        }, user -> {
+            if (user == null) {
                 AuthNavigator.logout(this);
                 return;
             }
-            changePassword.setEnabled(true);
-            com.project.foodwastagereductionapp.profile.ProfilePhotoStore.show(
-                    findViewById(R.id.imgAvatar), user.profilePhotoUri);
-            txtCustomerName.setText(user.fullName);
-            txtEmail.setText(user.email);
-            if (user.hasAddress()) {
-                txtAddress.setText(getString(R.string.fmtFullAddress,
-                        user.address, user.city, user.province, user.postalCode));
-            } else {
-                txtAddress.setText(getString(R.string.profileLocation,
-                        user.city, user.province, user.postalCode));
-            }
+            cachedUser = user;
+            long elapsed = System.currentTimeMillis() - startTime;
+            long delay = isColdLoad ? Math.max(0, 350 - elapsed) : 0;
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (isFinishing() || isDestroyed() || !session.isCurrent(snapshot)) return;
+                shimmerViewContainer.stopShimmer();
+                shimmerViewContainer.setVisibility(View.GONE);
+                scrollContent.setVisibility(View.VISIBLE);
+                bindProfile(user);
+                editProfile.setEnabled(true);
+                changePassword.setEnabled(true);
+            }, delay);
         });
+    }
+
+    private void bindProfile(User user) {
+        com.project.foodwastagereductionapp.profile.ProfilePhotoStore.show(
+                findViewById(R.id.imgAvatar), user.profilePhotoUri);
+        txtCustomerName.setText(user.fullName);
+        txtEmail.setText(user.email);
+        if (user.hasAddress()) {
+            txtAddress.setText(getString(R.string.fmtFullAddress,
+                    user.address, user.city, user.province, user.postalCode));
+        } else {
+            txtAddress.setText(getString(R.string.profileLocation,
+                    user.city, user.province, user.postalCode));
+        }
     }
 
     private void confirmLogout() {
@@ -137,5 +183,4 @@ public class CustomerProfileActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
         finish();
     }
-
 }
