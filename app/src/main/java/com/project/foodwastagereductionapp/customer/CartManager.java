@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-// In-memory cart for the current session. One restaurant per cart.
+// In-memory carts for the current session. One cart per restaurant, any number of restaurants.
 public final class CartManager {
 
-    // One row in the cart: a food item and how many of it.
+    // One row in a cart: a food item and how many of it.
     public static final class CartLine {
         public final FoodItem item;
         public final int quantity;
@@ -25,74 +25,101 @@ public final class CartManager {
         }
     }
 
-    private static final Map<Integer, FoodItem> items = new LinkedHashMap<>();
-    private static final Map<Integer, Integer> quantities = new LinkedHashMap<>();
-    private static long restaurantId = -1;
+    // The food in one restaurant's cart.
+    private static final class Cart {
+        final Map<Integer, FoodItem> items = new LinkedHashMap<>();
+        final Map<Integer, Integer> quantities = new LinkedHashMap<>();
+    }
+
+    // restaurant id -> its cart (in the order the carts were started)
+    private static final Map<Long, Cart> carts = new LinkedHashMap<>();
 
     private CartManager() {
     }
 
-    // Adds one. Returns false if the cart already holds food from a different restaurant.
-    public static synchronized boolean add(long fromRestaurantId, FoodItem item) {
-        if (restaurantId != -1 && restaurantId != fromRestaurantId) return false;
-        restaurantId = fromRestaurantId;
-        items.put(item.id, item);
-        Integer current = quantities.get(item.id);
-        quantities.put(item.id, current == null ? 1 : current + 1);
-        return true;
+    // Adds one item to that restaurant's cart.
+    public static synchronized void add(long restaurantId, FoodItem item) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) {
+            cart = new Cart();
+            carts.put(restaurantId, cart);
+        }
+        cart.items.put(item.id, item);
+        Integer current = cart.quantities.get(item.id);
+        cart.quantities.put(item.id, current == null ? 1 : current + 1);
     }
 
-    // Removes one. Removes the line when it reaches 0; empties the cart's restaurant when nothing is left.
-    public static synchronized void decrease(int foodId) {
-        Integer current = quantities.get(foodId);
+    // Removes one. Removes the line when it reaches 0, and the cart when nothing is left.
+    public static synchronized void decrease(long restaurantId, int foodId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return;
+        Integer current = cart.quantities.get(foodId);
         if (current == null) return;
         if (current <= 1) {
-            quantities.remove(foodId);
-            items.remove(foodId);
+            cart.quantities.remove(foodId);
+            cart.items.remove(foodId);
         } else {
-            quantities.put(foodId, current - 1);
+            cart.quantities.put(foodId, current - 1);
         }
-        if (quantities.isEmpty()) restaurantId = -1;
+        if (cart.quantities.isEmpty()) carts.remove(restaurantId);
     }
 
-    public static synchronized int quantityOf(int foodId) {
-        Integer q = quantities.get(foodId);
+    public static synchronized int quantityOf(long restaurantId, int foodId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return 0;
+        Integer q = cart.quantities.get(foodId);
         return q == null ? 0 : q;
     }
 
-    // Total number of items (sum of quantities).
-    public static synchronized int count() {
+    // Number of items in one restaurant's cart (sum of quantities).
+    public static synchronized int count(long restaurantId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return 0;
         int total = 0;
-        for (int q : quantities.values()) total += q;
+        for (int q : cart.quantities.values()) total += q;
         return total;
     }
 
-    public static synchronized List<CartLine> getLines() {
+    // Number of items in all carts together.
+    public static synchronized int count() {
+        int total = 0;
+        for (long restaurantId : carts.keySet()) total += count(restaurantId);
+        return total;
+    }
+
+    // Ids of the restaurants that have a cart, in the order the carts were started.
+    public static synchronized List<Long> getRestaurantIds() {
+        return new ArrayList<>(carts.keySet());
+    }
+
+    public static synchronized List<CartLine> getLines(long restaurantId) {
         List<CartLine> lines = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> e : quantities.entrySet()) {
-            lines.add(new CartLine(items.get(e.getKey()), e.getValue()));
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return lines;
+        for (Map.Entry<Integer, Integer> e : cart.quantities.entrySet()) {
+            lines.add(new CartLine(cart.items.get(e.getKey()), e.getValue()));
         }
         return lines;
     }
 
-    // Sum of discounted price x quantity, before tax.
-    public static synchronized double subtotal() {
+    // Sum of discounted price x quantity for one restaurant's cart, before tax.
+    public static synchronized double subtotal(long restaurantId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return 0;
         double total = 0;
-        for (Map.Entry<Integer, Integer> e : quantities.entrySet()) {
-            total += items.get(e.getKey()).price * e.getValue();
+        for (Map.Entry<Integer, Integer> e : cart.quantities.entrySet()) {
+            total += cart.items.get(e.getKey()).price * e.getValue();
         }
         return total;
     }
 
-    public static synchronized long getRestaurantId() {
-        return restaurantId;
-    }
-
-    public static synchronized String earliestAvailableUntil() {
+    public static synchronized String earliestAvailableUntil(long restaurantId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return null;
         SimpleDateFormat format = new SimpleDateFormat("h:mm a", Locale.ENGLISH);
         String earliest = null;
         Date earliestDate = null;
-        for (FoodItem f : items.values()) {
+        for (FoodItem f : cart.items.values()) {
             if (f.availableUntil == null || f.availableUntil.isEmpty()) continue;
             try {
                 Date d = format.parse(f.availableUntil);
@@ -107,9 +134,13 @@ public final class CartManager {
         return earliest;
     }
 
+    // Empties one restaurant's cart (after its order was placed).
+    public static synchronized void clear(long restaurantId) {
+        carts.remove(restaurantId);
+    }
+
+    // Empties every cart (log in / log out).
     public static synchronized void clear() {
-        items.clear();
-        quantities.clear();
-        restaurantId = -1;
+        carts.clear();
     }
 }

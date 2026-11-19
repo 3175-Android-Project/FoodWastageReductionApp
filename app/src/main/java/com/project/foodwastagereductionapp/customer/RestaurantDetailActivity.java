@@ -122,26 +122,25 @@ public class RestaurantDetailActivity extends AppCompatActivity {
 
     private void addToCart(FoodItem item) {
         // Don't allow more than what's left
-        if (CartManager.quantityOf(item.id) >= item.quantityLeft) {
+        if (CartManager.quantityOf(restaurantId, item.id) >= item.quantityLeft) {
             Toast.makeText(this, R.string.msgNoMoreStock, Toast.LENGTH_SHORT).show();
             return;
         }
-        // One restaurant per cart
-        if (!CartManager.add(restaurantId, item)) {
-            Toast.makeText(this, R.string.msgCartOtherRestaurant, Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // Each restaurant has its own cart
+        CartManager.add(restaurantId, item);
         updateCartButton();
     }
 
     private void updateCartButton() {
-        int count = CartManager.count();
+        int count = CartManager.count(restaurantId);
         btnViewCart.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
         btnViewCart.setText(getString(R.string.fmtViewCart, count));
     }
 
     private void openCart() {
-        if (CartManager.count() == 0) return;
-        startActivity(new Intent(this, CheckoutActivity.class));
+        if (CartManager.count(restaurantId) == 0) return;
+        Intent intent = new Intent(this, CheckoutActivity.class);
+        intent.putExtra(CheckoutActivity.EXTRA_RESTAURANT_ID, restaurantId);
+        startActivity(intent);
     }
 }

@@ -25,9 +25,11 @@ public class CartLineAdapter extends RecyclerView.Adapter<CartLineAdapter.CartLi
     }
 
     private final List<CartManager.CartLine> rows = new ArrayList<>();
+    private final long restaurantId;
     private final OnCartChanged onChanged;
 
-    public CartLineAdapter(OnCartChanged onChanged) {
+    public CartLineAdapter(long restaurantId, OnCartChanged onChanged) {
+        this.restaurantId = restaurantId;
         this.onChanged = onChanged;
     }
 
@@ -60,17 +62,17 @@ public class CartLineAdapter extends RecyclerView.Adapter<CartLineAdapter.CartLi
 
         // - : remove one (the row disappears at 0)
         h.btnMinus.setOnClickListener(v -> {
-            CartManager.decrease(f.id);
+            CartManager.decrease(restaurantId, f.id);
             onChanged.onChanged();
         });
 
         // + : add one, but not more than what's left
         h.btnPlus.setOnClickListener(v -> {
-            if (CartManager.quantityOf(f.id) >= f.quantityLeft) {
+            if (CartManager.quantityOf(restaurantId, f.id) >= f.quantityLeft) {
                 Toast.makeText(v.getContext(), R.string.msgNoMoreStock, Toast.LENGTH_SHORT).show();
                 return;
             }
-            CartManager.add(CartManager.getRestaurantId(), f);
+            CartManager.add(restaurantId, f);
             onChanged.onChanged();
         });
     }

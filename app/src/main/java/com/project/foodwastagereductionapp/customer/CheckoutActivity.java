@@ -30,6 +30,10 @@ import java.util.List;
 
 public class CheckoutActivity extends BaseActivity {
 
+    /** The restaurant whose cart is being checked out. */
+    public static final String EXTRA_RESTAURANT_ID = "restaurant_id";
+    private long restaurantId;
+
     private CartLineAdapter adapter;
     private boolean isDelivery = false;
 
@@ -42,6 +46,11 @@ public class CheckoutActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        restaurantId = getIntent().getLongExtra(EXTRA_RESTAURANT_ID, -1);
+        if (restaurantId == -1) { // opened without a cart
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_checkout);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -72,7 +81,7 @@ public class CheckoutActivity extends BaseActivity {
 
         // Cart items (the +/- buttons call refresh() after changing the cart)
         RecyclerView recyclerCart = findViewById(R.id.recyclerCart);
-        adapter = new CartLineAdapter(this::refresh);
+        adapter = new CartLineAdapter(restaurantId, this::refresh);
         recyclerCart.setAdapter(adapter);
 
         // Pickup / Delivery toggle
@@ -93,17 +102,17 @@ public class CheckoutActivity extends BaseActivity {
 
     /** Re-reads the cart and updates the list, time box and totals. */
     private void refresh() {
-        if (CartManager.count() == 0) {
+        if (CartManager.count(restaurantId) == 0) {
             finish(); // nothing left to check out
             return;
         }
-        adapter.setRows(CartManager.getLines());
+        adapter.setRows(CartManager.getLines(restaurantId));
 
-        int count = CartManager.count();
+        int count = CartManager.count(restaurantId);
         txtOrderItemsTitle.setText(getString(R.string.fmtOrderItems, count));
 
         // Same tax rule as the saved order (OrderPricing), so Checkout and the saved order always match
-        double subtotal = CartManager.subtotal();
+        double subtotal = CartManager.subtotal(restaurantId);
         double tax = OrderPricing.taxOf(subtotal);
         txtItemsLabel.setText(getString(R.string.fmtItemsCount, count));
         txtItemsAmount.setText(PriceFormatter.format(subtotal));
@@ -132,7 +141,7 @@ public class CheckoutActivity extends BaseActivity {
 
     /** Pickup/delivery deadline = the soonest "available until" time in the cart. */
     private void updateTimeBox() {
-        String time = CartManager.earliestAvailableUntil();
+        String time = CartManager.earliestAvailableUntil(restaurantId);
 
         txtTimeLabel.setText(isDelivery ? R.string.lblDeliverBy : R.string.lblPickUpBy);
         if (time != null) {
@@ -152,16 +161,15 @@ public class CheckoutActivity extends BaseActivity {
 
     // Everything database-related runs on the worker thread; the screen changes on the main thread
     private void placeOrder() {
-        long restaurantId = CartManager.getRestaurantId();
         long userId = new SessionManager(this).getUserId();
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
 
         // Cart -> order lines (name and price are copied into the order)
         List<OrderLine> lines = new ArrayList<>();
-        for (CartManager.CartLine line : CartManager.getLines()) {
+        for (CartManager.CartLine line : CartManager.getLines(restaurantId)) {
             lines.add(new OrderLine(line.item.id, line.item.name, line.item.price, line.quantity));
         }
-        String time = CartManager.earliestAvailableUntil();
+        String time = CartManager.earliestAvailableUntil(restaurantId);
         String pickupTime = time != null ? getString(R.string.fmtTodayAt, time)
                 : getString(R.string.txtNotSet);
         boolean delivery = isDelivery;
@@ -192,7 +200,7 @@ public class CheckoutActivity extends BaseActivity {
     }
 
     private void openStatus(long orderId) {
-        CartManager.clear();
+        CartManager.clear(restaurantId); // only this restaurant's cart, other carts stay
         Toast.makeText(this, R.string.msgOrderPlaced, Toast.LENGTH_SHORT).show();
 
         // Orders tab underneath, the new order's status on top (Back -> Orders)
