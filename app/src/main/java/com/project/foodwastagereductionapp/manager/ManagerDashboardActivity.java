@@ -17,6 +17,7 @@ import com.project.foodwastagereductionapp.auth.AuthNavigator;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.auth.SessionManager;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.AppNotification;
 import com.project.foodwastagereductionapp.data.OrderEntity;
 import com.project.foodwastagereductionapp.data.OrderStatus;
 import com.project.foodwastagereductionapp.data.Restaurant;
@@ -34,11 +35,13 @@ public class ManagerDashboardActivity extends AppCompatActivity {
         final int pending;
         final int accepted;
         final int ready;
-        DashboardData(Restaurant restaurant, int pending, int accepted, int ready) {
+        final boolean hasNotifications;
+        DashboardData(Restaurant restaurant, int pending, int accepted, int ready, boolean hasNotifications) {
             this.restaurant = restaurant;
             this.pending = pending;
             this.accepted = accepted;
             this.ready = ready;
+            this.hasNotifications = hasNotifications;
         }
     }
 
@@ -71,6 +74,10 @@ public class ManagerDashboardActivity extends AppCompatActivity {
 
         shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
         scrollContent = findViewById(R.id.scrollContent);
+
+        findViewById(R.id.btnNotification).setOnClickListener(v -> {
+            startActivity(new Intent(this, ManagerNotificationsActivity.class));
+        });
 
         findViewById(R.id.cardRestaurantProfile).setOnClickListener(v -> openProfile());
         BottomNavigationView nav = findViewById(R.id.bottomNav);
@@ -167,7 +174,8 @@ public class ManagerDashboardActivity extends AppCompatActivity {
                     ready++;
                 }
             }
-            return new DashboardData(restaurant, pending, accepted, ready);
+            List<AppNotification> notifs = db.getManagerNotifications(userId);
+            return new DashboardData(restaurant, pending, accepted, ready, !notifs.isEmpty());
         }, data -> {
             if (data == null) {
                 AuthNavigator.logout(this);
@@ -192,6 +200,7 @@ public class ManagerDashboardActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.txtPendingCount)).setText(String.valueOf(data.pending));
         ((TextView) findViewById(R.id.txtAcceptedCount)).setText(String.valueOf(data.accepted));
         ((TextView) findViewById(R.id.txtReadyCount)).setText(String.valueOf(data.ready));
+        findViewById(R.id.notificationBadge).setVisibility(data.hasNotifications ? View.VISIBLE : View.GONE);
     }
 
     private void openProfile() {
