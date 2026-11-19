@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cart icon on the Home screen -->
+    <string name="msgCartEmpty">Your cart is empty</string>
+    <string name="fmtCartCountMax">99+</string>
+</resources>

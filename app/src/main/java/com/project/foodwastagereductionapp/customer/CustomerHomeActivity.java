@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -111,6 +112,15 @@ public class CustomerHomeActivity extends AppCompatActivity {
         findViewById(R.id.btnNotification).setOnClickListener(v ->
                 startActivity(new Intent(this, NotificationsActivity.class)));
 
+        // Cart opens Checkout (nothing to check out when it is empty)
+        findViewById(R.id.btnCart).setOnClickListener(v -> {
+            if (CartManager.count() == 0) {
+                Toast.makeText(this, R.string.msgCartEmpty, Toast.LENGTH_SHORT).show();
+            } else {
+                startActivity(new Intent(this, CheckoutActivity.class));
+            }
+        });
+
         // Bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setSelectedItemId(R.id.nav_home);
@@ -137,6 +147,15 @@ public class CustomerHomeActivity extends AppCompatActivity {
         super.onResume();
         loadHome(); // refresh (e.g. after editing the profile city)
         checkUnreadNotifications();
+        updateCartBadge(); // the cart may have changed on another screen
+    }
+
+    /** Green number on the cart icon: how many items are in the cart (hidden when empty). */
+    private void updateCartBadge() {
+        TextView badge = findViewById(R.id.txtCartBadge);
+        int count = CartManager.count();
+        badge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        badge.setText(count > 99 ? getString(R.string.fmtCartCountMax) : String.valueOf(count));
     }
 
     private void checkUnreadNotifications() {
