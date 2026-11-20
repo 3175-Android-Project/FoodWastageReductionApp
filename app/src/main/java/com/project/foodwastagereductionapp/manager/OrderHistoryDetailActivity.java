@@ -67,9 +67,9 @@ public class OrderHistoryDetailActivity extends AppCompatActivity {
         Order order = details.order;
 
         TextView txtHeaderTitle = findViewById(R.id.txtHeaderTitle);
-        txtHeaderTitle.setText(getString(R.string.fmtOrderNumber, order.orderNumber));
+        txtHeaderTitle.setText(R.string.titleOrderDetails);
 
-        ((TextView) findViewById(R.id.txtRestaurantName)).setText(order.restaurantName);
+        ((TextView) findViewById(R.id.txtRestaurantName)).setText(getString(R.string.fmtOrderNumber, order.orderNumber));
         ((TextView) findViewById(R.id.txtOrderDate)).setText(getString(R.string.fmtDateTime, order.date, order.time));
 
         TextView txtStatus = findViewById(R.id.txtStatus);

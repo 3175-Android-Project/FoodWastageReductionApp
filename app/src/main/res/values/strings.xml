@@ -15,7 +15,8 @@
     <string name="hintConfirmPassword">Confirm Password</string>
     <string name="hintFullName">Full Name</string>
     <string name="hintAddress">Address</string>
-    <string name="hintCity">City</string>
+    <string name="hintCity">City / Region</string>
+    <string name="titleSelectCity">Select City</string>
     <string name="hintProvince">Province</string>
     <string name="hintPostalCode">Postal Code</string>
     <string name="hintPhone">Phone Number</string>
@@ -297,6 +298,7 @@
     <string name="txtProfiletitle">Profile</string>
     <string name="txtAddFoodCaption">Create a new food item for customers</string>
     <string name="titleIncomingOrders">Incoming orders</string>
+    <string name="titleOrderDetails">Order Details</string>
     <string name="tabPending">Pending</string>
     <string name="tabAccepted">Accepted</string>
     <string name="tabReady">Ready</string>

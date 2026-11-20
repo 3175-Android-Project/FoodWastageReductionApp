@@ -53,6 +53,14 @@ public class EditProfileActivity extends BaseActivity {
         etProvince = findViewById(R.id.etProvince);
         etPostalCode = findViewById(R.id.etPostalCode);
         etPhone = findViewById(R.id.etPhone);
+
+        etCity.setFocusable(false);
+        etCity.setClickable(true);
+        etCity.setOnClickListener(v -> com.project.foodwastagereductionapp.ui.CityPickerBottomSheet.show(this, selectedCity -> {
+            etCity.setText(selectedCity);
+            etCity.setError(null);
+        }));
+
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
 
         btnSaveChanges.setEnabled(false);
@@ -91,20 +99,26 @@ public class EditProfileActivity extends BaseActivity {
         String postalCode = textOf(etPostalCode);
         String phone = textOf(etPhone);
 
-        // Name, city, province and postal code are required (same as sign up)
         if (fullName.isEmpty()) {
             inputFullName.setError(getString(R.string.msgFullNameRequired));
             return;
         }
-        if (address.isEmpty()) { etAddress.setError(getString(R.string.msgAddressRequired)); return; }
-        if (city.isEmpty() || province.isEmpty() || postalCode.isEmpty()) {
+        if (city.isEmpty()) {
             Toast.makeText(this, R.string.msgCompleteAllFields, Toast.LENGTH_SHORT).show();
             return;
         }
 
+        if (address.isEmpty()) address = city + ", BC";
+        if (province.isEmpty()) province = "BC";
+        if (postalCode.isEmpty()) postalCode = "V6B 1A1";
+
+        String finalAddress = address;
+        String finalProvince = province;
+        String finalPostalCode = postalCode;
+
         AuthTasks.run(this, btnSaveChanges,
                 () -> AppDatabaseHelper.getInstance(this).updateProfile(
-                        userId, fullName, address, city, province, postalCode, phone),
+                        userId, fullName, finalAddress, city, finalProvince, finalPostalCode, phone),
                 user -> {
                     SessionManager.invalidateCaches();
                     Toast.makeText(this, R.string.msgProfileSaved, Toast.LENGTH_SHORT).show();

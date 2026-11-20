@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/screen_padding"
+    android:paddingEnd="@dimen/screen_padding"
+    android:paddingTop="12dp"
+    android:paddingBottom="36dp">
+
+    <!-- Drag handle -->
+    <View
+        android:layout_width="32dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_status_pill" />
+
+    <!-- Header: Title + Close Button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            style="@style/Text.HeadlineSm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="@string/titleSelectCity"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btnClose"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_status_badge"
+            android:backgroundTint="@color/pill_grey_bg"
+            android:contentDescription="@string/btnCancel"
+            android:padding="8dp"
+            android:src="@drawable/icon_close"
+            app:tint="@color/text_primary" />
+
+    </RelativeLayout>
+
+    <!-- List of Cities -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerCities"
+        android:layout_width="match_parent"
+        android:layout_height="460dp"
+        android:layout_marginTop="8dp"
+        tools:listitem="@layout/item_city_option" />
+
+</LinearLayout>
