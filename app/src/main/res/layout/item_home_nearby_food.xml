@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One "Nearby" food card on the Home screen: food name, restaurant · distance, prices -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Card.Default"
+    android:layout_width="220dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/imgFood"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:background="@color/background_secondary"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/txtFoodName"
+        style="@style/Text.HeadlineSm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="Cinnamon Roll" />
+
+    <TextView
+        android:id="@+id/txtRestaurantInfo"
+        style="@style/Text.BodySm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="Burnaby Bakery · 6.4 km" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <!-- Original price: grey, crossed out (hidden when there is no discount) -->
+        <TextView
+            android:id="@+id/txtOriginalPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_body_sm"
+            tools:text="$5.00" />
+
+        <!-- Discounted price: green, bold -->
+        <TextView
+            android:id="@+id/txtPrice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/pretendard_bold"
+            android:textColor="@color/background_accent1"
+            android:textSize="@dimen/text_body_md"
+            tools:text="$2.50" />
+
+        <TextView
+            android:id="@+id/txtItemsLeft"
+            style="@style/Text.BodySm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="5 left" />
+
+    </LinearLayout>
+
+</LinearLayout>

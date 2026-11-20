@@ -123,15 +123,30 @@ public final class AppDatabaseHelper {
     public Restaurant getRestaurantForManager(long managerId) {
         RestaurantEntity restaurant = database.restaurantDao().findByManagerId(managerId);
         if (restaurant == null) return null;
-        return new Restaurant(restaurant.id, restaurant.managerId, restaurant.name, restaurant.city,
-                restaurant.province, restaurant.postalCode, restaurant.phone,
-                restaurant.cuisineType, restaurant.description, restaurant.imageUri);
+        return toRestaurant(restaurant);
     }
     public Restaurant getRestaurant(long id) {
         RestaurantEntity e = database.restaurantDao().findById(id);
         if (e == null) return null;
+        return toRestaurant(e);
+    }
+
+    private static Restaurant toRestaurant(RestaurantEntity e) {
         return new Restaurant(e.id, e.managerId, e.name, e.city, e.province,
-                e.postalCode, e.phone, e.cuisineType, e.description, e.imageUri);
+                e.postalCode, e.phone, e.cuisineType, e.description, e.imageUri,
+                e.latitude, e.longitude);
+    }
+
+    // ---- Restaurant map position (distance-based Nearby) ----------------------------------
+
+    /** Saves the map position of the manager's restaurant (after geocoding its address). */
+    public void saveRestaurantLocation(long managerId, double latitude, double longitude) {
+        RestaurantEntity e = database.restaurantDao().findByManagerId(managerId);
+        if (e != null) database.restaurantDao().updateLocation(e.id, latitude, longitude);
+    }
+
+    public void updateRestaurantLocation(long restaurantId, double latitude, double longitude) {
+        database.restaurantDao().updateLocation(restaurantId, latitude, longitude);
     }
     /** Called only after the email service has verified a reset code for this account. */
     public String issuePasswordResetGrant(
@@ -208,9 +223,7 @@ public final class AppDatabaseHelper {
         String like = "%" + (query == null ? "" : query.trim()) + "%";
         java.util.List<RestaurantListing> results = new java.util.ArrayList<>();
         for (RestaurantEntity e : database.restaurantDao().search(like)) {
-            Restaurant r = new Restaurant(e.id, e.managerId, e.name, e.city, e.province,
-                    e.postalCode, e.phone, e.cuisineType, e.description, e.imageUri);
-            results.add(new RestaurantListing(r, 0, null));
+            results.add(new RestaurantListing(toRestaurant(e), 0, null));
         }
         return results;
     }

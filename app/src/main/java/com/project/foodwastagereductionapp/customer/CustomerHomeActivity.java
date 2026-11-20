@@ -1,5 +1,6 @@
 package com.project.foodwastagereductionapp.customer;
 
+import android.Manifest;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -25,6 +28,9 @@ import com.project.foodwastagereductionapp.data.FoodItem;
 import com.project.foodwastagereductionapp.data.Restaurant;
 import com.project.foodwastagereductionapp.data.RestaurantListing;
 import com.project.foodwastagereductionapp.data.User;
+import com.project.foodwastagereductionapp.ui.CityPickerBottomSheet;
+import com.project.foodwastagereductionapp.ui.LocationHelper;
+import android.graphics.Paint;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,6 +45,27 @@ import java.util.Map;
 public class CustomerHomeActivity extends AppCompatActivity {
 
     private static final int ENDING_SOON_LIMIT = 3;
+    private static final double NEARBY_RADIUS_KM = 15;
+
+    // Where "Nearby" is measured from: the phone's location, or a city the customer picked.
+    // Static so it survives the screen being recreated by the bottom navigation.
+    private static boolean useCurrentLocation = true;
+    private static Double originLat = null, originLng = null;
+    private static String originLabel = null;
+    private static boolean askedLocationPermission = false;
+    private static boolean backfillStarted = false;
+
+    // restaurant id -> km from the origin (empty when there is no origin)
+    private final Map<Long, Double> distanceKm = new HashMap<>();
+
+    private final ActivityResultLauncher<String[]> locationPermission =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                if (LocationHelper.hasPermission(this)) {
+                    fetchCurrentLocation();
+                } else {
+                    Toast.makeText(this, R.string.msgLocationUnavailable, Toast.LENGTH_SHORT).show();
+                }
+            });
 
     private TextView txtLocation, txtNearbyTitle, txtNoNearby, txtEndingSoonTitle;
     private LinearLayout llNearby, llEndingSoon;
@@ -101,6 +128,10 @@ public class CustomerHomeActivity extends AppCompatActivity {
         llEndingSoon = findViewById(R.id.llEndingSoon);
         shimmerViewContainer = findViewById(R.id.shimmerViewContainer);
         scrollContent = findViewById(R.id.scrollContent);
+
+        // Location: tap to pick a city or go back to the phone's location
+        findViewById(R.id.llLocation).setOnClickListener(v -> showLocationPicker());
+        if (useCurrentLocation) requestCurrentLocation(false);
 
         // Browse: search box and "See all" open the Browse screen
         findViewById(R.id.editSearch).setOnClickListener(v ->
@@ -226,14 +257,126 @@ public class CustomerHomeActivity extends AppCompatActivity {
                 foodByRestaurant = result.foodByRestaurant;
                 bindHome(user, all);
             }, delay);
+            backfillRestaurantLocations(all);
         });
     }
 
+    // ---- Location ---------------------------------------------------------------------------
+
+    /** Ask for permission once (or again when the customer picks "current location"). */
+    private void requestCurrentLocation(boolean userAsked) {
+        if (LocationHelper.hasPermission(this)) {
+            fetchCurrentLocation();
+        } else if (userAsked || !askedLocationPermission) {
+            askedLocationPermission = true;
+            locationPermission.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION});
+        }
+    }
+
+    private void fetchCurrentLocation() {
+        if (originLat == null) txtLocation.setText(R.string.txtLocating);
+        LocationHelper.getCurrentLocation(this, location -> {
+            if (!useCurrentLocation || isFinishing() || isDestroyed()) return; // picked a city meanwhile
+            if (location == null) {
+                if (originLat == null) {
+                    Toast.makeText(this, R.string.msgLocationUnavailable, Toast.LENGTH_SHORT).show();
+                    rebindHome();
+                }
+                return;
+            }
+            double lat = location.getLatitude(), lng = location.getLongitude();
+            // City name for the label (network lookup, so off the main thread)
+            new Thread(() -> {
+                String city = LocationHelper.cityFrom(this, lat, lng);
+                runOnUiThread(() -> {
+                    if (!useCurrentLocation || isFinishing() || isDestroyed()) return;
+                    originLat = lat;
+                    originLng = lng;
+                    originLabel = city != null ? city : getString(R.string.txtCurrentLocation);
+                    rebindHome();
+                });
+            }).start();
+        });
+    }
+
+    private void showLocationPicker() {
+        String current = getString(R.string.optCurrentLocation);
+        List<String> options = new ArrayList<>();
+        options.add(current);
+        options.addAll(CityPickerBottomSheet.cities());
+
+        CityPickerBottomSheet.showOptions(this, R.string.titleSelectCity, options, choice -> {
+            if (choice.equals(current)) {
+                useCurrentLocation = true;
+                requestCurrentLocation(true);
+                return;
+            }
+            // A city: measure from its centre (falls back to a city-name match if offline)
+            useCurrentLocation = false;
+            originLat = null;
+            originLng = null;
+            originLabel = choice;
+            rebindHome();
+            new Thread(() -> {
+                double[] latLng = LocationHelper.geocode(this, choice + ", BC, Canada");
+                runOnUiThread(() -> {
+                    if (latLng == null || useCurrentLocation || !choice.equals(originLabel)) return;
+                    originLat = latLng[0];
+                    originLng = latLng[1];
+                    rebindHome();
+                });
+            }).start();
+        });
+    }
+
+    /** Restaurants saved before the location update have no map position yet: look it up once. */
+    private void backfillRestaurantLocations(List<RestaurantListing> all) {
+        if (backfillStarted) return;
+        List<Restaurant> missing = new ArrayList<>();
+        for (RestaurantListing l : all) if (!l.restaurant.hasLocation()) missing.add(l.restaurant);
+        if (missing.isEmpty()) return;
+        backfillStarted = true;
+
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        new Thread(() -> {
+            boolean changed = false;
+            for (Restaurant r : missing) {
+                double[] latLng = LocationHelper.geocode(this,
+                        r.postalCode + ", " + r.city + ", " + r.province + ", Canada");
+                if (latLng != null) {
+                    db.updateRestaurantLocation(r.id, latLng[0], latLng[1]);
+                    changed = true;
+                }
+            }
+            if (!changed) return;
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                invalidateCache();
+                loadHome();
+            });
+        }).start();
+    }
+
+    private void rebindHome() {
+        if (cachedHomeUser != null && cachedHomeRestaurants != null) {
+            bindHome(cachedHomeUser, cachedHomeRestaurants);
+        }
+    }
+
     private void bindHome(User user, List<RestaurantListing> all) {
-        String city = user != null ? user.city : null;
+        // Label: phone/picked location, else the profile city
+        String city = originLabel != null ? originLabel : (user != null ? user.city : null);
         txtLocation.setText(city != null ? city : "");
 
-        // Nearby: restaurants in the customer's city; if none, show all restaurants
+        distanceKm.clear();
+        if (originLat != null && originLng != null) {
+            bindHomeByDistance(all, city);
+            return;
+        }
+
+        // No location: restaurants in the customer's city; if none, show all restaurants
         List<Restaurant> nearby = new ArrayList<>();
         if (city != null) {
             for (RestaurantListing l : all) {
@@ -251,41 +394,86 @@ public class CustomerHomeActivity extends AppCompatActivity {
         bindEndingSoon(nearby);
     }
 
+    // Nearby = within NEARBY_RADIUS_KM of the origin, closest first; if none, all restaurants by distance
+    private void bindHomeByDistance(List<RestaurantListing> all, String city) {
+        List<Restaurant> nearby = new ArrayList<>();
+        List<Restaurant> everyone = new ArrayList<>();
+        for (RestaurantListing l : all) {
+            Restaurant r = l.restaurant;
+            everyone.add(r);
+            if (r.hasLocation()) {
+                double km = LocationHelper.distanceKm(originLat, originLng, r.latitude, r.longitude);
+                distanceKm.put(r.id, km);
+                if (km <= NEARBY_RADIUS_KM) nearby.add(r);
+            } else if (city != null && city.trim().equalsIgnoreCase(r.city.trim())) {
+                nearby.add(r); // no map position yet: same city counts as nearby
+            }
+        }
+
+        if (!nearby.isEmpty()) {
+            txtNearbyTitle.setText(useCurrentLocation
+                    ? getString(R.string.titleNearbyYou)
+                    : getString(R.string.fmtNearbyIn, city));
+        } else {
+            nearby = everyone;
+            txtNearbyTitle.setText(R.string.titleAllRestaurants);
+        }
+        Collections.sort(nearby, (a, b) -> Double.compare(distanceOf(a), distanceOf(b)));
+
+        bindNearby(nearby);
+        bindEndingSoon(nearby);
+    }
+
+    private double distanceOf(Restaurant r) {
+        Double km = distanceKm.get(r.id);
+        return km != null ? km : Double.MAX_VALUE; // unknown distance goes last
+    }
+
+    // Nearby: one card per food item still available, closest restaurant first
     private void bindNearby(List<Restaurant> restaurants) {
         llNearby.removeAllViews();
-        txtNoNearby.setVisibility(restaurants.isEmpty() ? View.VISIBLE : View.GONE);
-
         LayoutInflater inflater = LayoutInflater.from(this);
+        int shown = 0;
+
         for (Restaurant r : restaurants) {
-            View card = inflater.inflate(R.layout.item_home_restaurant, llNearby, false);
+            Double km = distanceKm.get(r.id);
+            String restaurantInfo = km != null
+                    ? getString(R.string.fmtRestaurantDistance, r.name, km)
+                    : getString(R.string.fmtRestaurantCity, r.name, r.city);
 
-            setImage(card.findViewById(R.id.imgRestaurant), r.imageUri);
-            ((TextView) card.findViewById(R.id.txtRestaurantName)).setText(r.name);
-            ((TextView) card.findViewById(R.id.txtRestaurantAddress))
-                    .setText(getString(R.string.fmtCityProvince, r.city, r.province));
-
-            // Lowest discounted price and total items left (food_items table)
-            TextView txtPrice = card.findViewById(R.id.txtPrice);
-            TextView txtItemsLeft = card.findViewById(R.id.txtItemsLeft);
-            double lowest = -1;
-            int totalLeft = 0;
             for (FoodItem f : foodFor(r.id)) {
-                if (f.quantityLeft <= 0) continue;
-                totalLeft += f.quantityLeft;
-                if (lowest < 0 || f.price < lowest) lowest = f.price;
-            }
-            if (totalLeft > 0) {
-                txtPrice.setText(PriceFormatter.format(lowest));
-                txtItemsLeft.setText(getString(R.string.fmtQuantityLeft, totalLeft));
-                txtItemsLeft.setVisibility(View.VISIBLE);
-            } else {
-                txtPrice.setText(r.cuisineType);
-                txtItemsLeft.setVisibility(View.GONE);
-            }
+                if (f.quantityLeft <= 0) continue; // sold out
+                View card = inflater.inflate(R.layout.item_home_nearby_food, llNearby, false);
 
-            card.setOnClickListener(v -> openRestaurant(r.id));
-            llNearby.addView(card);
+                ImageView imgFood = card.findViewById(R.id.imgFood);
+                if (f.hasImageUri()) {
+                    setImage(imgFood, f.imageUri);
+                } else if (f.imageRes != 0) {
+                    imgFood.setImageResource(f.imageRes);
+                }
+                ((TextView) card.findViewById(R.id.txtFoodName)).setText(f.name);
+                ((TextView) card.findViewById(R.id.txtRestaurantInfo)).setText(restaurantInfo);
+
+                // Original price (grey, crossed out) only when there is a real discount
+                TextView txtOriginalPrice = card.findViewById(R.id.txtOriginalPrice);
+                if (f.originalPrice > f.price) {
+                    txtOriginalPrice.setVisibility(View.VISIBLE);
+                    txtOriginalPrice.setText(PriceFormatter.format(f.originalPrice));
+                    txtOriginalPrice.setPaintFlags(
+                            txtOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                } else {
+                    txtOriginalPrice.setVisibility(View.GONE);
+                }
+                ((TextView) card.findViewById(R.id.txtPrice)).setText(PriceFormatter.format(f.price));
+                ((TextView) card.findViewById(R.id.txtItemsLeft))
+                        .setText(getString(R.string.fmtQuantityLeft, f.quantityLeft));
+
+                card.setOnClickListener(v -> openFood(r.id, f.id));
+                llNearby.addView(card);
+                shown++;
+            }
         }
+        txtNoNearby.setVisibility(shown == 0 ? View.VISIBLE : View.GONE);
     }
 
     // Top 3 food items (still available) with the soonest "until" time.
@@ -323,6 +511,17 @@ public class CustomerHomeActivity extends AppCompatActivity {
             ((TextView) card.findViewById(R.id.txtFoodName)).setText(e.food.name);
             ((TextView) card.findViewById(R.id.txtRestaurantInfo))
                     .setText(getString(R.string.fmtRestaurantCity, e.restaurant.name, e.restaurant.city));
+
+            // Original price (grey, crossed out) only when there is a real discount
+            TextView txtOriginalPrice = card.findViewById(R.id.txtOriginalPrice);
+            if (e.food.originalPrice > e.food.price) {
+                txtOriginalPrice.setVisibility(View.VISIBLE);
+                txtOriginalPrice.setText(PriceFormatter.format(e.food.originalPrice));
+                txtOriginalPrice.setPaintFlags(
+                        txtOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                txtOriginalPrice.setVisibility(View.GONE);
+            }
             ((TextView) card.findViewById(R.id.txtPriceUntil)).setText(getString(
                     R.string.fmtPriceUntil, PriceFormatter.format(e.food.price), e.food.availableUntil));
 

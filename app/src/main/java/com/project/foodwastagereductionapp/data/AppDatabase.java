@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
         entities = {UserEntity.class, RestaurantEntity.class, OrderEntity.class,
                 OrderItemEntity.class, NotificationEntity.class, FoodItemEntity.class,
                 PasswordResetGrantEntity.class, CartItemEntity.class},
-        version = 7,
+        version = 8,
         exportSchema = false
 )
 abstract class AppDatabase extends RoomDatabase {
@@ -128,6 +128,14 @@ abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    /** Version 8: restaurant map position for distance-based Nearby. Keeps all existing data. */
+    static final Migration MIGRATION_7_8 = new Migration(7, 8) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE restaurants ADD COLUMN latitude REAL");
+            db.execSQL("ALTER TABLE restaurants ADD COLUMN longitude REAL");
+        }
+    };
     private static volatile AppDatabase instance;
 
     static AppDatabase getInstance(Context context, String databaseName) {
@@ -142,7 +150,7 @@ abstract class AppDatabase extends RoomDatabase {
                     result = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, databaseName)
                             .addMigrations(MIGRATION_1_2, MIGRATION_2_3,
-                                    MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+                                    MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                             .build();
                     result.getOpenHelper().getWritableDatabase();
                     instance = result;
