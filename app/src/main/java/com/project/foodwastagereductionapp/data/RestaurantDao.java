@@ -28,4 +28,8 @@ interface RestaurantDao {
 
     @Query("SELECT * FROM restaurants WHERE id = :id LIMIT 1")
     RestaurantEntity findById(long id);
+
+    // Map position (distance-based Nearby on the customer Home screen)
+    @Query("UPDATE restaurants SET latitude = :latitude, longitude = :longitude WHERE id = :id")
+    int updateLocation(long id, double latitude, double longitude);
 }

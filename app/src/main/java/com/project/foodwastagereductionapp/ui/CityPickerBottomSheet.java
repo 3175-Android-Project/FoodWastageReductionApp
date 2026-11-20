@@ -41,7 +41,17 @@ public final class CityPickerBottomSheet {
     private CityPickerBottomSheet() {
     }
 
+    public static List<String> cities() {
+        return CITIES;
+    }
+
     public static void show(Context context, OnCitySelectedListener listener) {
+        showOptions(context, R.string.titleSelectCity, CITIES, listener);
+    }
+
+    /** Same bottom sheet with any title and list (used for cities and food categories). */
+    public static void showOptions(Context context, int titleRes, List<String> options,
+                                   OnCitySelectedListener listener) {
         BottomSheetDialog dialog = new BottomSheetDialog(context);
         View view = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_city_picker, null);
         dialog.setContentView(view);
@@ -58,6 +68,9 @@ public final class CityPickerBottomSheet {
             dialog.getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         }
 
+        TextView txtSheetTitle = view.findViewById(R.id.txtSheetTitle);
+        if (txtSheetTitle != null) txtSheetTitle.setText(titleRes);
+
         ImageView btnClose = view.findViewById(R.id.btnClose);
         if (btnClose != null) {
             btnClose.setOnClickListener(v -> dialog.dismiss());
@@ -65,7 +78,7 @@ public final class CityPickerBottomSheet {
 
         RecyclerView recyclerCities = view.findViewById(R.id.recyclerCities);
         recyclerCities.setLayoutManager(new LinearLayoutManager(context));
-        recyclerCities.setAdapter(new CityAdapter(CITIES, selectedCity -> {
+        recyclerCities.setAdapter(new CityAdapter(options, selectedCity -> {
             listener.onCitySelected(selectedCity);
             dialog.dismiss();
         }));

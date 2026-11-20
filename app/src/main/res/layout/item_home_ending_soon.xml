@@ -44,15 +44,33 @@
             android:maxLines="1"
             tools:text="Happy Sushi · Coquitlam" />
 
-        <TextView
-            android:id="@+id/txtPriceUntil"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:fontFamily="@font/pretendard_bold"
-            android:textColor="@color/background_accent1"
-            android:textSize="@dimen/text_body_sm"
-            tools:text="$8.50 · until 7:15 PM" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Original price: grey, crossed out (hidden when there is no discount) -->
+            <TextView
+                android:id="@+id/txtOriginalPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_body_sm"
+                tools:text="$12.00" />
+
+            <TextView
+                android:id="@+id/txtPriceUntil"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/pretendard_bold"
+                android:textColor="@color/background_accent1"
+                android:textSize="@dimen/text_body_sm"
+                tools:text="$8.50 · until 7:15 PM" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

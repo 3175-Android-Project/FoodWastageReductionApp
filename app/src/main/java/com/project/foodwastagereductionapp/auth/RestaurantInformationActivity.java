@@ -25,6 +25,7 @@ import com.project.foodwastagereductionapp.data.Restaurant;
 import com.project.foodwastagereductionapp.data.User;
 import com.project.foodwastagereductionapp.manager.ManagerDashboardActivity;
 import com.project.foodwastagereductionapp.ui.BaseActivity;
+import com.project.foodwastagereductionapp.ui.LocationHelper;
 
 public class RestaurantInformationActivity extends BaseActivity {
 
@@ -379,6 +380,16 @@ public class RestaurantInformationActivity extends BaseActivity {
                         db.saveRestaurant(
                                 restaurant
                         );
+
+                        // Map position for the customer's "Nearby" (skipped if offline)
+                        double[] latLng = LocationHelper.geocode(
+                                this,
+                                restaurant.postalCode + ", " + restaurant.city + ", "
+                                        + restaurant.province + ", Canada"
+                        );
+                        if (latLng != null) {
+                            db.saveRestaurantLocation(restaurant.managerId, latLng[0], latLng[1]);
+                        }
 
                         return true;
                     },

@@ -25,6 +25,7 @@ import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.FoodItemEntity;
 import com.project.foodwastagereductionapp.data.Restaurant;
 import com.project.foodwastagereductionapp.ui.BaseActivity;
+import com.project.foodwastagereductionapp.ui.CategoryPickerBottomSheet;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -81,6 +82,14 @@ public class AddFoodItemActivity extends BaseActivity {
         etFoodName = findViewById(R.id.etFoodName);
         etDescription = findViewById(R.id.etDescription);
         etCategory = findViewById(R.id.etCategory);
+        // Category is a dropdown (bottom sheet)
+        etCategory.setFocusable(false);
+        etCategory.setClickable(true);
+        etCategory.setOnClickListener(v -> CategoryPickerBottomSheet.show(this, category -> {
+            etCategory.setText(category);
+            etCategory.setError(null);
+        }));
+
         etOriginalPrice = findViewById(R.id.etOriginalPrice);
         etDiscountPrice = findViewById(R.id.etDiscountPrice);
         etQuantity = findViewById(R.id.etQuantity);

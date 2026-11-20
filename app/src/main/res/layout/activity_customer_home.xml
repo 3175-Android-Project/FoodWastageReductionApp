@@ -31,11 +31,18 @@
             android:paddingBottom="32dp">
 
             <!-- Location (customer's city, set in code) -->
+            <!-- Location (phone location or chosen city, set in code). Tap to change. -->
             <LinearLayout
+                android:id="@+id/llLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
 
                 <ImageView
                     android:layout_width="18dp"
@@ -53,6 +60,13 @@
                     android:fontFamily="@font/pretendard_bold"
                     android:textColor="@color/background_accent1"
                     tools:text="Vancouver" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/icon_dropdown"
+                    android:importantForAccessibility="no"
+                    app:tint="@color/background_accent1" />
             </LinearLayout>
 
             <!-- Header -->

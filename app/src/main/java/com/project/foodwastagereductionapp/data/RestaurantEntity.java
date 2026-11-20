@@ -32,4 +32,10 @@ final class RestaurantEntity {
     String description;
     @ColumnInfo(name = "image_uri")
     String imageUri;
+
+    // Version 8: map position for distance-based "Nearby" (null until geocoded)
+    @ColumnInfo(name = "latitude")
+    Double latitude;
+    @ColumnInfo(name = "longitude")
+    Double longitude;
 }

@@ -95,7 +95,9 @@
                 style="@style/Input.Default"
                 android:layout_width="match_parent"
                 android:layout_marginTop="@dimen/space_md"
-                android:hint="@string/hintFoodCategory"/>
+                android:hint="@string/hintFoodCategory"
+                android:drawableEnd="@drawable/icon_dropdown"
+                android:drawableTint="@color/text_secondary"/>
 
             <!-- Original Price -->
 

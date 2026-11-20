@@ -288,7 +288,8 @@
     <string name="btnAddFoodItem">+ Add food item</string>
     <string name="hintFoodName">Name</string>
     <string name="hintFoodDescription">Description</string>
-    <string name="hintFoodCategory">Category</string>
+    <string name="hintFoodCategory">Select category</string>
+    <string name="titleSelectCategory">Select Category</string>
     <string name="hintOriginalPrice">Original Price</string>
     <string name="hintDiscountPrice">Discount Price</string>
     <string name="hintFoodQuantity">Quantity</string>
@@ -334,4 +335,13 @@
     <string name="dialogRejectOrderMessage">The customer will be told the order was rejected and the food goes back on sale.</string>
     <string name="msgReminderSent">Pickup reminder sent</string>
     <string name="msgOrderChangedReload">This order was already updated. The list has been refreshed.</string>
+
+    <!-- Home: location-based Nearby -->
+    <string name="optCurrentLocation">Use my current location</string>
+    <string name="txtLocating">Finding your location…</string>
+    <string name="txtCurrentLocation">Current location</string>
+    <string name="titleNearbyYou">Nearby you</string>
+    <string name="fmtCityDistance">%1$s · %2$.1f km</string>
+    <string name="fmtRestaurantDistance">%1$s · %2$.1f km</string>
+    <string name="msgLocationUnavailable">Couldn\'t get your location. Showing your profile city.</string>
 </resources>
