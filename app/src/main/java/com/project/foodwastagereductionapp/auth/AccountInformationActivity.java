@@ -84,43 +84,56 @@ public class AccountInformationActivity extends BaseActivity {
         EditText editPostalCode =
                 findViewById(R.id.editPostalCode);
 
+        editCity.setFocusable(false);
+        editCity.setClickable(true);
+        editCity.setOnClickListener(v -> com.project.foodwastagereductionapp.ui.CityPickerBottomSheet.show(this, selectedCity -> {
+            editCity.setText(selectedCity);
+            editProvince.setText("BC");
+            editCity.setError(null);
+        }));
+
         Button btnCreateAccount =
                 findViewById(R.id.btnCreateAccount);
 
         btnCreateAccount.setOnClickListener(v -> {
 
-            String address = editAddress.getText().toString().trim();
-            if (address.isEmpty()) { editAddress.setError(getString(R.string.msgAddressRequired)); return; }
             String fullName =
                     editFullName.getText().toString().trim();
 
             String city =
                     editCity.getText().toString().trim();
 
-            String province =
-                    editProvince.getText().toString().trim();
+            if (fullName.isEmpty()) {
+                editFullName.setError(getString(R.string.msgFullNameRequired));
+                return;
+            }
 
-            String postalCode =
-                    editPostalCode.getText().toString().trim();
-
-            if (fullName.isEmpty()
-                    || city.isEmpty()
-                    || province.isEmpty()
-                    || postalCode.isEmpty()) {
-
+            if (city.isEmpty()) {
                 Toast.makeText(
                         AccountInformationActivity.this,
                         R.string.msgCompleteAllFields,
                         Toast.LENGTH_SHORT
                 ).show();
-
                 return;
             }
+
+            String address = editAddress.getText().toString().trim();
+            if (address.isEmpty()) address = city + ", BC";
+
+            String province = editProvince.getText().toString().trim();
+            if (province.isEmpty()) province = "BC";
+
+            String postalCode = editPostalCode.getText().toString().trim();
+            if (postalCode.isEmpty()) postalCode = "V6B 1A1";
+
+            String finalAddress = address;
+            String finalProvince = province;
+            String finalPostalCode = postalCode;
 
             AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
             AuthTasks.run(this, btnCreateAccount,
                     () -> db.createUser(email, passwordHash, selectedRole, fullName,
-                            city, province, postalCode, address, ""),
+                            city, finalProvince, finalPostalCode, finalAddress, ""),
                     userId -> AuthNavigator.open(this, EmailVerificationActivity.class, userId));
         });
     }

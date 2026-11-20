@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cart icon on the Home screen -->
+    <string name="msgCartEmpty">Your cart is empty</string>
+    <string name="fmtCartCountMax">99+</string>
+
+    <!-- Carts screen (one cart per restaurant) -->
+    <string name="titleCarts">Carts</string>
+    <string name="btnCartView">View Cart</string>
+    <string name="btnCartSeeRestaurant">See Restaurant</string>
+</resources>

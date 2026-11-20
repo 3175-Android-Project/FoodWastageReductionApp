@@ -174,7 +174,6 @@ public class CustomerProfileActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        CartManager.clear();
         AuthNavigator.logout(this);
     }
 

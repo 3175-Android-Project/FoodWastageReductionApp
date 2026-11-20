@@ -195,6 +195,12 @@ public class AddFoodItemActivity extends BaseActivity {
             return;
         }
 
+        if (discountPrice < 0) {
+            etDiscountPrice.setError("Discount price can't be negative");
+            etDiscountPrice.requestFocus();
+            return;
+        }
+
         if (discountPrice >= originalPrice) {
             etDiscountPrice.setError("Discounted price must be lower than the original price");
             etDiscountPrice.requestFocus();

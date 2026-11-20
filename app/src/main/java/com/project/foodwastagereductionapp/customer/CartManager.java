@@ -1,5 +1,10 @@
 package com.project.foodwastagereductionapp.customer;
 
+import android.content.Context;
+import android.os.Looper;
+
+import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
+import com.project.foodwastagereductionapp.data.CartItemEntity;
 import com.project.foodwastagereductionapp.data.FoodItem;
 
 import java.text.ParseException;
@@ -11,10 +16,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-// In-memory cart for the current session. One restaurant per cart.
+// In-memory and Room DB persistent carts for users. One cart per restaurant, any number of restaurants.
 public final class CartManager {
 
-    // One row in the cart: a food item and how many of it.
+    // One row in a cart: a food item and how many of it.
     public static final class CartLine {
         public final FoodItem item;
         public final int quantity;
@@ -25,74 +30,194 @@ public final class CartManager {
         }
     }
 
-    private static final Map<Integer, FoodItem> items = new LinkedHashMap<>();
-    private static final Map<Integer, Integer> quantities = new LinkedHashMap<>();
-    private static long restaurantId = -1;
+    // The food in one restaurant's cart.
+    private static final class Cart {
+        final Map<Integer, FoodItem> items = new LinkedHashMap<>();
+        final Map<Integer, Integer> quantities = new LinkedHashMap<>();
+    }
+
+    // restaurant id -> its cart (in the order the carts were started)
+    private static final Map<Long, Cart> carts = new LinkedHashMap<>();
+    private static Context appContext = null;
+    private static long activeUserId = -1;
 
     private CartManager() {
     }
 
-    // Adds one. Returns false if the cart already holds food from a different restaurant.
-    public static synchronized boolean add(long fromRestaurantId, FoodItem item) {
-        if (restaurantId != -1 && restaurantId != fromRestaurantId) return false;
-        restaurantId = fromRestaurantId;
-        items.put(item.id, item);
-        Integer current = quantities.get(item.id);
-        quantities.put(item.id, current == null ? 1 : current + 1);
-        return true;
-    }
-
-    // Removes one. Removes the line when it reaches 0; empties the cart's restaurant when nothing is left.
-    public static synchronized void decrease(int foodId) {
-        Integer current = quantities.get(foodId);
-        if (current == null) return;
-        if (current <= 1) {
-            quantities.remove(foodId);
-            items.remove(foodId);
-        } else {
-            quantities.put(foodId, current - 1);
+    public static synchronized void init(Context context, long userId) {
+        if (context != null) appContext = context.getApplicationContext();
+        if (activeUserId != userId) {
+            loadForUser(context, userId);
         }
-        if (quantities.isEmpty()) restaurantId = -1;
     }
 
-    public static synchronized int quantityOf(int foodId) {
-        Integer q = quantities.get(foodId);
+    public static synchronized long getActiveUserId() {
+        return activeUserId;
+    }
+
+    public static synchronized void saveAndLoadUser(Context context, long userId) {
+        if (context != null) appContext = context.getApplicationContext();
+        loadForUser(context, userId);
+    }
+
+    public static synchronized void saveAndClear(Context context) {
+        if (context != null) appContext = context.getApplicationContext();
+        carts.clear();
+        activeUserId = -1;
+    }
+
+    private static void loadForUser(Context context, long userId) {
+        activeUserId = userId;
+        carts.clear();
+        if (context == null || userId == -1) return;
+
+        Runnable task = () -> {
+            try {
+                AppDatabaseHelper db = AppDatabaseHelper.getInstance(context);
+                List<CartItemEntity> rows = db.getCartItemsForUser(userId);
+                synchronized (CartManager.class) {
+                    if (activeUserId != userId) return;
+                    carts.clear();
+                    for (CartItemEntity e : rows) {
+                        Cart cart = carts.get(e.restaurantId);
+                        if (cart == null) {
+                            cart = new Cart();
+                            carts.put(e.restaurantId, cart);
+                        }
+                        FoodItem item = new FoodItem(
+                                e.foodItemId, e.name, e.originalPrice, e.price,
+                                e.quantityLeft, e.availableUntil, e.imageRes,
+                                e.description, e.imageUri
+                        );
+                        cart.items.put(e.foodItemId, item);
+                        cart.quantities.put(e.foodItemId, e.quantity);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        };
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            new Thread(task).start();
+        } else {
+            task.run();
+        }
+    }
+
+    // Adds one item to that restaurant's cart.
+    public static synchronized void add(long restaurantId, FoodItem item) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) {
+            cart = new Cart();
+            carts.put(restaurantId, cart);
+        }
+        cart.items.put(item.id, item);
+        Integer current = cart.quantities.get(item.id);
+        int newQuantity = current == null ? 1 : current + 1;
+        cart.quantities.put(item.id, newQuantity);
+
+        long userId = activeUserId;
+        Context context = appContext;
+        if (context != null && userId != -1) {
+            new Thread(() -> {
+                try {
+                    AppDatabaseHelper.getInstance(context).saveCartItem(userId, restaurantId, item, newQuantity);
+                } catch (Exception ignored) {
+                }
+            }).start();
+        }
+    }
+
+    // Removes one. Removes the line when it reaches 0, and the cart when nothing is left.
+    public static synchronized void decrease(long restaurantId, int foodId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return;
+        Integer current = cart.quantities.get(foodId);
+        if (current == null) return;
+        FoodItem item = cart.items.get(foodId);
+        int newQuantity = current - 1;
+
+        if (newQuantity <= 0) {
+            cart.quantities.remove(foodId);
+            cart.items.remove(foodId);
+        } else {
+            cart.quantities.put(foodId, newQuantity);
+        }
+        if (cart.quantities.isEmpty()) carts.remove(restaurantId);
+
+        long userId = activeUserId;
+        Context context = appContext;
+        if (context != null && userId != -1) {
+            new Thread(() -> {
+                try {
+                    AppDatabaseHelper db = AppDatabaseHelper.getInstance(context);
+                    if (newQuantity > 0 && item != null) {
+                        db.saveCartItem(userId, restaurantId, item, newQuantity);
+                    } else {
+                        db.removeCartItem(userId, restaurantId, foodId);
+                    }
+                } catch (Exception ignored) {
+                }
+            }).start();
+        }
+    }
+
+    public static synchronized int quantityOf(long restaurantId, int foodId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return 0;
+        Integer q = cart.quantities.get(foodId);
         return q == null ? 0 : q;
     }
 
-    // Total number of items (sum of quantities).
-    public static synchronized int count() {
+    // Number of items in one restaurant's cart (sum of quantities).
+    public static synchronized int count(long restaurantId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return 0;
         int total = 0;
-        for (int q : quantities.values()) total += q;
+        for (int q : cart.quantities.values()) total += q;
         return total;
     }
 
-    public static synchronized List<CartLine> getLines() {
+    // Number of items in all carts together.
+    public static synchronized int count() {
+        int total = 0;
+        for (long restaurantId : carts.keySet()) total += count(restaurantId);
+        return total;
+    }
+
+    // Ids of the restaurants that have a cart, in the order the carts were started.
+    public static synchronized List<Long> getRestaurantIds() {
+        return new ArrayList<>(carts.keySet());
+    }
+
+    public static synchronized List<CartLine> getLines(long restaurantId) {
         List<CartLine> lines = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> e : quantities.entrySet()) {
-            lines.add(new CartLine(items.get(e.getKey()), e.getValue()));
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return lines;
+        for (Map.Entry<Integer, Integer> e : cart.quantities.entrySet()) {
+            lines.add(new CartLine(cart.items.get(e.getKey()), e.getValue()));
         }
         return lines;
     }
 
-    // Sum of discounted price x quantity, before tax.
-    public static synchronized double subtotal() {
+    // Sum of discounted price x quantity for one restaurant's cart, before tax.
+    public static synchronized double subtotal(long restaurantId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return 0;
         double total = 0;
-        for (Map.Entry<Integer, Integer> e : quantities.entrySet()) {
-            total += items.get(e.getKey()).price * e.getValue();
+        for (Map.Entry<Integer, Integer> e : cart.quantities.entrySet()) {
+            total += cart.items.get(e.getKey()).price * e.getValue();
         }
         return total;
     }
 
-    public static synchronized long getRestaurantId() {
-        return restaurantId;
-    }
-
-    public static synchronized String earliestAvailableUntil() {
+    public static synchronized String earliestAvailableUntil(long restaurantId) {
+        Cart cart = carts.get(restaurantId);
+        if (cart == null) return null;
         SimpleDateFormat format = new SimpleDateFormat("h:mm a", Locale.ENGLISH);
         String earliest = null;
         Date earliestDate = null;
-        for (FoodItem f : items.values()) {
+        for (FoodItem f : cart.items.values()) {
             if (f.availableUntil == null || f.availableUntil.isEmpty()) continue;
             try {
                 Date d = format.parse(f.availableUntil);
@@ -107,9 +232,33 @@ public final class CartManager {
         return earliest;
     }
 
+    // Empties one restaurant's cart (after its order was placed).
+    public static synchronized void clear(long restaurantId) {
+        carts.remove(restaurantId);
+        long userId = activeUserId;
+        Context context = appContext;
+        if (context != null && userId != -1) {
+            new Thread(() -> {
+                try {
+                    AppDatabaseHelper.getInstance(context).clearCartForRestaurant(userId, restaurantId);
+                } catch (Exception ignored) {
+                }
+            }).start();
+        }
+    }
+
+    // Empties every cart.
     public static synchronized void clear() {
-        items.clear();
-        quantities.clear();
-        restaurantId = -1;
+        carts.clear();
+        long userId = activeUserId;
+        Context context = appContext;
+        if (context != null && userId != -1) {
+            new Thread(() -> {
+                try {
+                    AppDatabaseHelper.getInstance(context).clearCartForUser(userId);
+                } catch (Exception ignored) {
+                }
+            }).start();
+        }
     }
 }

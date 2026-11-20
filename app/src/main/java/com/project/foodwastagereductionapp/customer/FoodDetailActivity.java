@@ -129,15 +129,12 @@ public class FoodDetailActivity extends AppCompatActivity {
     private void addToCart() {
         if (food == null) return; // still loading
         // Don't allow more than what's left
-        if (CartManager.quantityOf(food.id) >= food.quantityLeft) {
+        if (CartManager.quantityOf(restaurantId, food.id) >= food.quantityLeft) {
             Toast.makeText(this, R.string.msgNoMoreStock, Toast.LENGTH_SHORT).show();
             return;
         }
-        // One restaurant per cart
-        if (!CartManager.add(restaurantId, food)) {
-            Toast.makeText(this, R.string.msgCartOtherRestaurant, Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // Each restaurant has its own cart
+        CartManager.add(restaurantId, food);
         Toast.makeText(this, R.string.msgAddedToCart, Toast.LENGTH_SHORT).show();
         // back to the restaurant; its View Cart button updates in onResume()
         finish();

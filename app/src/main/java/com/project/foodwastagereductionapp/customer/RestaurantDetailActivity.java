@@ -52,12 +52,12 @@ public class RestaurantDetailActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        ImageView btnCart = findViewById(R.id.btnCart);
+        View btnCart = findViewById(R.id.btnCart);
         btnCart.setOnClickListener(v -> openCart());
 
         // Food list
         RecyclerView recyclerFood = findViewById(R.id.recyclerFood);
-        adapter = new FoodItemAdapter(restaurantId, this::addToCart);
+        adapter = new FoodItemAdapter(restaurantId, this::updateCartButton);
         recyclerFood.setAdapter(adapter);
 
         // View Cart button
@@ -71,6 +71,7 @@ public class RestaurantDetailActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (btnViewCart != null) updateCartButton(); // cart may have changed on another screen
+        if (adapter != null) adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -120,28 +121,30 @@ public class RestaurantDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void addToCart(FoodItem item) {
-        // Don't allow more than what's left
-        if (CartManager.quantityOf(item.id) >= item.quantityLeft) {
-            Toast.makeText(this, R.string.msgNoMoreStock, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        // One restaurant per cart
-        if (!CartManager.add(restaurantId, item)) {
-            Toast.makeText(this, R.string.msgCartOtherRestaurant, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        updateCartButton();
-    }
-
     private void updateCartButton() {
-        int count = CartManager.count();
+        int count = CartManager.count(restaurantId);
         btnViewCart.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
         btnViewCart.setText(getString(R.string.fmtViewCart, count));
+
+        TextView badge = findViewById(R.id.txtCartBadge);
+        if (badge != null) {
+            int totalCount = CartManager.count();
+            badge.setVisibility(totalCount > 0 ? View.VISIBLE : View.GONE);
+            badge.setText(totalCount > 99 ? getString(R.string.fmtCartCountMax) : String.valueOf(totalCount));
+        }
     }
 
     private void openCart() {
-        if (CartManager.count() == 0) return;
-        startActivity(new Intent(this, CheckoutActivity.class));
+        if (CartManager.count() == 0) {
+            Toast.makeText(this, R.string.msgCartEmpty, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (CartManager.count(restaurantId) > 0) {
+            Intent intent = new Intent(this, CheckoutActivity.class);
+            intent.putExtra(CheckoutActivity.EXTRA_RESTAURANT_ID, restaurantId);
+            startActivity(intent);
+        } else {
+            startActivity(new Intent(this, CartsActivity.class));
+        }
     }
 }

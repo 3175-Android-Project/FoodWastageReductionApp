@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
@@ -20,21 +21,20 @@ import com.project.foodwastagereductionapp.data.FoodItem;
 import java.util.ArrayList;
 import java.util.List;
 
-
-//Food items on the Restaurant Detail screen, each with an add-to-cart button. */
+// Food items on the Restaurant Detail screen, each with an add-to-cart button or quantity stepper.
 public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodViewHolder> {
 
-    public interface OnAddClick {
-        void onAdd(FoodItem item);
+    public interface OnCartChanged {
+        void onChanged();
     }
 
     private final List<FoodItem> rows = new ArrayList<>();
     private final long restaurantId;
-    private final OnAddClick onAdd;
+    private final OnCartChanged onCartChanged;
 
-    public FoodItemAdapter(long restaurantId, OnAddClick onAdd) {
+    public FoodItemAdapter(long restaurantId, OnCartChanged onCartChanged) {
         this.restaurantId = restaurantId;
-        this.onAdd = onAdd;
+        this.onCartChanged = onCartChanged;
     }
 
     public void setRows(List<FoodItem> newRows) {
@@ -84,15 +84,55 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
                 h.txtQuantityLeft.setText(context.getString(
                         R.string.fmtQuantityLeft, f.quantityLeft));
             }
-            h.btnAdd.setEnabled(true);
-            h.btnAdd.setAlpha(1f);
         } else {
             h.txtQuantityLeft.setText(R.string.msgSoldOut);
-            h.btnAdd.setEnabled(false);
-            h.btnAdd.setAlpha(0.4f);
         }
 
-        h.btnAdd.setOnClickListener(v -> onAdd.onAdd(f));
+        // Stepper vs Single Add button based on cart quantity
+        int countInCart = CartManager.quantityOf(restaurantId, f.id);
+        if (countInCart > 0) {
+            h.btnAdd.setVisibility(View.GONE);
+            h.layoutStepper.setVisibility(View.VISIBLE);
+            h.txtQuantity.setText(String.valueOf(countInCart));
+
+            // Minus button: decrease quantity
+            h.btnMinus.setOnClickListener(v -> {
+                CartManager.decrease(restaurantId, f.id);
+                int pos = h.getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) notifyItemChanged(pos);
+                if (onCartChanged != null) onCartChanged.onChanged();
+            });
+
+            // Plus button: increase quantity
+            h.btnPlus.setOnClickListener(v -> {
+                if (CartManager.quantityOf(restaurantId, f.id) >= f.quantityLeft) {
+                    Toast.makeText(context, R.string.msgNoMoreStock, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                CartManager.add(restaurantId, f);
+                int pos = h.getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) notifyItemChanged(pos);
+                if (onCartChanged != null) onCartChanged.onChanged();
+            });
+        } else {
+            h.btnAdd.setVisibility(View.VISIBLE);
+            h.layoutStepper.setVisibility(View.GONE);
+
+            if (f.quantityLeft > 0) {
+                h.btnAdd.setEnabled(true);
+                h.btnAdd.setAlpha(1f);
+                h.btnAdd.setOnClickListener(v -> {
+                    CartManager.add(restaurantId, f);
+                    int pos = h.getBindingAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) notifyItemChanged(pos);
+                    if (onCartChanged != null) onCartChanged.onChanged();
+                });
+            } else {
+                h.btnAdd.setEnabled(false);
+                h.btnAdd.setAlpha(0.4f);
+                h.btnAdd.setOnClickListener(null);
+            }
+        }
 
         // Tap the row to open Food Detail
         h.itemView.setOnClickListener(v -> {
@@ -112,6 +152,9 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
         final ImageView imgFood;
         final TextView txtFoodName, txtOriginalPrice, txtPrice, txtQuantityLeft;
         final ImageButton btnAdd;
+        final View layoutStepper;
+        final TextView btnMinus, txtQuantity, btnPlus;
+        final View divider;
 
         FoodViewHolder(@NonNull View v) {
             super(v);
@@ -121,6 +164,11 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
             txtPrice = v.findViewById(R.id.txtPrice);
             txtQuantityLeft = v.findViewById(R.id.txtQuantityLeft);
             btnAdd = v.findViewById(R.id.btnAdd);
+            layoutStepper = v.findViewById(R.id.layoutStepper);
+            btnMinus = v.findViewById(R.id.btnMinus);
+            txtQuantity = v.findViewById(R.id.txtQuantity);
+            btnPlus = v.findViewById(R.id.btnPlus);
+            divider = v.findViewById(R.id.divider);
         }
     }
 }

@@ -13,27 +13,37 @@ import com.project.foodwastagereductionapp.manager.ManagerDashboardActivity;
 public final class SessionManager {
     private static final Object LOCK = new Object();
     private static long generation;
+    private final Context context;
     private final SharedPreferences preferences;
+
     public SessionManager(Context context) {
-        preferences = context.getApplicationContext()
+        this.context = context.getApplicationContext();
+        preferences = this.context
                 .getSharedPreferences("grabbit_session", Context.MODE_PRIVATE);
+        long userId = getUserId();
+        if (userId != -1) {
+            CartManager.init(this.context, userId);
+        }
     }
+
     public long getUserId() { return preferences.getLong("userId", -1); }
     public boolean shouldAutoLogin() { return preferences.getBoolean("keepSignedIn", false); }
+
     public void start(long userId, boolean keepSignedIn) {
         synchronized (LOCK) {
             generation++;
             preferences.edit().putLong("userId", userId).putBoolean("keepSignedIn", keepSignedIn).apply();
             invalidateCaches();
-            CartManager.clear();
+            CartManager.saveAndLoadUser(context, userId);
         }
     }
+
     public void clear() {
         synchronized (LOCK) {
             generation++;
             preferences.edit().clear().apply();
             invalidateCaches();
-            CartManager.clear();
+            CartManager.saveAndClear(context);
         }
     }
     public Snapshot snapshot() {
