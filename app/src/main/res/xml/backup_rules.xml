@@ -3,5 +3,6 @@
     <!-- Accounts, password hashes, reset grants, orders and profile photos stay on this device. -->
     <exclude domain="database" path="grabbit.db" />
     <exclude domain="sharedpref" path="grabbit_session.xml" />
+    <exclude domain="sharedpref" path="grabbit_carts.xml" />
     <exclude domain="file" path="profile_photos/" />
 </full-backup-content>

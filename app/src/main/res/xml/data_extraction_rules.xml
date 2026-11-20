@@ -3,11 +3,13 @@
     <cloud-backup>
         <exclude domain="database" path="grabbit.db" />
         <exclude domain="sharedpref" path="grabbit_session.xml" />
+        <exclude domain="sharedpref" path="grabbit_carts.xml" />
         <exclude domain="file" path="profile_photos/" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="database" path="grabbit.db" />
         <exclude domain="sharedpref" path="grabbit_session.xml" />
+        <exclude domain="sharedpref" path="grabbit_carts.xml" />
         <exclude domain="file" path="profile_photos/" />
     </device-transfer>
 </data-extraction-rules>

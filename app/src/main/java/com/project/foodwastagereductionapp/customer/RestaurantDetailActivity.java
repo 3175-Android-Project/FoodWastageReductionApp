@@ -57,7 +57,7 @@ public class RestaurantDetailActivity extends AppCompatActivity {
 
         // Food list
         RecyclerView recyclerFood = findViewById(R.id.recyclerFood);
-        adapter = new FoodItemAdapter(restaurantId, this::addToCart);
+        adapter = new FoodItemAdapter(restaurantId, this::updateCartButton);
         recyclerFood.setAdapter(adapter);
 
         // View Cart button
@@ -71,6 +71,7 @@ public class RestaurantDetailActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (btnViewCart != null) updateCartButton(); // cart may have changed on another screen
+        if (adapter != null) adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -118,17 +119,6 @@ public class RestaurantDetailActivity extends AppCompatActivity {
             ImageView imgRestaurant = findViewById(R.id.imgRestaurant);
             imgRestaurant.setImageURI(Uri.parse(r.imageUri));
         }
-    }
-
-    private void addToCart(FoodItem item) {
-        // Don't allow more than what's left
-        if (CartManager.quantityOf(restaurantId, item.id) >= item.quantityLeft) {
-            Toast.makeText(this, R.string.msgNoMoreStock, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        // Each restaurant has its own cart
-        CartManager.add(restaurantId, item);
-        updateCartButton();
     }
 
     private void updateCartButton() {

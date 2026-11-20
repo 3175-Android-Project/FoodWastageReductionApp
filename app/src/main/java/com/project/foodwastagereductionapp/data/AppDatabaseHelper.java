@@ -637,4 +637,47 @@ public final class AppDatabaseHelper {
                 customer == null ? "" : customer.email,
                 customer == null || customer.phone == null ? "" : customer.phone);
     }
+
+    // ---- Cart items ----------------------------------------------------------------------
+
+    public List<CartItemEntity> getCartItemsForUser(long userId) {
+        return database.cartDao().findByUser(userId);
+    }
+
+    public void saveCartItem(long userId, long restaurantId, FoodItem item, int quantity) {
+        database.runInTransaction(() -> {
+            CartDao dao = database.cartDao();
+            CartItemEntity existing = dao.findItem(userId, restaurantId, item.id);
+            if (existing != null) {
+                dao.updateQuantity(userId, restaurantId, item.id, quantity);
+            } else {
+                CartItemEntity entity = new CartItemEntity();
+                entity.userId = userId;
+                entity.restaurantId = restaurantId;
+                entity.foodItemId = item.id;
+                entity.quantity = quantity;
+                entity.name = item.name == null ? "" : item.name;
+                entity.price = item.price;
+                entity.originalPrice = item.originalPrice;
+                entity.quantityLeft = item.quantityLeft;
+                entity.availableUntil = item.availableUntil == null ? "" : item.availableUntil;
+                entity.imageRes = item.imageRes;
+                entity.description = item.description == null ? "" : item.description;
+                entity.imageUri = item.imageUri == null ? "" : item.imageUri;
+                dao.insert(entity);
+            }
+        });
+    }
+
+    public void removeCartItem(long userId, long restaurantId, int foodId) {
+        database.cartDao().deleteItem(userId, restaurantId, foodId);
+    }
+
+    public void clearCartForRestaurant(long userId, long restaurantId) {
+        database.cartDao().deleteRestaurantCart(userId, restaurantId);
+    }
+
+    public void clearCartForUser(long userId) {
+        database.cartDao().deleteUserCart(userId);
+    }
 }

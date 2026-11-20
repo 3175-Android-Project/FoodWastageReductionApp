@@ -150,6 +150,15 @@ public class AppDatabaseHelperTest {
         assertEquals("First", db.getRestaurantForManager(first).name);
         assertEquals("Second", db.getRestaurantForManager(second).name);
     }
+    @Test public void cartItemsPersistInRoomDatabaseAndCascadeOnUserDelete() {
+        long userId = user("cartcustomer@example.com", User.CUSTOMER);
+        com.project.foodwastagereductionapp.data.FoodItem food = new com.project.foodwastagereductionapp.data.FoodItem(1, "Sushi", 8.0, 7.5, 5, "5:00 PM", 0, "Description");
+        db.saveCartItem(userId, 101L, food, 2);
+        assertEquals(1, db.getCartItemsForUser(userId).size());
+        assertEquals(2, db.getCartItemsForUser(userId).get(0).quantity);
+        db.deleteUser(userId);
+        assertEquals(0, db.getCartItemsForUser(userId).size());
+    }
 
     @Test public void managerFoodLifecycleAndStockAvailability() {
         long manager = user("manager@example.com", User.MANAGER);

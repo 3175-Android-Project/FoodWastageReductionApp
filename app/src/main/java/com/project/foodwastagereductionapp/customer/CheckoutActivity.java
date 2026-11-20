@@ -98,6 +98,7 @@ public class CheckoutActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         refresh();
+        validateStock();
     }
 
     /** Re-reads the cart and updates the list, time box and totals. */
@@ -120,6 +121,44 @@ public class CheckoutActivity extends BaseActivity {
         txtTotalAmount.setText(PriceFormatter.format(OrderPricing.totalWithTax(subtotal)));
 
         updateTimeBox();
+    }
+
+    /** Verifies that cart items are still available in the database and adjusts if stock changed. */
+    private void validateStock() {
+        AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
+        List<CartManager.CartLine> lines = CartManager.getLines(restaurantId);
+        if (lines.isEmpty()) return;
+
+        new Thread(() -> {
+            boolean changed = false;
+            String warningMsg = null;
+            for (CartManager.CartLine line : lines) {
+                com.project.foodwastagereductionapp.data.FoodItemEntity entity = db.getFoodItem(line.item.id);
+                if (entity == null || !entity.available || entity.quantityLeft <= 0) {
+                    while (CartManager.quantityOf(restaurantId, line.item.id) > 0) {
+                        CartManager.decrease(restaurantId, line.item.id);
+                    }
+                    warningMsg = getString(R.string.fmtSoldOutInCart, line.item.name);
+                    changed = true;
+                } else if (entity.quantityLeft < line.quantity) {
+                    while (CartManager.quantityOf(restaurantId, line.item.id) > entity.quantityLeft) {
+                        CartManager.decrease(restaurantId, line.item.id);
+                    }
+                    warningMsg = getString(R.string.fmtSoldOutInCart, line.item.name);
+                    changed = true;
+                }
+            }
+            if (changed) {
+                final String msg = warningMsg;
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    if (msg != null) {
+                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                    }
+                    refresh();
+                });
+            }
+        }).start();
     }
 
     private void setDelivery(boolean delivery) {

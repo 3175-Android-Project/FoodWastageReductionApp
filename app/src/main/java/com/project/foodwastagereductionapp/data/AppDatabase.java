@@ -11,8 +11,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(
         entities = {UserEntity.class, RestaurantEntity.class, OrderEntity.class,
-                OrderItemEntity.class, NotificationEntity.class, FoodItemEntity.class, PasswordResetGrantEntity.class},
-        version = 6,
+                OrderItemEntity.class, NotificationEntity.class, FoodItemEntity.class,
+                PasswordResetGrantEntity.class, CartItemEntity.class},
+        version = 7,
         exportSchema = false
 )
 abstract class AppDatabase extends RoomDatabase {
@@ -22,6 +23,7 @@ abstract class AppDatabase extends RoomDatabase {
     abstract NotificationDao notificationDao();
     abstract FoodItemDao foodItemDao();
     abstract PasswordResetGrantDao passwordResetGrantDao();
+    abstract CartDao cartDao();
 
     /** Version 2: account and restaurant tables remain unchanged. */
     static final Migration MIGRATION_1_2 = new Migration(1, 2) {
@@ -103,6 +105,29 @@ abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    /** Version 7: persistent cart_items table in Room DB. */
+    static final Migration MIGRATION_6_7 = new Migration(6, 7) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS `cart_items` ("
+                    + "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                    + "`user_id` INTEGER NOT NULL, "
+                    + "`restaurant_id` INTEGER NOT NULL, "
+                    + "`food_item_id` INTEGER NOT NULL, "
+                    + "`quantity` INTEGER NOT NULL, "
+                    + "`name` TEXT, "
+                    + "`price` REAL NOT NULL, "
+                    + "`original_price` REAL NOT NULL, "
+                    + "`quantity_left` INTEGER NOT NULL, "
+                    + "`available_until` TEXT, "
+                    + "`image_res` INTEGER NOT NULL, "
+                    + "`description` TEXT, "
+                    + "`image_uri` TEXT, "
+                    + "FOREIGN KEY(`user_id`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_cart_items_user_id` ON `cart_items` (`user_id`)");
+        }
+    };
+
     private static volatile AppDatabase instance;
 
     static AppDatabase getInstance(Context context, String databaseName) {
@@ -117,7 +142,7 @@ abstract class AppDatabase extends RoomDatabase {
                     result = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, databaseName)
                             .addMigrations(MIGRATION_1_2, MIGRATION_2_3,
-                                    MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                                    MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                             .build();
                     result.getOpenHelper().getWritableDatabase();
                     instance = result;

@@ -80,7 +80,7 @@
                 tools:text="5 left" />
         </LinearLayout>
 
-        <!-- Add to cart -->
+        <!-- Single Add Button (shown when item is not in cart) -->
         <ImageButton
             android:id="@+id/btnAdd"
             android:layout_width="52dp"
@@ -91,6 +91,56 @@
             android:contentDescription="@string/contentDescAddToCart"
             android:src="@drawable/icon_plus"
             app:tint="@color/background_accent1" />
+
+        <!-- Quantity Stepper: [- 1 +] (shown when item is in cart) -->
+        <LinearLayout
+            android:id="@+id/layoutStepper"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_icon_square"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/btnMinus"
+                android:layout_width="32dp"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/contentDescDecrease"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:text="@string/txtMinus"
+                android:textColor="@color/background_accent1"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtQuantity"
+                android:layout_width="28dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="1" />
+
+            <TextView
+                android:id="@+id/btnPlus"
+                android:layout_width="32dp"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/contentDescIncrease"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:text="@string/txtPlus"
+                android:textColor="@color/background_accent1"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
