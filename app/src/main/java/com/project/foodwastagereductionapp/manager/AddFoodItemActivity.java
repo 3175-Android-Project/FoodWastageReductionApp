@@ -188,22 +188,35 @@ public class AddFoodItemActivity extends BaseActivity {
             return;
         }
 
-        // Prices can't be negative, and the discounted price can't be higher than the original
-        if (originalPrice < 0) {
-            etOriginalPrice.setError("Original price can't be negative");
+        if (originalPrice <= 0) {
+            Toast.makeText(this, "Original price must be greater than 0.", Toast.LENGTH_LONG).show();
             etOriginalPrice.requestFocus();
+
             return;
         }
+
         if (discountPrice < 0) {
             etDiscountPrice.setError("Discount price can't be negative");
             etDiscountPrice.requestFocus();
             return;
         }
-        if (discountPrice > originalPrice) {
-            etDiscountPrice.setError("Discount price can't be higher than the original price");
+
+        if (discountPrice >= originalPrice) {
+            etDiscountPrice.setError("Discounted price must be lower than the original price");
             etDiscountPrice.requestFocus();
+
+            Toast.makeText(this, "Discounted price must be lower than the original price.", Toast.LENGTH_LONG).show();
+
             return;
         }
+
+        if (quantity <= 0) {
+            Toast.makeText(this, "Quantity must be greater than 0.", Toast.LENGTH_LONG).show();
+            etQuantity.requestFocus();
+
+            return;
+        }
+
 
         String imageUri = selectedImageUri == null ? "" : selectedImageUri.toString();
         long userId = new SessionManager(this).getUserId();
