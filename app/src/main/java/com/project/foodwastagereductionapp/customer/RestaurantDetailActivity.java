@@ -52,7 +52,7 @@ public class RestaurantDetailActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        ImageView btnCart = findViewById(R.id.btnCart);
+        View btnCart = findViewById(R.id.btnCart);
         btnCart.setOnClickListener(v -> openCart());
 
         // Food list
@@ -135,12 +135,26 @@ public class RestaurantDetailActivity extends AppCompatActivity {
         int count = CartManager.count(restaurantId);
         btnViewCart.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
         btnViewCart.setText(getString(R.string.fmtViewCart, count));
+
+        TextView badge = findViewById(R.id.txtCartBadge);
+        if (badge != null) {
+            int totalCount = CartManager.count();
+            badge.setVisibility(totalCount > 0 ? View.VISIBLE : View.GONE);
+            badge.setText(totalCount > 99 ? getString(R.string.fmtCartCountMax) : String.valueOf(totalCount));
+        }
     }
 
     private void openCart() {
-        if (CartManager.count(restaurantId) == 0) return;
-        Intent intent = new Intent(this, CheckoutActivity.class);
-        intent.putExtra(CheckoutActivity.EXTRA_RESTAURANT_ID, restaurantId);
-        startActivity(intent);
+        if (CartManager.count() == 0) {
+            Toast.makeText(this, R.string.msgCartEmpty, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (CartManager.count(restaurantId) > 0) {
+            Intent intent = new Intent(this, CheckoutActivity.class);
+            intent.putExtra(CheckoutActivity.EXTRA_RESTAURANT_ID, restaurantId);
+            startActivity(intent);
+        } else {
+            startActivity(new Intent(this, CartsActivity.class));
+        }
     }
 }

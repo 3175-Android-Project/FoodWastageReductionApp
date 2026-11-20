@@ -112,6 +112,7 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
         final ImageView imgFood;
         final TextView txtFoodName, txtOriginalPrice, txtPrice, txtQuantityLeft;
         final ImageButton btnAdd;
+        final View divider;
 
         FoodViewHolder(@NonNull View v) {
             super(v);
@@ -121,6 +122,7 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
             txtPrice = v.findViewById(R.id.txtPrice);
             txtQuantityLeft = v.findViewById(R.id.txtQuantityLeft);
             btnAdd = v.findViewById(R.id.btnAdd);
+            divider = v.findViewById(R.id.divider);
         }
     }
 }
