@@ -96,8 +96,8 @@
         <LinearLayout
             android:id="@+id/layoutStepper"
             android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:background="@drawable/bg_icon_square"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_stepper_green"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:visibility="gone"
@@ -112,9 +112,8 @@
                 android:gravity="center"
                 android:includeFontPadding="false"
                 android:text="@string/txtMinus"
-                android:textColor="@color/background_accent1"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textColor="@color/text_primary"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/txtQuantity"
@@ -136,9 +135,8 @@
                 android:gravity="center"
                 android:includeFontPadding="false"
                 android:text="@string/txtPlus"
-                android:textColor="@color/background_accent1"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textColor="@color/text_primary"
+                android:textSize="18sp" />
 
         </LinearLayout>
 
