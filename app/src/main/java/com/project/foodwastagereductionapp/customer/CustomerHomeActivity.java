@@ -112,12 +112,12 @@ public class CustomerHomeActivity extends AppCompatActivity {
         findViewById(R.id.btnNotification).setOnClickListener(v ->
                 startActivity(new Intent(this, NotificationsActivity.class)));
 
-        // Cart opens Checkout (nothing to check out when it is empty)
+        // Cart opens the list of carts, one per restaurant (nothing to show when empty)
         findViewById(R.id.btnCart).setOnClickListener(v -> {
             if (CartManager.count() == 0) {
                 Toast.makeText(this, R.string.msgCartEmpty, Toast.LENGTH_SHORT).show();
             } else {
-                startActivity(new Intent(this, CheckoutActivity.class));
+                startActivity(new Intent(this, CartsActivity.class));
             }
         });
 
