@@ -83,7 +83,8 @@
                 android:layout_width="match_parent"
                 android:layout_marginTop="@dimen/space_md"
                 android:hint="@string/hintProvince"
-                android:inputType="textCapWords" />
+                android:inputType="textCapWords"
+                android:visibility="gone" />
 
             <EditText
                 android:id="@+id/editPostalCode"

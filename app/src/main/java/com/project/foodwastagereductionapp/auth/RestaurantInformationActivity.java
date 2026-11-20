@@ -143,15 +143,16 @@ public class RestaurantInformationActivity extends BaseActivity {
         EditText editRestaurantCity =
                 findViewById(R.id.editRestaurantCity);
 
+        EditText editRestaurantProvince =
+                findViewById(R.id.editRestaurantProvince);
+
         editRestaurantCity.setFocusable(false);
         editRestaurantCity.setClickable(true);
         editRestaurantCity.setOnClickListener(v -> com.project.foodwastagereductionapp.ui.CityPickerBottomSheet.show(this, selectedCity -> {
             editRestaurantCity.setText(selectedCity);
+            editRestaurantProvince.setText("BC");
             editRestaurantCity.setError(null);
         }));
-
-        EditText editRestaurantProvince =
-                findViewById(R.id.editRestaurantProvince);
 
         EditText editRestaurantPostalCode =
                 findViewById(R.id.editRestaurantPostalCode);

@@ -58,6 +58,7 @@ public class EditProfileActivity extends BaseActivity {
         etCity.setClickable(true);
         etCity.setOnClickListener(v -> com.project.foodwastagereductionapp.ui.CityPickerBottomSheet.show(this, selectedCity -> {
             etCity.setText(selectedCity);
+            etProvince.setText("BC");
             etCity.setError(null);
         }));
 

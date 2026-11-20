@@ -88,6 +88,7 @@ public class AccountInformationActivity extends BaseActivity {
         editCity.setClickable(true);
         editCity.setOnClickListener(v -> com.project.foodwastagereductionapp.ui.CityPickerBottomSheet.show(this, selectedCity -> {
             editCity.setText(selectedCity);
+            editProvince.setText("BC");
             editCity.setError(null);
         }));
 
