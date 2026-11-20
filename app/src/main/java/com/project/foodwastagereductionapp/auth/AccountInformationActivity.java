@@ -14,6 +14,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.project.foodwastagereductionapp.ui.AddressPicker;
 import com.project.foodwastagereductionapp.ui.LocationHelper;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
@@ -85,13 +86,9 @@ public class AccountInformationActivity extends BaseActivity {
         EditText editPostalCode =
                 findViewById(R.id.editPostalCode);
 
-        editCity.setFocusable(false);
-        editCity.setClickable(true);
-        editCity.setOnClickListener(v -> com.project.foodwastagereductionapp.ui.CityPickerBottomSheet.show(this, selectedCity -> {
-            editCity.setText(selectedCity);
-            editProvince.setText("BC");
-            editCity.setError(null);
-        }));
+        // Province + city dropdowns, and "Use my current location"
+        AddressPicker.attach(this, editProvince, editCity, editPostalCode, editAddress,
+                findViewById(R.id.btnUseMyLocation));
 
         Button btnCreateAccount =
                 findViewById(R.id.btnCreateAccount);
@@ -118,11 +115,11 @@ public class AccountInformationActivity extends BaseActivity {
                 return;
             }
 
-            String address = editAddress.getText().toString().trim();
-            if (address.isEmpty()) address = city + ", BC";
-
             String province = editProvince.getText().toString().trim();
-            if (province.isEmpty()) province = "BC";
+            if (province.isEmpty()) province = AddressPicker.DEFAULT_PROVINCE;
+
+            String address = editAddress.getText().toString().trim();
+            if (address.isEmpty()) address = city + ", " + province;
 
             String postalCode = editPostalCode.getText().toString().trim();
             if (postalCode.isEmpty()) postalCode = "V6B 1A1";

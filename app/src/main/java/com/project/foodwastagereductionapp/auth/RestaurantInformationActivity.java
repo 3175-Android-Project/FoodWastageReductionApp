@@ -19,6 +19,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.project.foodwastagereductionapp.ui.AddressPicker;
 import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.Restaurant;
@@ -147,16 +148,13 @@ public class RestaurantInformationActivity extends BaseActivity {
         EditText editRestaurantProvince =
                 findViewById(R.id.editRestaurantProvince);
 
-        editRestaurantCity.setFocusable(false);
-        editRestaurantCity.setClickable(true);
-        editRestaurantCity.setOnClickListener(v -> com.project.foodwastagereductionapp.ui.CityPickerBottomSheet.show(this, selectedCity -> {
-            editRestaurantCity.setText(selectedCity);
-            editRestaurantProvince.setText("BC");
-            editRestaurantCity.setError(null);
-        }));
 
         EditText editRestaurantPostalCode =
                 findViewById(R.id.editRestaurantPostalCode);
+
+        // Province + city dropdowns, and "Use my current location"
+        AddressPicker.attach(this, editRestaurantProvince, editRestaurantCity,
+                editRestaurantPostalCode, null, findViewById(R.id.btnUseMyLocation));
 
         EditText editRestaurantPhone =
                 findViewById(R.id.editRestaurantPhone);
@@ -332,7 +330,7 @@ public class RestaurantInformationActivity extends BaseActivity {
                             .trim();
 
 
-            if (restaurantProvince.isEmpty()) restaurantProvince = "BC";
+            if (restaurantProvince.isEmpty()) restaurantProvince = AddressPicker.DEFAULT_PROVINCE;
             if (restaurantPostalCode.isEmpty()) restaurantPostalCode = "V5A 1S6";
 
             if (restaurantName.isEmpty()

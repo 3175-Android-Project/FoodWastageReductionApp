@@ -343,5 +343,8 @@
     <string name="titleNearbyYou">Nearby you</string>
     <string name="fmtCityDistance">%1$s · %2$.1f km</string>
     <string name="fmtRestaurantDistance">%1$s · %2$.1f km</string>
+    <string name="titleSelectProvince">Select Province</string>
+    <string name="msgFindingAddress">Finding your address…</string>
+    <string name="msgAddressNotFound">Couldn\'t get your location. Please choose your province and city.</string>
     <string name="msgLocationUnavailable">Couldn\'t get your location. Showing your profile city.</string>
 </resources>

@@ -69,6 +69,17 @@ public final class LocationHelper {
         }
     }
 
+    /** Full address for a position (city, province, postal code, street), or null. */
+    public static Address addressFrom(Context context, double latitude, double longitude) {
+        if (!Geocoder.isPresent()) return null;
+        try {
+            List<Address> results = new Geocoder(context, Locale.CANADA).getFromLocation(latitude, longitude, 1);
+            return results == null || results.isEmpty() ? null : results.get(0);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     /** City name for a position (e.g. "Burnaby"), or null. */
     public static String cityFrom(Context context, double latitude, double longitude) {
         if (!Geocoder.isPresent()) return null;

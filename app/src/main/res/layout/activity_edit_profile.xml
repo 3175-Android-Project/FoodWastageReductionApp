@@ -53,22 +53,41 @@
                 android:hint="@string/hintStreetAddressRequired"
                 android:inputType="textPostalAddress|textCapWords" />
 
-            <EditText
-                android:id="@+id/etCity"
-                style="@style/Input.Default"
-                android:layout_width="match_parent"
+            <!-- Fills province, city and postal code from the phone's location -->
+            <TextView
+                android:id="@+id/btnUseMyLocation"
+                style="@style/Text.BodySm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_md"
-                android:hint="@string/hintCity"
-                android:inputType="textCapWords" />
+                android:background="?attr/selectableItemBackground"
+                android:drawableStart="@drawable/icon_map"
+                android:drawablePadding="4dp"
+                android:drawableTint="@color/background_accent1"
+                android:fontFamily="@font/pretendard_bold"
+                android:gravity="center_vertical"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="@string/optCurrentLocation"
+                android:textColor="@color/background_accent1" />
 
             <EditText
                 android:id="@+id/etProvince"
                 style="@style/Input.Default"
                 android:layout_width="match_parent"
                 android:layout_marginTop="@dimen/space_md"
-                android:hint="@string/hintProvince"
-                android:inputType="textCapWords"
-                android:visibility="gone" />
+                android:drawableEnd="@drawable/icon_dropdown"
+                android:drawableTint="@color/text_secondary"
+                android:hint="@string/hintProvince" />
+
+            <EditText
+                android:id="@+id/etCity"
+                style="@style/Input.Default"
+                android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/space_md"
+                android:drawableEnd="@drawable/icon_dropdown"
+                android:drawableTint="@color/text_secondary"
+                android:hint="@string/hintCity" />
 
             <EditText
                 android:id="@+id/etPostalCode"
