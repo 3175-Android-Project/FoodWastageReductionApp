@@ -1,5 +1,6 @@
 package com.project.foodwastagereductionapp.customer;
 
+import android.content.Intent;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.project.foodwastagereductionapp.R;
 import com.project.foodwastagereductionapp.auth.AuthTasks;
 import com.project.foodwastagereductionapp.data.AppDatabaseHelper;
 import com.project.foodwastagereductionapp.data.FoodItem;
+import com.project.foodwastagereductionapp.data.Restaurant;
 
 public class FoodDetailActivity extends AppCompatActivity {
     public static final String EXTRA_RESTAURANT_ID = "restaurant_id";
@@ -26,6 +28,16 @@ public class FoodDetailActivity extends AppCompatActivity {
 
     private long restaurantId;
     private FoodItem food;
+    private Restaurant restaurant;
+
+    private static class FoodDetailData {
+        final FoodItem food;
+        final Restaurant restaurant;
+        FoodDetailData(FoodItem food, Restaurant restaurant) {
+            this.food = food;
+            this.restaurant = restaurant;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,13 +77,18 @@ public class FoodDetailActivity extends AppCompatActivity {
     // Food the manager listed (food_items table), read on the database worker thread
     private void loadFood(int foodId) {
         AppDatabaseHelper db = AppDatabaseHelper.getInstance(this);
-        AuthTasks.run(this, null, () -> db.getFood(restaurantId, foodId), result -> {
-            if (result == null) { // removed or switched off by the restaurant
+        AuthTasks.run(this, null, () -> {
+            FoodItem f = db.getFood(restaurantId, foodId);
+            Restaurant r = db.getRestaurant(restaurantId);
+            return new FoodDetailData(f, r);
+        }, result -> {
+            if (result == null || result.food == null) { // removed or switched off by the restaurant
                 Toast.makeText(this, R.string.msgFoodNoLongerAvailable, Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
-            food = result;
+            food = result.food;
+            restaurant = result.restaurant;
             bindFood();
         });
     }
@@ -82,6 +99,17 @@ public class FoodDetailActivity extends AppCompatActivity {
             imgFood.setImageURI(Uri.parse(food.imageUri));
         } else {
             imgFood.setImageResource(food.imageRes != 0 ? food.imageRes : R.drawable.icon_food);
+        }
+
+        if (restaurant != null) {
+            TextView txtRestaurantName = findViewById(R.id.txtRestaurantName);
+            if (txtRestaurantName != null) {
+                txtRestaurantName.setText(restaurant.name);
+            }
+            View layoutRestaurant = findViewById(R.id.layoutRestaurant);
+            if (layoutRestaurant != null) {
+                layoutRestaurant.setOnClickListener(v -> openRestaurant());
+            }
         }
 
         TextView txtFoodName = findViewById(R.id.txtFoodName);
@@ -124,6 +152,12 @@ public class FoodDetailActivity extends AppCompatActivity {
             btnAddToCart.setEnabled(false);
             btnAddToCart.setAlpha(0.4f);
         }
+    }
+
+    private void openRestaurant() {
+        Intent intent = new Intent(this, RestaurantDetailActivity.class);
+        intent.putExtra(RestaurantDetailActivity.EXTRA_RESTAURANT_ID, restaurantId);
+        startActivity(intent);
     }
 
     private void addToCart() {

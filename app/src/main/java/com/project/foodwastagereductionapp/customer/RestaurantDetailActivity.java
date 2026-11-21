@@ -128,23 +128,18 @@ public class RestaurantDetailActivity extends AppCompatActivity {
 
         TextView badge = findViewById(R.id.txtCartBadge);
         if (badge != null) {
-            int totalCount = CartManager.count();
-            badge.setVisibility(totalCount > 0 ? View.VISIBLE : View.GONE);
-            badge.setText(totalCount > 99 ? getString(R.string.fmtCartCountMax) : String.valueOf(totalCount));
+            badge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+            badge.setText(count > 99 ? getString(R.string.fmtCartCountMax) : String.valueOf(count));
         }
     }
 
     private void openCart() {
-        if (CartManager.count() == 0) {
+        if (CartManager.count(restaurantId) == 0) {
             Toast.makeText(this, R.string.msgCartEmpty, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (CartManager.count(restaurantId) > 0) {
-            Intent intent = new Intent(this, CheckoutActivity.class);
-            intent.putExtra(CheckoutActivity.EXTRA_RESTAURANT_ID, restaurantId);
-            startActivity(intent);
-        } else {
-            startActivity(new Intent(this, CartsActivity.class));
-        }
+        Intent intent = new Intent(this, CheckoutActivity.class);
+        intent.putExtra(CheckoutActivity.EXTRA_RESTAURANT_ID, restaurantId);
+        startActivity(intent);
     }
 }

@@ -43,17 +43,39 @@ public final class LocationHelper {
             done.accept(null);
             return;
         }
-        String provider = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-                ? LocationManager.NETWORK_PROVIDER : LocationManager.GPS_PROVIDER;
 
-        // A recent saved fix (under 10 min) is good enough and instant
-        Location last = lm.getLastKnownLocation(provider);
+        Location last = null;
+        try {
+            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                last = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            }
+            if (last == null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                last = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+            if (last == null && lm.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
+                last = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            }
+        } catch (SecurityException ignored) {
+        }
+
         if (last != null && System.currentTimeMillis() - last.getTime() < 10 * 60 * 1000) {
             done.accept(last);
             return;
         }
-        LocationManagerCompat.getCurrentLocation(lm, provider, (android.os.CancellationSignal) null,
-                ContextCompat.getMainExecutor(context), location -> done.accept(location != null ? location : last));
+
+        String provider = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                ? LocationManager.GPS_PROVIDER
+                : (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+                ? LocationManager.NETWORK_PROVIDER
+                : LocationManager.PASSIVE_PROVIDER);
+
+        Location finalLast = last;
+        try {
+            LocationManagerCompat.getCurrentLocation(lm, provider, (android.os.CancellationSignal) null,
+                    ContextCompat.getMainExecutor(context), location -> done.accept(location != null ? location : finalLast));
+        } catch (Exception e) {
+            done.accept(finalLast);
+        }
     }
 
     /** "V5H 2E2, Burnaby, BC, Canada" -> {lat, lng}, or null if not found / no network. */

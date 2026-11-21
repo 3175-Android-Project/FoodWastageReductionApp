@@ -48,13 +48,46 @@
                 android:contentDescription="@null"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
 
+            <!-- Restaurant Name (clickable -> opens Restaurant Detail page) -->
+            <LinearLayout
+                android:id="@+id/layoutRestaurant"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp">
+
+                <TextView
+                    android:id="@+id/txtRestaurantName"
+                    style="@style/Text.BodySm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_semibold"
+                    android:textColor="@color/text_secondary"
+                    tools:text="Sushi Barff" />
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="2dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/icon_right"
+                    app:tint="@color/text_secondary" />
+
+            </LinearLayout>
+
             <!-- Name -->
             <TextView
                 android:id="@+id/txtFoodName"
                 style="@style/Text.HeadlineSm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:textColor="@color/text_primary"
                 tools:text="Salmon Sushi Box" />
 

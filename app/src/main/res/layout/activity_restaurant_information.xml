@@ -89,22 +89,36 @@
                 android:inputType="textCapWords" />
 
             <!-- Fills province, city and postal code from the phone's location -->
-            <TextView
+            <LinearLayout
                 android:id="@+id/btnUseMyLocation"
-                style="@style/Text.BodySm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_md"
                 android:background="?attr/selectableItemBackground"
-                android:drawableStart="@drawable/icon_map"
-                android:drawablePadding="4dp"
-                android:drawableTint="@color/background_accent1"
-                android:fontFamily="@font/pretendard_bold"
+                android:clickable="true"
+                android:focusable="true"
                 android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:text="@string/optCurrentLocation"
-                android:textColor="@color/background_accent1" />
+                android:paddingBottom="4dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/icon_map"
+                    app:tint="@color/background_accent1" />
+
+                <TextView
+                    style="@style/Text.BodySm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:fontFamily="@font/pretendard_bold"
+                    android:text="@string/optCurrentLocation"
+                    android:textColor="@color/background_accent1" />
+
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/editRestaurantProvince"
