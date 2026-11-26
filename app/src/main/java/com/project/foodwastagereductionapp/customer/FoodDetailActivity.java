@@ -1,8 +1,9 @@
 package com.project.foodwastagereductionapp.customer;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.content.Intent;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -96,7 +97,7 @@ public class FoodDetailActivity extends AppCompatActivity {
     private void bindFood() {
         ImageView imgFood = findViewById(R.id.imgFood);
         if (food.hasImageUri()) {
-            imgFood.setImageURI(Uri.parse(food.imageUri));
+            LocalImageLoader.load(imgFood, food.imageUri);
         } else {
             imgFood.setImageResource(food.imageRes != 0 ? food.imageRes : R.drawable.icon_food);
         }

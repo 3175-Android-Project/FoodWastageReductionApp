@@ -1,5 +1,7 @@
 package com.project.foodwastagereductionapp.customer;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -51,7 +53,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         h.txtRestaurantName.setText(r.name);
         h.txtRestaurantAddress.setText(r.city + ", " + r.province);
         if (r.imageUri != null && !r.imageUri.isEmpty()) {
-            h.imgRestaurant.setImageURI(android.net.Uri.parse(r.imageUri));
+            LocalImageLoader.load(h.imgRestaurant, r.imageUri);
         } else {
             h.imgRestaurant.setImageResource(R.drawable.icon_store);
         }

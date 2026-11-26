@@ -1,12 +1,13 @@
 package com.project.foodwastagereductionapp.customer;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,7 +53,7 @@ public class CartLineAdapter extends RecyclerView.Adapter<CartLineAdapter.CartLi
         FoodItem f = line.item;
 
         if (f.hasImageUri()) {
-            h.imgFood.setImageURI(Uri.parse(f.imageUri));
+            LocalImageLoader.load(h.imgFood, f.imageUri);
         } else {
             h.imgFood.setImageResource(f.imageRes != 0 ? f.imageRes : R.drawable.icon_food);
         }

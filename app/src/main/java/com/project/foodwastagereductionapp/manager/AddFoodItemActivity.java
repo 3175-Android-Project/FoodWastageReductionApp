@@ -1,5 +1,7 @@
 package com.project.foodwastagereductionapp.manager;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -58,7 +60,7 @@ public class AddFoodItemActivity extends BaseActivity {
                             } catch (SecurityException ignored) {
                             }
                             selectedImageUri = uri;
-                            imgFood.setImageURI(uri);
+                            LocalImageLoader.load(imgFood, uri.toString());
                             txtAddImage.setVisibility(View.GONE);
                         }
                     }
@@ -133,7 +135,7 @@ public class AddFoodItemActivity extends BaseActivity {
                     etDescription.setText(item.description);
                     if (item.imageUri != null && !item.imageUri.isEmpty()) {
                         selectedImageUri = Uri.parse(item.imageUri);
-                        imgFood.setImageURI(selectedImageUri);
+                        LocalImageLoader.load(imgFood, selectedImageUri.toString());
                         txtAddImage.setVisibility(View.GONE);
                     }
                 }

@@ -1,8 +1,9 @@
 package com.project.foodwastagereductionapp.customer;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.Manifest;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -547,7 +548,7 @@ public class CustomerHomeActivity extends AppCompatActivity {
     }
 
     private void setImage(ImageView view, String uri) {
-        if (uri != null && !uri.isEmpty()) view.setImageURI(Uri.parse(uri));
+        if (uri != null && !uri.isEmpty()) LocalImageLoader.load(view, uri);
     }
 
     private void openRestaurant(long restaurantId) {

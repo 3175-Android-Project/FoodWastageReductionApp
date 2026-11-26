@@ -1,5 +1,7 @@
 package com.project.foodwastagereductionapp.customer;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
@@ -10,7 +12,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,7 +57,7 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.FoodVi
         Context context = h.itemView.getContext();
 
         if (f.hasImageUri()) {
-            h.imgFood.setImageURI(Uri.parse(f.imageUri));
+            LocalImageLoader.load(h.imgFood, f.imageUri);
         } else {
             h.imgFood.setImageResource(f.imageRes != 0 ? f.imageRes : R.drawable.icon_food);
         }

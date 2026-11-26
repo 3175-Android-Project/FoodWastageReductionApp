@@ -1,10 +1,11 @@
 package com.project.foodwastagereductionapp.manager;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,7 +95,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
         }
 
         if (food.imageUri != null && !food.imageUri.isEmpty()) {
-            holder.imgFood.setImageURI(Uri.parse(food.imageUri));
+            LocalImageLoader.load(holder.imgFood, food.imageUri);
             holder.imgFood.setImageTintList(null);
         } else {
             holder.imgFood.setImageResource(R.drawable.icon_food);

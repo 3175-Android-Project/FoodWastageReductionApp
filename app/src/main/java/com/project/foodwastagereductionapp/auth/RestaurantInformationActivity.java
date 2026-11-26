@@ -1,5 +1,7 @@
 package com.project.foodwastagereductionapp.auth;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -414,7 +416,7 @@ public class RestaurantInformationActivity extends BaseActivity {
 
     private void showRestaurantImage(Uri uri) {
 
-        imgRestaurant.setImageURI(uri);
+        LocalImageLoader.load(imgRestaurant, uri.toString());
 
         /*
          * Hide + icon once image is selected

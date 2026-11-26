@@ -18,6 +18,7 @@ public final class AppDatabaseHelper {
     public static final String DATABASE_NAME = "grabbit.db";
 
     private final AppDatabase database;
+    private final Context appContext;
 
     private static volatile boolean seedCheckStarted = false;
 
@@ -36,7 +37,8 @@ public final class AppDatabaseHelper {
     }
 
     public AppDatabaseHelper(Context context, String databaseName) {
-        database = AppDatabase.getInstance(context, databaseName);
+        appContext = context.getApplicationContext();
+        database = AppDatabase.getInstance(appContext, databaseName);
     }
 
     public static String normalizeEmail(String email) {
@@ -709,10 +711,11 @@ public final class AppDatabaseHelper {
     // ---- Demo Data Seeding ----------------------------------------------------------------
 
     public void seedDemoDataIfEmpty() {
-        if (database.restaurantDao().count() > 0) return;
-
         database.runInTransaction(() -> {
-            if (database.restaurantDao().count() > 0) return;
+            if (database.restaurantDao().count() > 0) {
+                fillMissingDemoImages();
+                return;
+            }
 
             String hash = PasswordHasher.hash("123456");
 
@@ -787,6 +790,23 @@ public final class AppDatabaseHelper {
                     "Korean", 18.0, 11.0, 4, "11:00 PM", true, "");
             createFoodItem(r4, "Bulgogi Rice Bowl", "Marinated beef bulgogi with steamed rice and kimchi",
                     "Korean", 15.0, 9.0, 5, "8:30 PM", true, "");
+            fillMissingDemoImages();
         });
+    }
+
+    /** Fill only blank photos on the known demo accounts; preserve every uploaded URI. */
+    private void fillMissingDemoImages() {
+        for (DemoImages.RestaurantPhotos photos : DemoImages.RESTAURANTS) {
+            UserEntity manager = database.userDao().findByEmail(photos.managerEmail);
+            if (manager == null || !User.MANAGER.equals(manager.role)) continue;
+            RestaurantEntity restaurant = database.restaurantDao().findByManagerId(manager.id);
+            if (restaurant == null || !photos.restaurantName.equals(restaurant.name)) continue;
+            database.restaurantDao().fillDemoImage(restaurant.id,
+                    DemoImages.uri(appContext, photos.restaurantImage));
+            for (int i = 0; i < photos.foodNames.length; i++) {
+                database.foodItemDao().fillDemoImage(restaurant.id, photos.foodNames[i],
+                        DemoImages.uri(appContext, photos.foodImages[i]));
+            }
+        }
     }
 }

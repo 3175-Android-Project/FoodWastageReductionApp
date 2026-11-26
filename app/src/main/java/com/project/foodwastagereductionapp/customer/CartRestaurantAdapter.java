@@ -1,8 +1,9 @@
 package com.project.foodwastagereductionapp.customer;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +45,7 @@ public class CartRestaurantAdapter extends RecyclerView.Adapter<CartRestaurantAd
 
         // Restaurant photo (same fallback as the other restaurant lists)
         if (r.imageUri != null && !r.imageUri.isEmpty()) {
-            h.imgRestaurant.setImageURI(Uri.parse(r.imageUri));
+            LocalImageLoader.load(h.imgRestaurant, r.imageUri);
         } else {
             h.imgRestaurant.setImageResource(R.drawable.icon_store);
         }

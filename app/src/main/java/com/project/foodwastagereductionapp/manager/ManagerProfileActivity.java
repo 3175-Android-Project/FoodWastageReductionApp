@@ -1,8 +1,9 @@
 package com.project.foodwastagereductionapp.manager;
 
+import com.project.foodwastagereductionapp.ui.LocalImageLoader;
+
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.view.View;
@@ -146,7 +147,7 @@ public class ManagerProfileActivity extends AppCompatActivity {
                     getResources().getDimensionPixelSize(R.dimen.space_xl)
             );
         } else {
-            image.setImageURI(Uri.parse(restaurant.imageUri));
+            LocalImageLoader.load(image, restaurant.imageUri);
             image.setPadding(0, 0, 0, 0);
             image.setImageTintList(null);
         }

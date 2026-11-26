@@ -11,6 +11,11 @@ public interface FoodItemDao {
     @Insert
     long insert(FoodItemEntity item);
 
+    @Query("UPDATE food_items SET imageUri = :imageUri " +
+            "WHERE restaurantId = :restaurantId AND name = :name " +
+            "AND (imageUri IS NULL OR TRIM(imageUri) = '')")
+    int fillDemoImage(long restaurantId, String name, String imageUri);
+
     @Update
     void update(FoodItemEntity item);
 

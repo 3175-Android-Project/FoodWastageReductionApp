@@ -20,6 +20,11 @@ interface RestaurantDao {
     int update(long managerId, String name, String city, String province, String postalCode,
                String phone, String cuisineType, String description, String imageUri);
 
+    // The URI is stored by resource name, never by a build-specific integer ID.
+    @Query("UPDATE restaurants SET image_uri = :imageUri WHERE id = :restaurantId " +
+            "AND (image_uri IS NULL OR TRIM(image_uri) = '')")
+    int fillDemoImage(long restaurantId, String imageUri);
+
     @Query("SELECT COUNT(*) FROM restaurants")
     int count();
 
