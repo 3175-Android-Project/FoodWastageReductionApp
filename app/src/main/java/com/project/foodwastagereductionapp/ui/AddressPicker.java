@@ -152,6 +152,13 @@ public final class AddressPicker {
                 return;
             }
             double lat = location.getLatitude(), lng = location.getLongitude();
+            if (LocationHelper.isEmulatorMountainView(lat, lng)) {
+                etCity.setText("New Westminster");
+                etProvince.setText("BC");
+                etPostalCode.setText("V3M 1A1");
+                if (etAddress != null) etAddress.setText("Royal Ave");
+                return;
+            }
             new Thread(() -> { // address lookup uses the network
                 Address address = LocationHelper.addressFrom(activity, lat, lng);
                 activity.runOnUiThread(() -> fill(address));

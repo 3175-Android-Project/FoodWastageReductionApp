@@ -85,7 +85,7 @@
     <string name="titleSearchFood">Search food near you</string>
     <string name="hintSearchRestaurants">Search restaurants or food</string>
     <string name="titleNearbyVancouver">Nearby in Vancouver</string>
-    <string name="actionSeeAll">See all</string>
+    <string name="actionSeeAll">All restaurants</string>
     <string name="sampleRestaurantSushi1">Awesome sushi</string>
     <string name="sampleRestaurantSushi2">Great sushi</string>
     <string name="sampleAddressVancouver">123 Food St, Vancouver</string>

@@ -45,7 +45,7 @@ import java.util.Map;
 public class CustomerHomeActivity extends AppCompatActivity {
 
     private static final int ENDING_SOON_LIMIT = 3;
-    private static final double NEARBY_RADIUS_KM = 15;
+    private static final double NEARBY_RADIUS_KM = 35;
 
     // Where "Nearby" is measured from: the phone's location, or a city the customer picked.
     // Static so it survives the screen being recreated by the bottom navigation.
@@ -287,14 +287,24 @@ public class CustomerHomeActivity extends AppCompatActivity {
                 return;
             }
             double lat = location.getLatitude(), lng = location.getLongitude();
+            if (LocationHelper.isEmulatorMountainView(lat, lng)) {
+                lat = 49.2057;
+                lng = -122.9110;
+            }
+            double finalLat = lat;
+            double finalLng = lng;
             // City name for the label (network lookup, so off the main thread)
             new Thread(() -> {
-                String city = LocationHelper.cityFrom(this, lat, lng);
+                String city = LocationHelper.cityFrom(this, finalLat, finalLng);
+                if (city == null || city.equalsIgnoreCase("Mountain View") || city.equalsIgnoreCase("California")) {
+                    city = "New Westminster";
+                }
+                String finalCity = city;
                 runOnUiThread(() -> {
                     if (!useCurrentLocation || isFinishing() || isDestroyed()) return;
-                    originLat = lat;
-                    originLng = lng;
-                    originLabel = city != null ? city : getString(R.string.txtCurrentLocation);
+                    originLat = finalLat;
+                    originLng = finalLng;
+                    originLabel = finalCity;
                     rebindHome();
                 });
             }).start();

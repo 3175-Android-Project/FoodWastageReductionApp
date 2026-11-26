@@ -13,17 +13,18 @@ Grabbit helps restaurants sell surplus food at a discount instead of discarding 
 1. [Purpose](#purpose)
 2. [Target Users](#target-users)
 3. [Registration and Authentication](#registration-and-authentication)
-4. [Customer Features](#customer-features)
-5. [Restaurant Manager Features](#restaurant-manager-features)
-6. [Password Reset](#password-reset)
-7. [Implementation Status](#implementation-status)
-8. [Proposal Requirement Coverage](#proposal-requirement-coverage)
-9. [Known TODOs](#known-todos)
-10. [Project Structure](#project-structure)
-11. [Development Setup](#development-setup)
-12. [Database Integration](#database-integration)
-13. [Design and Navigation](#design-and-navigation)
-14. [Testing](#testing)
+4. [Demo Accounts and Seed Data](#demo-accounts-and-seed-data)
+5. [Customer Features](#customer-features)
+6. [Restaurant Manager Features](#restaurant-manager-features)
+7. [Password Reset](#password-reset)
+8. [Implementation Status](#implementation-status)
+9. [Proposal Requirement Coverage](#proposal-requirement-coverage)
+10. [Known TODOs](#known-todos)
+11. [Project Structure](#project-structure)
+12. [Development Setup](#development-setup)
+13. [Database Integration](#database-integration)
+14. [Design and Navigation](#design-and-navigation)
+15. [Testing](#testing)
 
 ---
 
@@ -85,6 +86,34 @@ The welcome flow provides **Login** and **Register**.
 - Signed-in passwords can be changed by providing the current password.
 - Logout clears the current session and returns to the welcome flow.
 - For managers, the restaurant name and address come from the manager's restaurant record.
+
+---
+
+## Demo Accounts and Seed Data
+
+For testing and demonstration, the app automatically seeds the database with pre-configured demo accounts, restaurants, surplus food items, and map location coordinates on first launch (or when the database is empty).
+
+All demo accounts use the password: `123456`
+
+### Customer Accounts
+
+| Role | Email | Password | Name | City | Address |
+|---|---|---|---|---|---|
+| Customer | `customer@grabbit.demo` | `123456` | Demo Customer | Vancouver | 777 Robson Street |
+| Customer | `customer2@grabbit.demo` | `123456` | Sally Customer | Burnaby | 4500 Kingsway |
+
+### Manager Accounts & Restaurants
+
+| Role | Email | Password | Restaurant Name | City | Cuisine |
+|---|---|---|---|---|---|
+| Manager | `manager@grabbit.demo` | `123456` | Sushi Barff | Vancouver | Japanese |
+| Manager | `manager2@grabbit.demo` | `123456` | Italian Trattoria | Coquitlam | Italian |
+| Manager | `manager3@grabbit.demo` | `123456` | Burnaby Burger Co. | Burnaby | Burgers |
+| Manager | `manager4@grabbit.demo` | `123456` | Seoul Bistro | Richmond | Korean |
+
+- **Surplus Food Items:** Each restaurant contains 2–4 pre-configured surplus food items with original & discounted prices, quantities, descriptions, and available-until times.
+- **Location Coordinates:** Each demo restaurant includes map coordinates (latitude/longitude) for distance-based **Nearby** search and location discovery.
+- **Auto-Seeding:** If app storage is cleared or the database is deleted, these demo accounts and listings are automatically re-populated upon launch.
 
 ---
 

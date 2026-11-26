@@ -19,8 +19,20 @@ public final class AppDatabaseHelper {
 
     private final AppDatabase database;
 
+    private static volatile boolean seedCheckStarted = false;
+
     public static synchronized AppDatabaseHelper getInstance(Context context) {
-        return new AppDatabaseHelper(context, DATABASE_NAME);
+        AppDatabaseHelper helper = new AppDatabaseHelper(context, DATABASE_NAME);
+        if (!seedCheckStarted) {
+            seedCheckStarted = true;
+            new Thread(() -> {
+                try {
+                    helper.seedDemoDataIfEmpty();
+                } catch (Exception ignored) {
+                }
+            }).start();
+        }
+        return helper;
     }
 
     public AppDatabaseHelper(Context context, String databaseName) {
@@ -692,5 +704,89 @@ public final class AppDatabaseHelper {
 
     public void clearCartForUser(long userId) {
         database.cartDao().deleteUserCart(userId);
+    }
+
+    // ---- Demo Data Seeding ----------------------------------------------------------------
+
+    public void seedDemoDataIfEmpty() {
+        if (database.restaurantDao().count() > 0) return;
+
+        database.runInTransaction(() -> {
+            if (database.restaurantDao().count() > 0) return;
+
+            String hash = PasswordHasher.hash("123456");
+
+            // Demo Customer Accounts (Password: 123456)
+            long cust1 = createUser("customer@grabbit.demo", hash, User.CUSTOMER, "Demo Customer",
+                    "Vancouver", "BC", "V6B 1A1", "777 Robson Street", "");
+            confirmEmailLocally(cust1);
+
+            long cust2 = createUser("customer2@grabbit.demo", hash, User.CUSTOMER, "Sally Customer",
+                    "Burnaby", "BC", "V5H 1A1", "4500 Kingsway", "");
+            confirmEmailLocally(cust2);
+
+            // Demo Manager Accounts & Restaurants (Password: 123456)
+            // 1. Sushi Barff (Vancouver)
+            long mgr1 = createUser("manager@grabbit.demo", hash, User.MANAGER, "Sushi Manager",
+                    "Vancouver", "BC", "V6B 1A1", "123 Food Street", "");
+            confirmEmailLocally(mgr1);
+            saveRestaurant(new Restaurant(0, mgr1, "Sushi Barff", "Vancouver", "BC", "V6B 1A1",
+                    "604-555-0101", "Japanese", "Fresh local Japanese sushi box, rolls, and donburi. Discounted surplus food available daily.", ""));
+            saveRestaurantLocation(mgr1, 49.2827, -123.1207);
+            long r1 = getRestaurantForManager(mgr1).id;
+
+            createFoodItem(r1, "Salmon oshi", "Oshizushi layered with Atlantic salmon and jalapeño",
+                    "Japanese", 13.0, 8.0, 3, "11:50 PM", true, "");
+            createFoodItem(r1, "Tuna tadaki", "Seared albacore tuna with ponzu sauce",
+                    "Japanese", 25.0, 17.0, 5, "11:00 PM", true, "");
+            createFoodItem(r1, "Pork gyoza", "Pan-fried pork and cabbage dumplings (6 pcs)",
+                    "Japanese", 12.0, 6.0, 4, "10:00 PM", true, "");
+            createFoodItem(r1, "Takoyaki", "Octopus balls drizzled with mayo and takoyaki sauce",
+                    "Japanese", 9.0, 5.0, 7, "11:00 PM", true, "");
+
+            // 2. Italian Trattoria (Coquitlam)
+            long mgr2 = createUser("manager2@grabbit.demo", hash, User.MANAGER, "Trattoria Manager",
+                    "Coquitlam", "BC", "V3B 1A1", "456 Pizza Way", "");
+            confirmEmailLocally(mgr2);
+            saveRestaurant(new Restaurant(0, mgr2, "Italian Trattoria", "Coquitlam", "BC", "V3B 1A1",
+                    "604-555-0202", "Italian", "Authentic stone-oven pizzas, fresh handmade pasta, and fresh Italian bread.", ""));
+            saveRestaurantLocation(mgr2, 49.2838, -122.7932);
+            long r2 = getRestaurantForManager(mgr2).id;
+
+            createFoodItem(r2, "Margherita pizza", "Classic Neapolitan pizza with fresh basil and mozzarella",
+                    "Italian", 10.0, 6.0, 5, "10:00 PM", true, "");
+            createFoodItem(r2, "Bee sting pizza", "Pepperoni, hot honey, and spicy jalapeño",
+                    "Italian", 16.0, 10.0, 4, "8:00 PM", true, "");
+            createFoodItem(r2, "Truffle Pasta", "Fettuccine with cream truffle sauce and parmesan",
+                    "Italian", 18.0, 11.0, 3, "9:30 PM", true, "");
+
+            // 3. Burnaby Burger Co. (Burnaby)
+            long mgr3 = createUser("manager3@grabbit.demo", hash, User.MANAGER, "Burger Manager",
+                    "Burnaby", "BC", "V5H 1A1", "789 Burger Ave", "");
+            confirmEmailLocally(mgr3);
+            saveRestaurant(new Restaurant(0, mgr3, "Burnaby Burger Co.", "Burnaby", "BC", "V5H 1A1",
+                    "604-555-0303", "Burgers", "Juicy smash burgers, crispy fries, and thick milkshakes.", ""));
+            saveRestaurantLocation(mgr3, 49.2276, -123.0076);
+            long r3 = getRestaurantForManager(mgr3).id;
+
+            createFoodItem(r3, "Double Smash Burger", "Two beef patties with melted cheddar, pickles, and special sauce",
+                    "Burgers", 14.0, 8.5, 6, "10:30 PM", true, "");
+            createFoodItem(r3, "Loaded Cheese Fries", "Golden fries smothered in warm cheese and bacon bits",
+                    "Burgers", 8.0, 4.5, 8, "9:00 PM", true, "");
+
+            // 4. Seoul Bistro (Richmond)
+            long mgr4 = createUser("manager4@grabbit.demo", hash, User.MANAGER, "Seoul Manager",
+                    "Richmond", "BC", "V6Y 1A1", "101 Korean Blvd", "");
+            confirmEmailLocally(mgr4);
+            saveRestaurant(new Restaurant(0, mgr4, "Seoul Bistro", "Richmond", "BC", "V6Y 1A1",
+                    "604-555-0404", "Korean", "Korean fried chicken, bento bowls, and kimbap.", ""));
+            saveRestaurantLocation(mgr4, 49.1666, -123.1336);
+            long r4 = getRestaurantForManager(mgr4).id;
+
+            createFoodItem(r4, "Crispy Fried Chicken Box", "Korean sweet and spicy fried chicken with pickled radish",
+                    "Korean", 18.0, 11.0, 4, "11:00 PM", true, "");
+            createFoodItem(r4, "Bulgogi Rice Bowl", "Marinated beef bulgogi with steamed rice and kimchi",
+                    "Korean", 15.0, 9.0, 5, "8:30 PM", true, "");
+        });
     }
 }

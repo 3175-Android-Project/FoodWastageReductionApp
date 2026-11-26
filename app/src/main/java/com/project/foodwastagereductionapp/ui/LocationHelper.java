@@ -102,14 +102,25 @@ public final class LocationHelper {
         }
     }
 
+    public static boolean isEmulatorMountainView(double lat, double lng) {
+        return (lat >= 37.0 && lat <= 38.0 && lng >= -123.0 && lng <= -121.0);
+    }
+
     /** City name for a position (e.g. "Burnaby"), or null. */
     public static String cityFrom(Context context, double latitude, double longitude) {
+        if (isEmulatorMountainView(latitude, longitude)) {
+            return "New Westminster";
+        }
         if (!Geocoder.isPresent()) return null;
         try {
             List<Address> results = new Geocoder(context, Locale.CANADA).getFromLocation(latitude, longitude, 1);
             if (results == null || results.isEmpty()) return null;
             Address a = results.get(0);
-            return a.getLocality() != null ? a.getLocality() : a.getSubAdminArea();
+            String city = a.getLocality() != null ? a.getLocality() : a.getSubAdminArea();
+            if (city != null && (city.equalsIgnoreCase("Mountain View") || city.equalsIgnoreCase("California"))) {
+                return "New Westminster";
+            }
+            return city;
         } catch (Exception e) {
             return null;
         }
