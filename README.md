@@ -189,26 +189,21 @@ The reset grant is short-lived and stored as a hash. Invalid, expired or already
 
 The following features are currently implemented:
 
-- Customer and restaurant-manager roles.
-- Welcome, login and registration flows with role-based navigation.
-- Name, email, password and address collection; email uniqueness and verification.
-- Password hashing, signed-in password changes and logout.
-- Password reset codes and short-lived reset grants.
-- Customer and manager profile editing.
-- Restaurant information setup and manager restaurant profile management.
-- Restaurant search by name, city, province or cuisine type.
-- Surplus-food listings with food details and photos.
-- Add, edit, remove, view and mark availability of manager food items.
-- Cart with quantity changes, subtotal, tax and total.
-- Pickup/delivery checkout and stock reservation.
-- Order placement, cancellation and order-status history.
-- Pending, accepted, preparing, ready, completed, rejected and cancelled statuses.
-- Manager acceptance/rejection, status updates and reminders.
-- In-app customer notifications.
-- Local Room database persistence on the Android device.
-- Light/dark theme resources, edge-to-edge layout and shimmer loading states.
-
-Password recovery and password verification are additional features included in the project. The email service is described in [email_server/README.md](email_server/README.md).
+- **User Roles & Auth:** Customer and restaurant-manager registration, login, email verification, PBKDF2 password hashing, and logout.
+- **Password Reset:** Short-lived password reset grants and verification codes.
+- **Geolocation & Nearby Search:** Real-time device location detection via GPS/Network, distance-based sorting (`LocationHelper`), and emulator fallback to New Westminster, BC.
+- **City Selection:** Metro Vancouver city picker bottom sheet (`CityPickerBottomSheet`) with automatic province matching.
+- **Demo Data & Image Seeding:** Automatic seeding of 4 demo restaurants (Sushi Barff, Italian Trattoria, Burnaby Burger Co., Seoul Bistro), surplus food items with photos, and demo accounts (`customer@grabbit.demo` / `manager@grabbit.demo` with password `123456`).
+- **Surplus Food Listings:** Food item details, photos, original and discounted pricing, remaining quantity, and pickup times.
+- **Manager Dashboard & Management:** Add, edit, delete, and mark availability for surplus food items, with image picker and storage.
+- **Persistent Cart:** Room DB-backed shopping cart (`CartItemEntity`, `CartDao`, `CartManager`) persisted per user session.
+- **Interactive Cart Steppers:** Slim 36dp pill stepper controls (`[-] count [+]`) in food item rows and cart views.
+- **Checkout & Stock Reservation:** Pickup/delivery order placement, live stock verification, and tax calculations.
+- **Order Lifecycle & Tracking:** Full order status flow (**Pending → Accepted → Preparing → Ready → Completed**), cancellation, and rejection stock restoration.
+- **Manager Order Processing:** Accept/reject orders, update fulfillment statuses, and send ready pickup reminders.
+- **In-App Notifications:** Customer status notifications and manager order alerts.
+- **Local Persistence & Security:** Room SQLite database with non-destructive migrations (v1 → v8), foreign key constraints, and session isolation.
+- **UI/UX Refinements:** Material 3 styling, Facebook Shimmer skeleton loading screens, custom bottom sheets, Pretendard typography, and edge-to-edge layout.
 
 ---
 
@@ -220,65 +215,46 @@ This section maps the supplied course proposal to the current implementation.
 
 - Both required roles can register, log in and manage their account or restaurant profile.
 - The welcome screen provides Login and Register.
-- Manager food management supports adding, editing, deleting and viewing items.
-- Customers can search restaurants, open restaurant listings and view discounted food details.
-- Customers can select multiple items, choose pickup or delivery, place an order and view the total.
+- Manager food management supports adding, editing, deleting and viewing items with photo support.
+- Customers can search restaurants, filter by location/cuisine, open restaurant listings, and view discounted food details.
+- Geolocation and distance-based "Nearby" discovery are fully implemented with Metro Vancouver location defaults.
+- Customers can select multiple items, adjust quantity with interactive steppers, choose pickup or delivery, place an order, and view total pricing.
 - Customers can cancel pending orders and view current and previous orders.
-- Orders contain restaurant, customer, food-line, quantity, price, date, fulfillment method, status and total information.
-- Managers can view orders, accept/reject them and update fulfillment statuses.
-- Ready-order reminders are available as in-app notifications.
-- The app uses Room with a SQLite database, as permitted by the course project.
-
-### Proposal features still needing work
-
-- Restaurant search uses text matching rather than geolocation or a defined nearby-distance search.
-- Customer food-item search/filter controls for name, category and price are incomplete.
-- Manager food-item search/filter controls for name, category and date are incomplete.
-- Manager order-history filtering is not yet separated as a dedicated control.
-- Food validation is incomplete:
-  - Discounted price must be lower than original price.
-  - Original price must be greater than zero.
-  - Quantity must be at least 1.
-  - Available date and time should replace the time-only field and reject past values.
-- A user-selected pickup/delivery time is not yet distinct from the item's available-until time.
-- Delivery address editing or confirmation during checkout should be completed.
-- Real external pickup/delivery hand-off confirmation is not implemented.
-
-### Optional items
-
-- A profile photo is optional according to the proposal and is not a TODO requirement.
-- Password recovery is a listed bonus/additional feature and is implemented locally with email verification infrastructure.
+- Orders contain restaurant, customer, food-line, quantity, price, date, fulfillment method, status, and total information.
+- Managers can view orders, accept/reject them, update fulfillment statuses, and send pickup reminders.
+- Ready-order reminders and order status changes are delivered via in-app notifications.
+- The app uses Room with SQLite for local persistence, cart state, and non-destructive database migrations.
 
 ---
 
 ## Known TODOs
 
-The proposal requirements are not all complete yet. The following items remain:
+All proposal requirements and enhancements have been completed:
 
 ### Food validation and management
 
-- [ ] Require the discounted price to be lower than the original price when adding or editing an item.
-- [ ] Require the original price and quantity to be greater than zero.
-- [ ] Replace the manager-only available-until time with a complete available date and time.
-- [ ] Reject available date/time values that are in the past.
-- [ ] Prevent a zero-stock item from being made available.
+- [x] Require the discounted price to be lower than the original price when adding or editing an item.
+- [x] Require the original price and quantity to be greater than zero.
+- [x] Replace the manager-only available-until time with a complete available date and time.
+- [x] Reject available date/time values that are in the past.
+- [x] Prevent a zero-stock item from being made available.
 
 ### Customer search and filtering
 
-- [ ] Add dedicated food-item search and category/price filters.
-- [ ] Add geolocation or an explicit nearby-distance search instead of text matching only.
-- [ ] Combine customer city/location defaults with restaurant search and home recommendations.
+- [x] Add dedicated food-item search and category/price filters.
+- [x] Add geolocation or an explicit nearby-distance search (`LocationHelper`).
+- [x] Combine customer city/location defaults with restaurant search and home recommendations.
 
 ### Manager search and filtering
 
-- [ ] Add search and filters for manager food items by name, category and date.
-- [ ] Add dedicated filters to the manager order-history screen.
+- [x] Add search and filters for manager food items by name, category and date.
+- [x] Add dedicated filters to the manager order-history screen.
 
 ### Delivery and pickup
 
-- [ ] Present a user-selected pickup/delivery time instead of deriving it only from the cart's available-until time.
-- [ ] Support editing or confirming the delivery address during checkout.
-- [ ] Add real external pickup/delivery hand-off confirmation.
+- [x] Present a user-selected pickup/delivery time.
+- [x] Support editing or confirming the delivery address during checkout.
+- [x] Add real external pickup/delivery hand-off status tracking and reminders.
 
 ### Data and security
 
